@@ -1,0 +1,253 @@
+---
+title: "Space Use Summaries"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r echo=FALSE}
+library(ggplot2)
+library(adehabitatHR)
+library(adehabitatLT)
+library(tmap)
+library(sf)
+library(dplyr)
+library(sp)
+```
+
+```{r eval=FALSE}
+
+rm(list = ls())
+```
+
+
+
+## Map for context. The shapefile is the cropped northern coast of AK; black points are GPS locations. 
+
+```{r}
+
+# Bears
+
+pb <- readRDS('./Data/bears_072321.Rds')
+
+projection <- "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+
+pb <- st_as_sf(pb, coords = c('X','Y'), crs = 3338)
+
+# Alaska
+
+us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
+bb <- st_read('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/rectangle.shp')
+
+bb <- st_transform(bb, 3338)
+
+ak <- us %>%
+  filter(STATE_ABBR == "AK") %>%
+  st_transform(3338) 
+
+ak <- st_crop(ak, bb)
+
+plot(st_geometry(ak))
+plot(st_geometry(pb), add = TRUE)
+
+```
+
+## Traj summary
+
+```{r}
+
+pb <- cbind(pb, st_coordinates(pb)) # separate coords from geometry columns into X and Y columns
+
+pbdf <- as.data.frame(pb)
+
+traj.pb<-as.ltraj(xy=pbdf[,c("X","Y")], date=pbdf$datetime, id=as.character(pbdf$id))
+Summary.traj.pb <- summary(traj.pb)
+
+traj.pb <- as.ltraj(xy=pbdf[,c("X","Y")], date=pbdf$datetime, id=as.character(pbdf$id))
+
+Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj.pb$date.begin, units="days"),digits=1)
+Summary.traj.pb$Records <- Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs
+Summary.traj.pb$PctComplete <- round((Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs)/Summary.traj.pb$nb.reloc*100,digits=1)
+
+Summary.traj.pb
+
+```
+
+Mean: `mean(days$days)` 
+SD: `sd(days$days)`
+Range: `min(days$days)` to `max(days$days)`
+
+## Fixes
+
+```{r eval=FALSE}
+
+traj2 <- ld(traj.pb)
+
+traj2 <- traj2 %>%
+  mutate(fix_rate=dt/3600)
+
+fixes <- traj2 %>% 
+  group_by(id) %>%
+  summarise(n.fixes = n(),
+            missing_fixes = sum(is.na(date)),
+            fix.pct = n.fixes/missing_fixes)
+fixes
+
+
+```
+
+```{r echo=FALSE}
+
+avgs <- traj2 %>%
+  group_by(id) %>%
+  na.omit() %>%
+  summarise(mean = mean(fix_rate), median = median(fix_rate)) 
+
+avgs
+
+traj2 <- left_join(traj2, avgs)
+traj2$median <- round(traj2$median)
+
+table(traj2$id, traj2$median)
+
+```
+
+## Missing fixes
+
+```{r Missing fixes}
+
+# Divide into groups
+
+one <- filter(traj2, median == 1)
+two <- filter(traj2, median > 1 & median < 4)
+four <- filter(traj2, median == 4)
+eight <- filter(traj2, median == 8)
+
+traj.one <- as.ltraj(xy = one[,c('x','y')], date = one$date, id = one$id)
+traj.two <- as.ltraj(xy = two[,c('x','y')], date = two$date, id = two$id)
+traj.four <- as.ltraj(xy = four[,c('x','y')], date = four$date, id = four$id)
+traj.eight <- as.ltraj(xy = eight[,c('x','y')], date = eight$date, id = eight$id)
+
+# SetNAs
+
+refda <- parse_date_time(paste(min(pb$datetime)), orders = 'ymd HMS', tz = 'US/Alaska') #set reference date 
+
+NA1 <- setNA(traj.one, refda, 1, units = "hour")
+NA2 <- setNA(traj.two, refda, 2, units = "hour")
+NA4 <- setNA(traj.four, refda, 4, units = "hour")
+NA8 <- setNA(traj.eight, refda, 8, units = "hour")
+
+na1 <- sett0(NA1, refda, 1, units = "hour")
+na2 <- sett0(NA2, refda, 2, units = "hour")
+na4 <- sett0(NA4, refda, 4, units = "hour")
+na8 <- sett0(NA8, refda, 8, units = "hour")
+
+# Convert to summary df so can manipulate data (cannot manipulate data when it's an ltraj object)
+
+sum1 <- summary(na1)
+sum2 <- summary(na2)
+sum4 <- summary(na4)
+sum8 <- summary(na8)
+
+sum1 <- sum1 %>%
+  mutate(fix_rate = "1 hour")
+
+sum2 <- sum2 %>%
+  mutate(fix_rate = "2 hours")
+
+sum4 <- sum4 %>%
+  mutate(fix_rate = "4 hours")
+
+sum8 <- sum8 %>%
+  mutate(fix_rate = "8 hours")
+
+all_sums <- rbind(sum1, sum2, sum4, sum8)
+
+all_sums <- all_sums %>%
+  mutate(missed_fixes_pct = (NAs/(nb.reloc + NAs)*100)) %>%
+  select(id, missed_fixes_pct)
+
+knitr::kable(all_sums)
+
+```
+
+#3 Distribution of missing fixes
+
+
+```{r}
+
+runsNAltraj(na1)
+
+```
+```{r}
+runsNAltraj(na2)
+```
+
+```{r}
+runsNAltraj(na4)
+```
+
+```{r}
+runsNAltraj(na8)
+```
+
+
+## 95% MCP
+
+```{r}
+
+# AdehabitatHR
+
+data("puechabonsp")
+puechabonsp$relocs
+pbsf
+
+pbsf <- as_Spatial(pb)
+
+cp <- mcp(pbsf[,15], percent = 95, unin = "m", unout = "km2") # MCP95
+
+plot(cp)
+plot(pb, add = TRUE)
+
+```
+
+# 95% MCP given in km2
+
+```{r}
+
+as.data.frame(cp)
+
+```
+Mean 95% MCP: `mean(cp$area)`.
+Range: `min(cp$area)` to `max(cp$area)`
+SD: `sd(cp$area)`
+
+## Plot min (red) and max (blue) 95% MCP's
+
+*I tried to create facets where I could see all MCP's by ID but I couldn't get it to work in a reasonable amount of time*
+
+```{r}
+
+bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
+bone <- st_transform(bone, 3338)
+
+mincp <- subset(cp, id == "pb_20586.2008")
+maxcp <- subset(cp, id == 'pb_20333.2008')
+
+tmap_mode('plot')
+
+tm_shape(ak) + 
+  tm_borders() + 
+  tm_shape(mincp) + 
+  tm_borders(col = "red") + 
+  tm_shape(maxcp) + 
+  tm_borders(col = "blue") + 
+  tm_shape(bone) + 
+  tm_dots(col = "purple", size = 1) + 
+  tm_add_legend(type = "symbol",
+                col = "purple",
+                title = "Bonepile")
+  
+
+```
+

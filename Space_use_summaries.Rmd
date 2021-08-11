@@ -13,6 +13,7 @@ library(tmap)
 library(sf)
 library(dplyr)
 library(sp)
+library(lubridate)
 ```
 
 ```{r eval=FALSE}
@@ -37,8 +38,8 @@ pb <- st_as_sf(pb, coords = c('X','Y'), crs = 3338)
 # Alaska
 
 us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
-bb <- st_read('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/rectangle.shp')
 
+bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
 bb <- st_transform(bb, 3338)
 
 ak <- us %>%

@@ -1,0 +1,135 @@
+---
+title: "HR Estimation"
+author: "Annie Kellner"
+date: "8/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ctmm)
+library(dplyr)
+```
+
+# GPS points from pb20492. 
+
+I selected this bear because your main concern about using AKDE was the points varying minimally in latitude (ie are mostly along the coast). This bear also has a high rate of missing fixes (35%) though you can see the missing data is non-random. Collar is set to an hourly fix rate.
+
+Here is the raw (projected) GPS data:
+
+```{r}
+
+pb <- readRDS('./Data/bears_072321.Rds')
+
+pbx <- pb %>%
+  filter(id == "pb_20492.2008") %>% # select bear with spotty data (this one has 35% missing fixes)
+  dplyr::select(datetime, gps_lon, gps_lat, X, Y)
+
+colnames(pbx) <- c("timestamp", "longitude", "latitude", "x", "y") # Movebank format
+
+pbx.sf <- st_as_sf(pbx, coords = c("x", "y"), crs = 3338)
+
+# Alaska
+
+us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
+
+bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
+bb <- st_transform(bb, 3338)
+
+ak <- us %>%
+  filter(STATE_ABBR == "AK") %>%
+  st_transform(3338) 
+
+ak <- st_crop(ak, bb)
+
+plot(st_geometry(ak))
+plot(st_geometry(pbx.sf), add = TRUE)
+
+
+
+```
+
+This is what the 95% MCP looks like:
+
+```{r warning=FALSE}
+
+pbx.sp <- as_Spatial(pbx.sf)
+
+cp <- mcp(pbx.sp, percent = 95, unin = "m", unout = "km2") # MCP95
+ak.sp <- as_Spatial(ak)
+
+# plot in tmap
+
+tm_shape(ak) + 
+  tm_borders() + 
+  tm_shape(cp) + 
+  tm_borders(col = "blue") + 
+  tm_shape(pbx.sp) + 
+  tm_symbols(size = 0.5)
+
+```
+
+# AKDE - 95th
+
+```{r message=FALSE, warning=FALSE}
+pbx.t <- as.telemetry(pbx) # must be telemetry object for ctmm
+
+# Models
+
+M.IID <- ctmm.fit(pbx.t) # no autocorrelation
+m.ouf <- ctmm.guess(pbx.t,interactive=FALSE) # automated model guess
+M.OUF <- ctmm.fit(pbx.t, m.ouf)
+
+# Calculate akde object 
+
+UD0 <- akde(pbx.t,M.IID)
+UD2 <- akde(pbx.t,M.OUF)
+UD2w <- akde(pbx.t,M.OUF,weights=TRUE)
+
+# calculate one extent for all UDs
+EXT <- extent(list(UD0,UD2,UD2w),level=0.95)
+
+# Finally we calculate UDs with and with out accounting for autocorrelation (M.OUF versus M.IID) 
+# with and without optimal weighting of the data (weights=TRUE). 
+# Plot
+
+plot(pbx.t,UD=UD0,xlim=EXT$x,ylim=EXT$y)
+title(expression("IID KDE"["C"]))
+```
+
+```{r message=FALSE, warning=FALSE}
+plot(pbx.t,UD=UD2,xlim=EXT$x,ylim=EXT$y)
+title(expression("OUF AKDE"["C"]))
+
+```
+
+```{r message=FALSE, warning=FALSE}
+
+plot(pbx.t,UD=UD2w,xlim=EXT$x,ylim=EXT$y)
+title(expression("weighted OUF AKDE"["C"]))
+```
+# 50th AKDE
+
+```{r}
+
+plot(pbx.t,UD=UD0, level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
+title(expression("IID KDE"["C"]))
+
+```
+
+```{r}
+plot(pbx.t,UD=UD2, level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
+title(expression("OUF AKDE"["C"]))
+
+```
+
+```{r}
+
+plot(pbx.t,UD=UD2w,level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
+title(expression("weighted OUF AKDE"["C"]))
+
+```
+

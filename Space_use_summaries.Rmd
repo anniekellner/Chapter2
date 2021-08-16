@@ -31,7 +31,7 @@ rm(list = ls())
 
 pb <- readRDS('./Data/bears_072321.Rds')
 
-projection <- "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+#projection <- "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
 pb <- st_as_sf(pb, coords = c('X','Y'), crs = 3338)
 
@@ -63,8 +63,6 @@ pbdf <- as.data.frame(pb)
 
 traj.pb<-as.ltraj(xy=pbdf[,c("X","Y")], date=pbdf$datetime, id=as.character(pbdf$id))
 Summary.traj.pb <- summary(traj.pb)
-
-traj.pb <- as.ltraj(xy=pbdf[,c("X","Y")], date=pbdf$datetime, id=as.character(pbdf$id))
 
 Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj.pb$date.begin, units="days"),digits=1)
 Summary.traj.pb$Records <- Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs
@@ -172,83 +170,32 @@ knitr::kable(all_sums)
 
 ```
 
-#3 Distribution of missing fixes
-
-
-```{r}
-
-runsNAltraj(na1)
-
-```
-```{r}
-runsNAltraj(na2)
-```
-
-```{r}
-runsNAltraj(na4)
-```
-
-```{r}
-runsNAltraj(na8)
-```
-
-
-## 95% MCP
+## Plot trajectories - Time v. Distance traveled
 
 ```{r}
 
-# AdehabitatHR
-
-data("puechabonsp")
-puechabonsp$relocs
-pbsf
-
-pbsf <- as_Spatial(pb)
-
-cp <- mcp(pbsf[,15], percent = 95, unin = "m", unout = "km2") # MCP95
-
-plot(cp)
-plot(pb, add = TRUE)
+plotltr(traj.one, "dt/3600")
 
 ```
-
-# 95% MCP given in km2
-
 ```{r}
+# Define function that returns TRUE when time lag between successive relocations is > 24 hours
 
-as.data.frame(cp)
+foo <- function(dt) {
+return(dt> (24*3600))
+}
 
-```
-Mean 95% MCP: `mean(cp$area)`.
-Range: `min(cp$area)` to `max(cp$area)`
-SD: `sd(cp$area)`
+# Use cutltraj to cut any burst relocations such that foo(dt) is true
 
-## Plot min (red) and max (blue) 95% MCP's
-
-*I tried to create facets where I could see all MCP's by ID but I couldn't get it to work in a reasonable amount of time*
-
-```{r}
-
-bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
-bone <- st_transform(bone, 3338)
-
-mincp <- subset(cp, id == "pb_20586.2008")
-maxcp <- subset(cp, id == 'pb_20333.2008')
-
-tmap_mode('plot')
-
-tm_shape(ak) + 
-  tm_borders() + 
-  tm_shape(mincp) + 
-  tm_borders(col = "red") + 
-  tm_shape(maxcp) + 
-  tm_borders(col = "blue") + 
-  tm_shape(bone) + 
-  tm_dots(col = "purple", size = 1) + 
-  tm_add_legend(type = "symbol",
-                col = "purple",
-                title = "Bonepile")
-  
+traj.one <- cutltraj(traj.one, 'foo(dt)', nextr = TRUE)
 
 ```
+
+
+
+
+
+
+
+
+
 

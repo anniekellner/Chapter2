@@ -3,38 +3,45 @@
 #########################################################
 
 # See whether auto-correlated kernel density estimator would work 
+# 
 
 library(ctmm)
 library(dplyr)
+library(stringr)
 
 rm(list = ls())
 
 pb <- readRDS('./Data/bears_072321.Rds')
 
-pbx <- pb %>%
-  filter(id == "pb_20492.2008") %>% # select bear with spotty data (this one has 35% missing fixes)
-  dplyr::select(datetime, gps_lon, gps_lat, X, Y)
+pb <- pb %>%
+  select(id, datetime, gps_lon, gps_lat, X, Y)
 
-colnames(pbx) <- c("timestamp", "longitude", "latitude", "x", "y") # Movebank format
+colnames(pb) <- c("id", "timestamp", "longitude", "latitude", "x", "y") # Movebank format
 
-# See what GPS points look like
+pbt <- as.telemetry(pb)
 
-pbx.sf <- st_as_sf(pbx, coords = c("x", "y"), crs = 3338)
-plot(st_geometry(pbx.sf))
+for(i in 1:length(pbt)){
+  pbx = pbt[[i]]
+  m.ouf = ctmm.guess(pbx,interactive=FALSE)
+  M.OUF = ctmm.fit(pbx, m.ouf) # model accouting for autocorrelation
+  UD2w = akde(pbx, M.OUF, weights=TRUE) # with optimal weighting of data
+  EXT = extent(UD2w, level = 0.95)
+  animal = pbx@info$identity
+  animal2 = gsub('\\.', '_', animal)
+  png(filename = paste0('./Plots/', animal2, '.png'))
+  plot(pbx,UD=UD2w,level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
+  title(animal)
+  dev.off()
+}
 
-pbx.t <- as.telemetry(pbx) # must be telemetry object for ctmm
 
-# Models
 
-M.IID <- ctmm.fit(pbx.t) # no autocorrelation
-m.ouf <- ctmm.guess(pbx.t,interactive=FALSE) # automated model guess
-M.OUF <- ctmm.fit(pbx.t, m.ouf)
 
 # Calculate akde object 
 
 UD0 <- akde(pbx.t,M.IID)
 UD2 <- akde(pbx.t,M.OUF)
-UD2w <- akde(pbx.t,M.OUF,weights=TRUE)
+
 
 # calculate one extent for all UDs
 EXT <- extent(list(UD0,UD2,UD2w),level=0.95)

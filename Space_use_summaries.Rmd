@@ -5,7 +5,7 @@ output:
     df_print: paged
 ---
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 library(ggplot2)
 library(adehabitatHR)
 library(adehabitatLT)
@@ -78,7 +78,7 @@ Range: `min(days$days)` to `max(days$days)`
 
 ## Fixes
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 
 traj2 <- ld(traj.pb)
 
@@ -95,7 +95,7 @@ fixes
 
 ```
 
-```{r echo=FALSE}
+```{r eval=TRUE}
 
 avgs <- traj2 %>%
   group_by(id) %>%

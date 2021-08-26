@@ -29,7 +29,7 @@ for(i in 1:length(pbt)){
   animal = pbx@info$identity
   animal2 = gsub('\\.', '_', animal)
   png(filename = paste0('./Plots/', animal2, '.png'))
-  plot(pbx,UD=UD2w,level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
+  plot(pbx,UD=UD2w,level.UD = 0.95, xlim=EXT$x,ylim=EXT$y)
   title(animal)
   dev.off()
 }

@@ -89,7 +89,7 @@ M.OUF <- ctmm.fit(pbx.t, m.ouf)
 
 UD0 <- akde(pbx.t,M.IID)
 UD2 <- akde(pbx.t,M.OUF)
-UD2w <- akde(pbx.t,M.OUF,weights=TRUE)
+UD2w <- akde(pbx.t,M.OUF,weights=TRUE) #The Ornstein-Uhlenbeck-F (OUF) model m.ouf introduces an additional autocorrelation timescale for the animal’s velocity, so that it more closely matches the initial behavior of the variogram.
 
 # calculate one extent for all UDs
 EXT <- extent(list(UD0,UD2,UD2w),level=0.95)

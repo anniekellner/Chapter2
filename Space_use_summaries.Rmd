@@ -68,7 +68,8 @@ Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj
 Summary.traj.pb$Records <- Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs
 Summary.traj.pb$PctComplete <- round((Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs)/Summary.traj.pb$nb.reloc*100,digits=1)
 
-Summary.traj.pb
+Summary.traj.pb %>%
+  dplyr::select(id, date.begin, date.end, DaysTrack) -> akde_tib
 
 ```
 
@@ -108,6 +109,17 @@ traj2 <- left_join(traj2, avgs)
 traj2$median <- round(traj2$median)
 
 table(traj2$id, traj2$median)
+
+# add to df
+
+traj2 %>%
+  group_by(id) %>%
+  slice_head() %>%
+  dplyr::select(mean, median) %>%
+  rename(mean_fix = mean) %>%
+  rename(median_fix = median) %>%
+  left_join(akde_tib) -> akde_tib2
+
 
 ```
 
@@ -164,10 +176,11 @@ all_sums <- rbind(sum1, sum2, sum4, sum8)
 
 all_sums <- all_sums %>%
   mutate(missed_fixes_pct = (NAs/(nb.reloc + NAs)*100)) %>%
-  select(id, missed_fixes_pct)
+  dplyr::select(id, missed_fixes_pct)
 
-knitr::kable(all_sums)
+akde_tib3 <- right_join(all_sums, akde_tib2)
 
+saveRDS(akde_tib3, file = './Data/akde_df.Rds')
 ```
 
 ## Plot trajectories - Time v. Distance traveled

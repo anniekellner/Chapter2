@@ -8,6 +8,7 @@
 library(ctmm)
 library(dplyr)
 library(stringr)
+library(tidyr)
 
 rm(list = ls())
 
@@ -20,7 +21,9 @@ colnames(pb) <- c("id", "timestamp", "longitude", "latitude", "x", "y") # Moveba
 
 pbt <- as.telemetry(pb)
 
-for(i in 1:length(pbt)){
+# Plots
+
+for(i in 1:length(pbt)){ # plots
   pbx = pbt[[i]]
   m.ouf = ctmm.guess(pbx,interactive=FALSE)
   M.OUF = ctmm.fit(pbx, m.ouf) # model accouting for autocorrelation
@@ -34,48 +37,21 @@ for(i in 1:length(pbt)){
   dev.off()
 }
 
+akde_df <- as.data.frame(matrix(data = NA, nrow = 4))
+
+add_column(akde_df, .before = estimate)
+# Area calculation
+
+
+akde <- list()
+
+for(i in 1:length(pbt)){ # plots
+  pbx = pbt[[i]]
+  m.ouf = ctmm.guess(pbx,interactive=FALSE)
+  M.OUF = ctmm.fit(pbx, m.ouf) # model accouting for autocorrelation
+  UD2w = akde(pbx, M.OUF, weights=TRUE) # with optimal weighting of data
+  akde[[i]] <- summary(UD2w)
+}
 
 
 
-# Calculate akde object 
-
-UD0 <- akde(pbx.t,M.IID)
-UD2 <- akde(pbx.t,M.OUF)
-
-
-# calculate one extent for all UDs
-EXT <- extent(list(UD0,UD2,UD2w),level=0.95)
-
-# Finally we calculate UDs with and with out accounting for autocorrelation (M.OUF versus M.IID) 
-# with and without optimal weighting of the data (weights=TRUE). 
-# Plot
-
-plot(pbx.t,UD=UD0,xlim=EXT$x,ylim=EXT$y)
-title(expression("IID KDE"["C"]))
-plot(pbx.t,UD=UD2,xlim=EXT$x,ylim=EXT$y)
-title(expression("OUF AKDE"["C"]))
-plot(pbx.t,UD=UD2w,xlim=EXT$x,ylim=EXT$y)
-title(expression("weighted OUF AKDE"["C"]))
-
-# Compare estimates
-
-summary(UD0)
-summary(UD2w)
-
-# ----  Look at 50th AKDE  ----------- #
-
-plot(pbx.t,UD=UD0, level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
-title(expression("IID KDE"["C"]))
-plot(pbx.t,UD=UD2, level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
-title(expression("OUF AKDE"["C"]))
-plot(pbx.t,UD=UD2w,level.UD = 0.50, xlim=EXT$x,ylim=EXT$y)
-title(expression("weighted OUF AKDE"["C"]))
-
-# ----- MCP 95% ----------- #
-
-pbx.sp <- as_Spatial(pbx.sf)
-
-cp <- mcp(pbx.sp, percent = 95, unin = "m", unout = "km2") # MCP95
-
-plot(cp)
-plot(pbx.sp, add = TRUE)

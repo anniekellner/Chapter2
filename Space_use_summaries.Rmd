@@ -143,15 +143,21 @@ traj.eight <- as.ltraj(xy = eight[,c('x','y')], date = eight$date, id = eight$id
 
 refda <- parse_date_time(paste(min(pb$datetime)), orders = 'ymd HMS', tz = 'US/Alaska') #set reference date 
 
+# Nearly regular (times may still vary slightly)
+
 NA1 <- setNA(traj.one, refda, 1, units = "hour")
 NA2 <- setNA(traj.two, refda, 2, units = "hour")
 NA4 <- setNA(traj.four, refda, 4, units = "hour")
 NA8 <- setNA(traj.eight, refda, 8, units = "hour")
 
+# Regular: accounting for small GPS inconsistencies
+
 na1 <- sett0(NA1, refda, 1, units = "hour")
 na2 <- sett0(NA2, refda, 2, units = "hour")
 na4 <- sett0(NA4, refda, 4, units = "hour")
 na8 <- sett0(NA8, refda, 8, units = "hour")
+
+hrs <- "dt/3600" # so don't have to keep typing this out
 
 # Convert to summary df so can manipulate data (cannot manipulate data when it's an ltraj object)
 
@@ -183,26 +189,36 @@ akde_tib3 <- right_join(all_sums, akde_tib2)
 saveRDS(akde_tib3, file = './Data/akde_df.Rds')
 ```
 
-## Plot trajectories - Time v. Distance traveled
 
-```{r}
-
-plotltr(traj.one, "dt/3600")
-
-```
-```{r}
+```{r Cut-trajs}
 # Define function that returns TRUE when time lag between successive relocations is > 24 hours
 
-foo <- function(dt) {
+cut_24hrs <- function(dt) {
 return(dt> (24*3600))
 }
 
-# Use cutltraj to cut any burst relocations such that foo(dt) is true
+# Use cutltraj to cut any burst relocations when fix is not taken for > 24 hrs
 
-traj.one <- cutltraj(traj.one, 'foo(dt)', nextr = TRUE)
+traj.one.cut <- cutltraj(traj.one, 'cut_24hrs(dt)', nextr = TRUE)
+traj.two.cut <- cutltraj(traj.two, 'cut_24hrs(dt)', nextr = TRUE)
+traj.four.cut <- cutltraj(traj.four, 'cut_24hrs(dt)', nextr = TRUE)
+traj.eight.cut <- cutltraj(traj.eight, 'cut_24hrs(dt)', nextr = TRUE)
 
+plotltr(traj.one[1], "dt/3600") 
 ```
 
+```{r Make-regular-trajs}
+
+t1reg <- setNA(traj.one.cut, refda, 1, units = "hour")
+t2reg <- setNA(traj.two.cut, refda, 1, units = "hour")
+t4reg <- setNA(traj.four.cut, refda, 1, units = "hour")
+t8reg <- setNA(traj.eight.cut, refda, 1, units = "hour")
+
+t1reg <- sett0(t1reg, refda, 1, units = "hour")
+t2reg <- sett0(t2reg, refda, 1, units = "hour")
+t4reg <- sett0(t4reg, refda, 1, units = "hour")
+t8reg <- sett0(t8reg, refda, 1, units = "hour")
+```
 
 
 

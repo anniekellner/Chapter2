@@ -21,3 +21,5 @@ for(i in 1:length(pbt)){ # plots
   UD2w = akde(pbx, M.OUF, weights=TRUE) # with optimal weighting of data
   akde[[i]] <- summary(UD2w)
 }
+
+saveRDS(akde, file = './Data/Derived-data/akde_list.Rds')

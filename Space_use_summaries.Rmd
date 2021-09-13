@@ -14,6 +14,8 @@ library(sf)
 library(dplyr)
 library(sp)
 library(lubridate)
+library(tidyr)
+library(broom)
 ```
 
 ```{r eval=FALSE}
@@ -189,6 +191,34 @@ akde_tib3 <- right_join(all_sums, akde_tib2)
 saveRDS(akde_tib3, file = './Data/akde_df.Rds')
 ```
 
+```{r}
+
+# Extract estimates from akde object
+
+CI_list <- list()
+
+for(i in 1:length(akde)){
+  CI_list[[i]] <- akde[[i]]$CI
+}
+
+CI_df <- data.frame(matrix(unlist(CI_list), nrow = length(CI_list), byrow = TRUE))
+colnames(CI_df) <- c("low", "est", "high")
+
+# Add ID to column
+
+for(i in 1:nrow(CI_df)){
+  CI_df$id[i] <- akde_tib$id[i] 
+}
+
+final <- akde_tib3 %>%
+  left_join(CI_df)
+
+saveRDS(final, file = './Data/Derived-data/akde_list.Rds')
+
+```
+
+
+## Trajectory analysis - adehabitatLT
 
 ```{r Cut-trajs}
 # Define function that returns TRUE when time lag between successive relocations is > 24 hours
@@ -221,6 +251,26 @@ t8reg <- sett0(t8reg, refda, 1, units = "hour")
 ```
 
 
+```{r}
+# Divide trajectories into segments characterized by behavior and then summarize
+# Do Poisson??
+
+t1reg.df <- ld(t1reg) # turn into dataframe so can calculate sd of dist
+sd(t1reg.df$dist, na.rm = TRUE) # 835 m
+mean(t1reg.df$dist, na.rm = TRUE)
+
+tested.means <- round(seq(1, 5000, length =10), 0)
+
+limod <- as.list(paste("dpois(dist=",tested.means,")"))
+
+
+
+
+mod <- modpartltraj(t1reg[3], limod)
+
+mod
+bestpartmod(mod)
+```
 
 
 

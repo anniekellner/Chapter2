@@ -7,6 +7,7 @@ library(sf)
 library(sp)
 library(raster)
 library(tmap)
+library(lubridate)
 
 rm(list = ls())
 
@@ -14,14 +15,60 @@ source('./Code/MyFunctions.R')
 
 # -------   DATA  ----------------------------------------------------------------- #
 
-load('./Data/all_v2.RData')
+pb <- read.csv(file = "./Data/usgs_pbear_gps_ccde16_v20170131.csv")
+
+pb <- pb %>%
+  dplyr::select(animal:date) %>% # remove unnecessary columns
+  filter(month > 6 & month < 11)
+
+pbsf <- DFtoSF(pb, 3338)
+pb.spdf <- as_Spatial(pbsf)
+
+dem <- raster('./Data/Spatial/ans_dem_8bit.tif')
+
+for(i in 1:nrow(pb.spdf)){
+  pb.spdf$temp[i] = extract(dem, pb.spdf[i,], na.rm = TRUE)
+  pb.spdf$land[i] = ifelse(pb.spdf$temp[i] == 27, 0, 1)
+}
+
+# Why so many NA's?
+# Because have not filtered out 'ice bears', so points are extending beyond dem
+# Apply 7-day criteria
+
+pbsf2 <- st_as_sf(pb.spdf) 
+
+pbsf2$id = paste(pbsf2$animal, pbsf2$year, sep = '.')
+pbsf2$ymd <- mdy(pbsf2$date)
+pbsf2$datetime <- ymd_hms(paste(pbsf2$year, 
+                                pbsf2$month, 
+                                pbsf2$day, 
+                                pbsf2$hour, 
+                                pbsf2$minute,
+                                pbsf2$second, sep = '-'), tz = "US/Alaska")
+
+land.pts <- pbsf2 %>%
+  group_by(id, ymd) %>%
+  arrange(id, datetime) %>%
+  mutate(number.land = cumsum(land))
+
+saveRDS(pbsf2, file = './Data/bears_091521.Rds')
+
+
+tmap_mode('view')
+
+tm_shape(pbx) + 
+  tm_symbols(col = "month", popup.vars = "land")
+
 
 # Bear data
 
-b <- all.v2 %>%
-  select(animal:land, id, X:id.datetime, land_bear_ows, land_bear) %>%
-  filter(month > 6 & month < 11) %>%
-  filter(land_bear_ows == 1)
+pb <- pb %>%
+  dplyr::select(animal:land, id, X:id.datetime) %>%
+  filter(month > 6 & month < 11) 
+
+# Is land_bear_ows the same as land == 1? No - somehow land_bear_ows removed points not on land
+
+water <- filter(b, land == 0)
 
 projection <- CRS("+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs") #find this in spatialreference.org
 polar.stereo <-CRS('+proj=stere +lat_0=90 +lat_ts=60 +lon_0=-80 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +units=m + datum=WGS84 +no_defs +towgs84=0,0,0') # matches MASIE raster

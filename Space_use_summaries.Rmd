@@ -215,6 +215,8 @@ final <- akde_tib3 %>%
 
 saveRDS(final, file = './Data/Derived-data/akde_list.Rds')
 
+write.csv(final, file = 'C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Chapter2/Analyses/akde_and_fix_stats.csv')
+
 ```
 
 

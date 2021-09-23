@@ -3,11 +3,13 @@
 #######################################
 
 library(dplyr)
+library(tidyr)
 library(sf)
 library(sp)
 library(raster)
 library(tmap)
 library(lubridate)
+library(data.table)
 
 rm(list = ls())
 
@@ -15,69 +17,7 @@ source('./Code/MyFunctions.R')
 
 # -------   DATA  ----------------------------------------------------------------- #
 
-pb <- read.csv(file = "./Data/usgs_pbear_gps_ccde16_v20170131.csv")
-
-pb <- pb %>%
-  dplyr::select(animal:date) %>% # remove unnecessary columns
-  filter(month > 6 & month < 11)
-
-pbsf <- DFtoSF(pb, 3338)
-pb.spdf <- as_Spatial(pbsf)
-
-dem <- raster('./Data/Spatial/ans_dem_8bit.tif')
-
-for(i in 1:nrow(pb.spdf)){
-  pb.spdf$temp[i] = extract(dem, pb.spdf[i,], na.rm = TRUE)
-  pb.spdf$land[i] = ifelse(pb.spdf$temp[i] == 27, 0, 1)
-}
-
-# Why so many NA's?
-# Because have not filtered out 'ice bears', so points are extending beyond dem
-# Apply 7-day criteria
-
-pbsf2 <- st_as_sf(pb.spdf) 
-
-pbsf2$id = paste(pbsf2$animal, pbsf2$year, sep = '.')
-pbsf2$ymd <- mdy(pbsf2$date)
-pbsf2$datetime <- ymd_hms(paste(pbsf2$year, 
-                                pbsf2$month, 
-                                pbsf2$day, 
-                                pbsf2$hour, 
-                                pbsf2$minute,
-                                pbsf2$second, sep = '-'), tz = "US/Alaska")
-
-land.pts <- pbsf2 %>%
-  group_by(id, ymd) %>%
-  arrange(id, datetime) %>%
-  mutate(number.land = cumsum(land))
-
-saveRDS(pbsf2, file = './Data/bears_091521.Rds')
-
-
-tmap_mode('view')
-
-tm_shape(pbx) + 
-  tm_symbols(col = "month", popup.vars = "land")
-
-
-# Bear data
-
-pb <- pb %>%
-  dplyr::select(animal:land, id, X:id.datetime) %>%
-  filter(month > 6 & month < 11) 
-
-# Is land_bear_ows the same as land == 1? No - somehow land_bear_ows removed points not on land
-
-water <- filter(b, land == 0)
-
-projection <- CRS("+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs") #find this in spatialreference.org
-polar.stereo <-CRS('+proj=stere +lat_0=90 +lat_ts=60 +lon_0=-80 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +units=m + datum=WGS84 +no_defs +towgs84=0,0,0') # matches MASIE raster
-
-# points
-
-coords <- cbind(b$X, b$Y)
-b.spdf <- SpatialPointsDataFrame(coords = coords, data = b, proj4string = projection) 
-pb <- st_as_sf(b.spdf) #convert to sf object
+pb <- readRDS('./Data/bears_091521.Rds')
 
 # Spatial data
 
@@ -89,10 +29,6 @@ ak <- us %>%
 plot(st_geometry(ak))
 plot(st_geometry(pb), add = TRUE)
 
-# -----   Create dataset  ------------------------- #
-
-unique(pb$id)
-table(pb$id)
 
 # -------- Use tmap to visualize dataset  ----------------------------------- #
 
@@ -105,18 +41,44 @@ tm_shape(ak) +
   tm_facets(by = "id") + 
   tmap_options(limits = c(facets.view = 40))
 
-# Remove bears with less than 100 data points
+# ------ Eliminate data prior to landfall ----------------------------------- #
 
-noData <- pb %>%
+land.pts <- pb %>%
+  group_by(id, ymd) %>%
+  arrange(id, datetime) %>%
+  drop_na(land) %>%
+  mutate(all.land = cumsum(land))
+
+flag <- land.pts %>%
+  group_by(id, ymd) %>%
+  arrange(id, datetime) %>%
+  slice(n()) %>%
+  mutate(flag = if_else(all.land == 0,0,1))
+
+comb <- left_join(land.pts, flag)
+comb[is.na(comb)] <- 1
+
+x = comb %>% 
+  group_by(id) %>% 
+  arrange(id, datetime) %>% 
+  mutate(time.land=ifelse(land==0 | is.na(lag(land)) | lag(land)==0 | flag==0, 
+                          0,
+                          difftime(datetime, lag(datetime), units="hours"))) 
+
+x.df <- as.data.frame(x) #convert to df
+
+setDT(x.df)
+x.df[, cum.land := flag*cumsum(time.land), .(id, rleid(flag))]
+
+x.df$cum.land = x.df$cum.land/24
+
+land_bears <- filter(x.df, cum.land > 7)
+
+day7 <- land_bears %>%
   group_by(id) %>%
-  add_count(id) %>%
-  filter(n < 100)
+  arrange(id, datetime) %>%
+  slice_head()
 
-# Convert sf object to dataframe
 
-pbdf <- st_drop_geometry(pb)
-noDatadf <- st_drop_geometry(noData)
-mydata <- anti_join(pbdf, noDatadf)
+write.csv(pb, file = './Data/Derived-data/eliminate_points_before_arrival.csv')      # write to csv so can manually remove points before landfall
 
-table(mydata$id)
-unique(mydata$id) # 29

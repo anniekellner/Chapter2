@@ -23,14 +23,37 @@ pb <- pb %>%
   filter(month > 6 & month < 11)
 
 pbsf <- DFtoSF(pb, 3338)
-pb.spdf <- as_Spatial(pbsf)
+#pb.spdf <- as_Spatial(pbsf)
 
-dem <- raster('./Data/Spatial/ans_dem_8bit.tif')
+dem_poly <- st_read('C:/Users/akell/Documents/ArcGIS/North_Slope_DEM/dem_clip_poly.shp')
 
-for(i in 1:nrow(pb.spdf)){
-  pb.spdf$temp[i] = extract(dem, pb.spdf[i,], na.rm = TRUE)
-  pb.spdf$land[i] = ifelse(pb.spdf$temp[i] == 27, 0, 1)
+land <- st_buffer(dem_poly, dist = 5000)
+
+land2 <- st
+
+saveRDS(land, './Data/Derived-data/dem_with_5kbuffer.shp')
+
+st_intersects(pbsf[1,], land)
+
+test <- st_cast(land, "MULTIPOLYGON")
+
+test <- st_union(test)
+
+i = 1
+for(i in 1:nrow(pbsf)){
+  pbsf$land[i] = ifelse(st_intersects(land, pbsf[i,]) == TRUE, 1, 0)
 }
+
+#dem[dem == 27] <- NA # turn water to NA
+
+#dem_5kbuff <- buffer(dem, 5000, dissolve = TRUE)
+
+#for(i in 1:nrow(pb.spdf)){
+  #pb.spdf$temp[i] = extract(dem, pb.spdf[i,], na.rm = TRUE)
+  #pb.spdf$land[i] = ifelse(pb.spdf$temp[i] == 27, 0, 1)
+#}
+
+
 
 # Why so many NA's?
 # Because have not filtered out 'ice bears', so points are extending beyond dem

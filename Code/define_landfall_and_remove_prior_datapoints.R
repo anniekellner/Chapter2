@@ -56,3 +56,12 @@ pb3 <- pb3 %>%
                 ~replace(., row_number() < match(1, landfall), NA))) %>%
   na.omit() %>%
   ungroup()
+
+# Merge landfall with original pb dataframe
+
+pb4 <- pb3 %>%
+  select(id, datetime, landfall)
+
+pb5 <- inner_join(pb, pb4)
+
+saveRDS(pb5, './Data/bears_092921.Rds')

@@ -29,11 +29,11 @@ pb <- pb %>%
   left_join(pb)
 
 
-pb <- select(pb, id, on_land, consec_seven, ymd, datetime, date)
+pb <- dplyr::select(pb, id, on_land, consec_seven, ymd, datetime, date, land)
 
 arrival <- pb %>%
   group_by(id, consec_seven) %>%
-  filter(consec_seven == TRUE) %>%
+  filter(consec_seven == TRUE & land == 1) %>%
   slice_head() 
 
 arrival$landfall <- 1
@@ -60,7 +60,9 @@ pb3 <- pb3 %>%
 # Merge landfall with original pb dataframe
 
 pb4 <- pb3 %>%
-  select(id, datetime, landfall)
+  dplyr::select(id, datetime, landfall)
+
+pb <- readRDS('./Data/bears_091521.Rds') 
 
 pb5 <- inner_join(pb, pb4)
 

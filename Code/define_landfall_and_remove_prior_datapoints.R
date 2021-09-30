@@ -42,7 +42,7 @@ arrival$landfall <- 1
 
 pb2 <- pb %>%
   left_join(arrival) %>%
-  mutate_at(7, ~replace(., is.na(.), 0)) # replace NA values in landfall column with 0
+  mutate_at(8, ~replace(., is.na(.), 0)) # replace NA values in landfall column with 0
 
 # Remove points prior to landfall 
 

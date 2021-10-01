@@ -2,6 +2,8 @@
 ##  ARE SKIPPED FIXES RANDOM?  ################
 ###############################################
 
+# October 1, 2021
+
 # Use Kolmogorov-Smirnov test to see whether missed fixes occur randomly or non-randomly
 # Skipped fixes were random in 8 bears; non-random in 13 bears
 

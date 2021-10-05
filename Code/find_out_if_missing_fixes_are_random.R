@@ -161,6 +161,9 @@ saveRDS(ks_results, './Results/ks_results.Rds')
 # add ids to ks results df
 
 ks <- readRDS('./Results/ks_results.Rds')
-
 ks$ids <- all_ids
+
+saveRDS(ks, './Results/ks_results.Rds')
+
+
 

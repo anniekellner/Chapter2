@@ -10,7 +10,7 @@
 library(sf)
 library(dplyr)
 library(adehabitatLT)
-library(snpar)
+library(lubridate)
 
 rm(list = ls())
 
@@ -57,7 +57,6 @@ traj2 %>%
 head(pbdf2)
 
 # Divide into groups
-
 
 one <- filter(traj2, median == 1)
 two <- filter(traj2, median > 1 & median < 4)
@@ -117,38 +116,31 @@ all2df$obs_pt[is.na(all2df$obs_pt)] <- 0
 all4df$obs_pt[is.na(all4df$obs_pt)] <- 0
 all8df$obs_pt[is.na(all8df$obs_pt)] <- 0
 
-# Runs test - not sure if this is valid because there should be more 1's than 0's. Not supposed to be 50-50
-
-rt1 <- all1df$obs_pt
-runs.test(rt1) # data is not random (p < 2.2e-16)
-
-rt2 <- all2df$obs_pt
-runs.test(rt2) # data is not random (p < 2.2e-16)
-
-rt4 <- all4df$obs_pt
-runs.test(rt4)
-
-rt8 <- all8df$obs_pt
-
 # Kolmogorov-Smirnov test
 
 # Write loop that checks for uniformity of missed fixes over time for each individual bear
 
-ids <- unique(pbdf.8$id)
+#In order to associate ks results with ids
 
-results8 <- list()
+ids1 <- unique(pbdf.1$id)
+ids2 <- unique(pbdf.2$id)
+ids4 <- unique(pbdf.4$id)
+ids8 <- unique(pbdf.8$id)
+
+all_ids <- cbind(c(ids1, ids2, ids4, ids8))
+
+results1 <- list()
 
 for(i in 1:length(ids)){
-  pbx = filter(all8df, id == ids[i])
+  pbx = filter(all1df, id == ids[i])
   pbx = arrange(pbx, datetime)
   pbx = mutate(pbx, obs_number = row_number())
   start <- first(pbx$obs_number)
   end <- last(pbx$obs_number)
   zeros <- filter(pbx, obs_pt == 0)
   zero_vec <- zeros$obs_number
-  results8[[i]] <- ks.test(zero_vec, "punif", start, end)
+  results1[[i]] <- ks.test(zero_vec, "punif", start, end)
 }
-
 
 r1.df <- do.call(rbind.data.frame, results1)
 r1.df$fix_rate <- 1
@@ -166,5 +158,9 @@ ks_results <- rbind(r1.df, r2.df, r4.df, r8.df) # Final dataframe with K-S resul
 
 saveRDS(ks_results, './Results/ks_results.Rds')
 
+# add ids to ks results df
 
+ks <- readRDS('./Results/ks_results.Rds')
+
+ks$ids <- all_ids
 

@@ -31,11 +31,14 @@ rm(list = ls())
 
 # Bears
 
-pb <- readRDS('./Data/bears_072321.Rds')
+pb <- readRDS('./Data/bears_092921.Rds')
+
+pb <- st_transform(pb, 3338)
+pb$datetime <- ymd_hms(pb$datetime, tz = "US/Alaska")
 
 #projection <- "+proj=aea +lat_1=55 +lat_2=65 +lat_0=50 +lon_0=-154 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
 
-pb <- st_as_sf(pb, coords = c('X','Y'), crs = 3338)
+#pb <- st_as_sf(pb, coords = c('X','Y'), crs = 3338)
 
 # Alaska
 
@@ -72,6 +75,8 @@ Summary.traj.pb$PctComplete <- round((Summary.traj.pb$nb.reloc-Summary.traj.pb$N
 
 Summary.traj.pb %>%
   dplyr::select(id, date.begin, date.end, DaysTrack) -> akde_tib
+
+akde_tib
 
 ```
 
@@ -253,26 +258,6 @@ t8reg <- sett0(t8reg, refda, 1, units = "hour")
 ```
 
 
-```{r}
-# Divide trajectories into segments characterized by behavior and then summarize
-# Do Poisson??
-
-t1reg.df <- ld(t1reg) # turn into dataframe so can calculate sd of dist
-sd(t1reg.df$dist, na.rm = TRUE) # 835 m
-mean(t1reg.df$dist, na.rm = TRUE)
-
-tested.means <- round(seq(1, 5000, length =10), 0)
-
-limod <- as.list(paste("dpois(dist=",tested.means,")"))
-
-
-
-
-mod <- modpartltraj(t1reg[3], limod)
-
-mod
-bestpartmod(mod)
-```
 
 
 

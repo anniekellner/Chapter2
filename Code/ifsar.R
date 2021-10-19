@@ -5,10 +5,14 @@
 # https://apps.nationalmap.gov/downloader/#/
 # Interferometric Synthetic Aperture Radar
 
+# Stars vignette: https://r-spatial.github.io/stars/articles/
+
 library(raster)
 library(stars)
 
-file_list = list.files(path = "C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Chapter2/Data/ifsar", pattern = '.tif', full.names = TRUE)
+file_list = list.files(path = "C:/Users/akell/Documents/PhD/Polar_Bears/Data/ifsar", pattern = '.tif', full.names = TRUE) # Desktop
+
+test <- read_stars(file_list, along = 1)
 
 l <- list()
 
@@ -16,10 +20,9 @@ for(i in 1:length(file_list)){
   l[[i]] <- read_stars(file_list[i])
 }
 
-ifsar1 <- read_stars('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Chapter2/Data/ifsar/USGS_NED_DSM_AK_IFSAR_NPRA_Recollect_C3_2018_TIFF_2019/DSM_n7100w15515P.tif')
-ifsar2 <- read_stars('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Chapter2/Data/ifsar/USGS_NED_DSM_AK_IFSAR_NPRA_Recollect_C3_2018_TIFF_2019/DSM_n7100w15530P.tif')
+# Combine two objects
 
-plot(ifsar1)
-plot(ifsar2)
+l1 <- l[[1]]
+l2 <- l[[2]]
 
-ifsar <- 
+test <- c()

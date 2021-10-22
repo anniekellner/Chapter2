@@ -35,9 +35,6 @@ tr2 <- make_track(twos, X, Y, datetime, id = id, crs = sp::CRS("+init=epsg:3338"
 tr4 <- make_track(fours, X, Y, datetime, id = id, crs = sp::CRS("+init=epsg:3338"))
 tr8 <- make_track(eights, X, Y, datetime, id = id, crs = sp::CRS("+init=epsg:3338"))
 
-tracks <- list(tr1,tr2,tr4,tr8)
-#saveRDS(tracks, './Data/Derived-data/tracks.Rds')
-
 head(tr1) # x and y coordinates have been converted to what looks like a new crs...not sure why
 
 # Nest
@@ -64,6 +61,9 @@ tr4 <- tr4 %>%
 tr8 <- tr8 %>%
   mutate(steps = map(data, function(x)
     x %>% track_resample(rate = hours(8), tolerance = minutes(80)) %>% steps_by_burst()))
+
+tracks <- list(tr1,tr2,tr4,tr8)
+#saveRDS(tracks, './Data/Derived-data/tracks.Rds')
 
 # Check any implausible values
 

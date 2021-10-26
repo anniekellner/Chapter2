@@ -8,6 +8,7 @@ library(lubridate)
 library(raster)
 library(amt)
 library(sf)
+library(ggplot2)
 
 rm(list = ls())
 

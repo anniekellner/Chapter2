@@ -7,9 +7,13 @@
 
 # Stars vignette: https://r-spatial.github.io/stars/articles/
 
+rm(list = ls())
+
 library(raster)
 library(stars)
 library(dplyr)
+
+# ------------------------ Raster
 
 file_list = list.files(path = "C:/Users/akell/Documents/PhD/Polar_Bears/Data/ifsar/tifs", 
                        pattern = '.tif', 
@@ -26,3 +30,22 @@ for(i in 1:length(file_list)){
                                     overwrite = TRUE)
 }
 
+names(r_list) <- c("x", "y")
+r_list$filename <- 'test.tif'
+r_list$overwrite <- TRUE
+m <- do.call(merge, r_list)
+
+# ------------------ Stars
+
+file_list = list.files(path = "C:/Users/akell/Documents/PhD/Polar_Bears/Data/ifsar/tifs", pattern = '.tif', full.names = TRUE)
+test <- file_list[1:2]
+
+y = read_stars(test, proxy = TRUE, along = c('x','y'))
+
+l <- list()
+
+for(i in 1:length(file_list)){
+  l[[i]] <- read_stars(file_list[i])
+}
+
+test <- Reduce(c, l)

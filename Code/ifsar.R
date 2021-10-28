@@ -9,15 +9,28 @@
 
 library(raster)
 library(stars)
+library(dplyr)
 
 file_list = list.files(path = "C:/Users/akell/Documents/PhD/Polar_Bears/Data/ifsar", pattern = '.tif', full.names = TRUE) # Desktop
 
-test <- read_stars(file_list, along = 1)
-
 l <- list()
+r_list <- list() # raster
+
+# Read all files into a list of stars objects
 
 for(i in 1:length(file_list)){
   l[[i]] <- read_stars(file_list[i])
+}
+
+for(i in 1:length(file_list)){
+  r_list[[i]] <- raster(file_list[i])
+}
+
+ras2 <- list()
+
+
+for(i in 1:length(r_list)){
+  ras2[[i]] <- reclassify(r_list[[i]], cbind(-Inf, 0, NA), right=TRUE)
 }
 
 # Combine two objects

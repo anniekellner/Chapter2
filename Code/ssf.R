@@ -26,13 +26,21 @@ ggplot(ssf1, aes(x2_, y2_, color=case_))+geom_point()+facet_wrap(~id, scales="fr
 
 ssf1_sf <- st_as_sf(ssf1, coords = c('x2_', 'y2_'), crs = 3338)
 
+# Write to csv for use with GEE
+
+#ssfi1_gee <- select(ssf1, id, x2_, y2_, case_)
+#write.csv(ssf1, file = 'C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Chapter2/Data/GEE/ssf_1hr.csv')
+
 # ----------------- Bonepile ----------------------------------------------------------------- #
 
 bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp') 
 bone <- st_transform(bone, 3338)
 
+for(i in 1:length(ssf1_sf)){
+  ssf1$dist_bonepile[i] = st_distance(ssf1_sf[i], bone, by_element = TRUE)
+}
+
 ssf1_covs <- ssf1_sf %>%
-  group_by(id) %>%
   mutate(dist2bonepile = st_distance(ssf1_sf, bone), by_element = TRUE)
 
 mean(steps1$sl_) # calculate mean step length for buffer. 500m should work 

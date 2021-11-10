@@ -7,11 +7,28 @@
 
 # Stars vignette: https://r-spatial.github.io/stars/articles/
 
+# Remove tifs from zipped folders and put into tif folder
+
 rm(list = ls())
 
-library(raster)
-library(stars)
+#library(raster)
+#library(stars)
 library(dplyr)
+library(sf)
+
+bears <- readRDS('./Data/bears_092921.Rds')
+
+st_write(bears, 'C:/Users/akell/Documents/PhD/Polar_Bears/Data/bears_ch2.shp')
+bears <- st_transform(bears, 4326) # add lat/long coordinates for GEE
+coords <- st_coordinates(bears)
+bears <- cbind(bears, coords)
+
+source('./Code/MyFunctions.R')
+
+#bears <- st_drop_geometry(bears)
+bears <- select(bears, animal:second, id, ymd, datetime, landfall)
+
+write.csv(bears, 'C:/Users/akell/Documents/PhD/Polar_Bears/Data/bears_ch2.csv')
 
 # ------------------------ Raster
 

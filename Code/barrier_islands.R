@@ -17,20 +17,13 @@ library(tmaptools)
 
 bi1 <- st_read('./Data/Spatial/Barrier_islands/barrier_islands1.shp') # from T. Atwood (AA projection)
 
-bi2 <- st_read('./Data/Spatial/Barrier_islands/more-barrier-islands_11112021.shp') # digitized from GEE
+bi2 <- st_read('./Data/Spatial/Barrier_islands/barrier-islands-11112021-2.shp') # digitized from GEE
 
-tm_shape(bi2) + 
-  tm_polygons() # look better
+# Reproject ifSAR-based digitized shp to AA 
 
-# see what projection original shapefile is in
+bi2 <- st_transform(bi2, crs = st_crs(bi1))
 
-coast <- st_read('./Data/Spatial/coastline/coastline/Physical Features - Coast - Alaska Coast - 250,000_POLYGON.shp')
-
-# See what happens when crs are aligned and files merged
-
-bi2 <- st_transform(bi2, crs = st_crs(bi_aa))
-
-islands <- st_union(bi_aa, bi2)
+islands <- st_union(bi1, bi2)
 
 tm_shape(islands) + 
   tm_polygons()

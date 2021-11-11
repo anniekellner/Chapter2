@@ -19,11 +19,13 @@ bi1 <- st_read('./Data/Spatial/Barrier_islands/barrier_islands1.shp') # from T. 
 
 bi2 <- st_read('./Data/Spatial/Barrier_islands/barrier-islands-11112021-2.shp') # digitized from GEE
 
-# Reproject ifSAR-based digitized shp to AA 
+bi2 <- st_transform(bi2, crs = st_crs(bi1)) # Reproject ifSAR-based digitized shp to AA 
 
-bi2 <- st_transform(bi2, crs = st_crs(bi1))
+islands <- st_union(bi1, bi2) # join
 
-islands <- st_union(bi1, bi2)
-
-tm_shape(islands) + 
+tm_shape(islands) + # Check that it looks good
   tm_polygons()
+
+# ------- Write new shapefile --------------------------------------- #
+
+st_write(islands, './Data/Spatial/Barrier_Islands/all_islands.shp')

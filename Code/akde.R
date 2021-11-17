@@ -9,17 +9,27 @@ library(ctmm)
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(sf)
 
 rm(list = ls())
 
-pb <- readRDS('./Data/bears_072321.Rds')
+source('./Code/MyFunctions.R')
 
-pb <- pb %>%
-  select(id, datetime, gps_lon, gps_lat, X, Y)
+pb <- readRDS('./Data/bears_092921.Rds')
+pb <- st_transform(pb, 4326)
 
-colnames(pb) <- c("id", "timestamp", "longitude", "latitude", "x", "y") # Movebank format
+coords <- st_coordinates(pb)
 
-pbt <- as.telemetry(pb)
+pb <- st_drop_geometry(pb)
+
+pb2 <- cbind(pb, coords)
+
+pb2 <- pb2 %>%
+  select(id, datetime, X, Y)
+
+colnames(pb2) <- c("id", "timestamp", "longitude", "latitude") # Movebank format
+
+pbt <- as.telemetry(pb2)
 
 # Plots
 

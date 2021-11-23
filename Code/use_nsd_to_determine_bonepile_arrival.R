@@ -40,5 +40,7 @@ traj.df %>%
   group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
+# Look at plots manually and use interactive view to determined bonepile arrival 
+
 plotlist[[21]]
 uni[[21]]

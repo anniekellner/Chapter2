@@ -7,6 +7,8 @@ library(sf)
 library(ggplot2)
 library(plotly)
 library(dplyr)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -40,7 +42,29 @@ traj.df %>%
   group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
-# Look at plots manually and use interactive view to determined bonepile arrival 
+# Look at plots manually and use interactive view to determine bonepile arrival 
 
-plotlist[[21]]
-uni[[21]]
+plotlist[[1]]
+uni[[1]]
+
+#-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
+
+tmap_mode('view')
+tmaptools::palette_explorer()
+
+bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
+
+bone <- st_transform(bone, 3338)
+
+
+# 20414.2009
+
+pbx <- filter(pb, id == "pb_20845.2015")
+
+tm_shape(bone) + 
+  tm_symbols(shape = 2, col = "purple") + 
+  tm_shape(pbx) + 
+  tm_symbols(col = "month", palette = "YlOrRd", popup.vars = "datetime")
+  
+
+# recorded data bonepile_denning_info.xlsx

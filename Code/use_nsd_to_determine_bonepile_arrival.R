@@ -44,8 +44,8 @@ traj.df %>%
 
 # Look at plots manually and use interactive view to determine bonepile arrival 
 
-plotlist[[1]]
-uni[[1]]
+plotlist[[13]]
+uni[[15]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 

@@ -14,8 +14,7 @@ library(adehabitatHR)
 library(sf)
 library(dplyr)
 library(sp)
-library(tmap)
-library(tmaptools)
+library(ggplot2)
 
 rm(list = ls())
 
@@ -47,20 +46,7 @@ bp_only.mcp <- mcp(bp.sp, percent = 95) # creates spdf with one polygon for each
 plot(bp.sp, col = as.factor(bp.sp@data$id), pch = 16)
 plot(bp_only.mcp, col = alpha(1:4, 0.5), add = TRUE)
 
-# --------------  Non-bonepile bears  ------------------------------------------------- #
 
-no.bp <- pb %>%
-  filter(id == "pb_20418.2005" | id == "pb_21237.2011" | id == "pb_32255.2008" | id == "pb_20414.2009") %>%
-  select(id, geometry)
-
-no_bp.sp <- as_Spatial(no.bp)
-
-no_bp.mcp <- mcp(no_bp.sp, percent = 95) # mcp spdf
-
-# Plot
-
-plot(no_bp.sp, col = as.factor(no_bp.sp@data$id), pch = 16)
-plot(no_bp.mcp, col = alpha(1:3, 0.5), add = TRUE)
 
 # ------------------ Bonepile bears at the bonepile ------------------------ #
 
@@ -105,7 +91,7 @@ pb32366_2011 <- pb %>%
   filter(datetime > "2011-08-30 12:00:00")
 
 pb32608 <- pb %>%
-  filter(id == "pb_32608") %>%
+  filter(id == "pb_32608.2008") %>%
   filter(datetime > "2008-08-30 10:00:00" & datetime < "2008-10-15 07:00:00") 
 
 pb20333 <- pb %>%
@@ -138,16 +124,16 @@ all_bp.sp <- as_Spatial(all.bp)
 
 all_bp.mcp <- mcp(all_bp.sp, percent = 95)
 
-# Plot
+all_bp.mcp # make sure there are 17 bears/polygons
 
-plot(all_bp.sp, col = as.factor(no_bp.sp@data$id), pch = 16)
-plot(all_bp.mcp, col = alpha(1:5, 0.5), add = TRUE)
-
-# Convert mcp to sf
+# Convert mcp to sf just because I hate sp
 
 bp_mcp.sf <- st_as_sf(all_bp.mcp)
 
-head(bp_mcp.sf)
+# Plot
+
+ggplot(data = bp_mcp.sf) + 
+  geom_sf(mapping = aes(fill = id, alpha = 0.5)) 
 
 
 

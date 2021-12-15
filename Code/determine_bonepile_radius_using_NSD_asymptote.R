@@ -2,6 +2,13 @@
 ###   USE NSD TO CREATE HOME RANGES FOR BEARS BEFORE/AFTER OR AT BONEPILE   ##########
 ##############################################################################################
 
+# Use this script in combination with bonepile_denning_info.xlsx 
+# and use_nsd_to_determine_bonepile_arrival.R
+
+# First look at NSD (script above) and see whether there is a clear asymptote (likely bonepile)
+# Then check with script above and use tmap to plot bear locations and bp locations on map to verify
+
+
 library(adehabitatLT)
 library(adehabitatHR)
 library(sf)

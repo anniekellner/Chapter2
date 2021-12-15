@@ -44,8 +44,8 @@ traj.df %>%
 
 # Look at plots manually and use interactive view to determine bonepile arrival 
 
-plotlist[[13]]
-uni[[15]]
+plotlist[[21]]
+uni[[21]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
@@ -57,9 +57,7 @@ bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 bone <- st_transform(bone, 3338)
 
 
-# 20414.2009
-
-pbx <- filter(pb, id == "pb_20845.2015")
+pbx <- filter(pb, id == "pb_20982.2008")
 
 tm_shape(bone) + 
   tm_symbols(shape = 2, col = "purple") + 

@@ -3,7 +3,9 @@
 ############################################################################
 
 library(sf)
-
+library(dplyr)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -88,4 +90,27 @@ all.bp <- bind_rows(bp_only,
 
 #saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
 
-# -------- 
+# -------- Find individual centroids to see how close to the bonepile they are --------------- #
+
+all.bp <- cbind(all.bp, st_coordinates(all.bp))
+
+centroids <- all.bp %>%
+  group_by(id) %>%
+  summarise(across(.cols = c(X,Y), mean)) %>%
+  st_drop_geometry() 
+
+centroids <- st_as_sf(centroids, coords = c("X","Y"), crs = 3338)
+  
+
+bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
+
+tmap_mode('view')
+
+tm_shape(centroids) + 
+  tm_symbols(size = 0.5) + 
+  tm_shape(bones) + 
+  tm_symbols(shape = 213, size = 0.5, col = "red") # not very close for Barter Island
+
+
+
+

@@ -37,15 +37,15 @@ for(i in 1:length(uni)){
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n)
   }
 
-traj.df %>%
-  group_by(burst) %>%
-  group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
-  subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
+#traj.df %>%
+  #group_by(burst) %>%
+  #group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
+  #subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
 # Look at plots manually and use interactive view to determine bonepile arrival 
 
-plotlist[[21]]
-uni[[21]]
+plotlist[[13]]
+uni[[13]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 

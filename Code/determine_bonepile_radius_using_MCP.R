@@ -100,7 +100,7 @@ pb20333 <- pb %>%
 
 pb20982 <- pb %>%
   filter(id == "pb_20982.2008") %>%
-  filter(datetime > "2008-09-20" & datetime < "2008-10-10 10:00:00")
+  filter(datetime > "2008-09-20 16:00:00" & datetime < "2008-10-10 10:00:00")
 
 all.bp <- bind_rows(bp_only, 
                     pb06810, 
@@ -117,7 +117,7 @@ all.bp <- bind_rows(bp_only,
                     pb20333,
                     pb20982)
 
-# saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
+saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
 
 # ------------------  MCP -------------------------------- #
 

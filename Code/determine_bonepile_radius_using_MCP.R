@@ -64,7 +64,7 @@ pb20492 <- pb %>%
 
 pb20520 <- pb %>% 
   filter(id == "pb_20520.2012") %>%
-  filter(datetime > "2012-08-27 20:00:00")
+  filter(datetime > "2012-08-27 20:00:00" & datetime < "2012-10-19 08:00:00")
 
 pb20735 <- pb %>%
   filter(id == "pb_20735.2009") %>%
@@ -117,6 +117,8 @@ all.bp <- bind_rows(bp_only,
                     pb20333,
                     pb20982)
 
+# saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
+
 # ------------------  MCP -------------------------------- #
 
 all.bp <- all.bp %>%
@@ -137,10 +139,7 @@ bp_mcp.sf <- st_as_sf(all_bp.mcp)
 ggplot(data = bp_mcp.sf) + 
   geom_sf(mapping = aes(fill = id, alpha = 0.5)) 
 
-# ----------- Asymptotic distance ------------------------ #
 
-asym <- all.bp %>%
-  group_by(id) %>%
   
 
 

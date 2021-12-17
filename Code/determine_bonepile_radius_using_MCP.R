@@ -117,7 +117,7 @@ all.bp <- bind_rows(bp_only,
                     pb20333,
                     pb20982)
 
-saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
+#saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
 
 # ------------------  MCP -------------------------------- #
 

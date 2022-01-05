@@ -35,5 +35,5 @@ used <- pts %>%
   select(id, geometry) %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
 
-saveRDS(used, './Data/used_bonepile.Rds')
+#saveRDS(used, './Data/used_bonepile.Rds')
 

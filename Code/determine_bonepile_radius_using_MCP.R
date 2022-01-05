@@ -119,33 +119,3 @@ all.bp <- bind_rows(bp_only,
 
 #saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
 
-# ------------------  MCP -------------------------------- #
-
-all.bp <- all.bp %>%
-  dplyr::select(id, geometry)
-
-all_bp.sp <- as_Spatial(all.bp)
-
-all_bp.mcp <- mcp(all_bp.sp, percent = 95)
-
-all_bp.mcp # make sure there are 17 bears/polygons
-
-# Convert mcp to sf just because I hate sp
-
-bp_mcp.sf <- st_as_sf(all_bp.mcp)
-
-#saveRDS(bp_mcp.sf, file = './Data/Spatial/MCPs/mcp_bonepiles.Rds') # save BP MCP's as Rds
-
-# Plot
-
-ggplot(data = bp_mcp.sf) + 
-  geom_sf(mapping = aes(fill = id, alpha = 0.5)) 
-
-
-  
-
-
-
-
-
-

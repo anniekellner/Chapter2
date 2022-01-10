@@ -7,6 +7,8 @@
 library(amt)
 library(dplyr)
 library(sf)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -38,8 +40,29 @@ for(i in 1:length(ids)){
 
 saveRDS(rsf, file = './Data/Derived-data/bonepile_pts_used_avail.Rds')
 
+# ------------- GUT CHECK ------------------------------------------------------------------------------- #
 
+# Check to make sure used/avail points look right
 
+# Random sample
+
+ids <- unique(rsf$id)
+sample(1:17, 1)
+ids[5]
+
+pbx <- filter(rsf, id == "pb_06810.2008")
+
+# Plot
+
+tmap_mode('view')
+
+tm_shape(pbx) + 
+  tm_dots()
+
+# How many TRUE/FALSE
+
+false <- filter(pbx, case_ == "FALSE")
+true <- filter(pbx, case_ == "TRUE")
 
 
 

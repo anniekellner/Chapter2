@@ -3,6 +3,8 @@
 ###############################################
 
 # Coast = mainland coast
+# Distance: water --> land = -
+#           land --> water = +  
 
 library(dplyr)
 library(sf)
@@ -35,11 +37,11 @@ pts <- st_as_sf(pts, coords = c('x_', 'y_'), crs = 3338) # convert to sf
 dist_to_coast <- pts %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
 
-saveRDS(pts, './Data/Derived-data/bonepile_data_used_avail.Rds')
+# Check values in ArcGIS - look good 
 
-# Check values in ArcGIS
+#sample10 <- slice_sample(dist_to_coast, prop = .10, replace = FALSE) # randomly select 10% of observations
+#st_write(sample10, paste0(arcgis, "/", "dist_to_coast.shp"))
 
-sample10 <- slice_sample(dist_to_coast, prop = .10, replace = FALSE) # randomly select 10% of observations
-st_write(sample10, paste0(arcgis, "/", "dist_to_coast.shp"))
+#saveRDS(pts, './Data/Derived-data/bonepile_data_used_avail.Rds')
 
          

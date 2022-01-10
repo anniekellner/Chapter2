@@ -11,29 +11,35 @@ library(tmaptools)
 
 rm(list = ls())
 
+arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test'
+
 # Load data
 
 coast <- st_read('./Data/Spatial/coastline/digitized_coastline.shp') # Used .shp of coastline as digitized from IFSAR images on GEE
 coast <- st_transform(coast, 3338)
 
-pts <- readRDS('./Data/all_bonepile_points.Rds')
-
-mcp <- 
+pts <- readRDS('./Data/Derived-data/bonepile_pts_used_avail.Rds')
+pts <- st_as_sf(pts, coords = c('x_', 'y_'), crs = 3338) # convert to sf
 
 # Plot
 
-tmap_mode('view')
+#tmap_mode('view')
 
-tm_shape(coast) + 
-  tm_lines(col = "green") + 
-  tm_shape(pts) + 
-  tm_dots()
+#tm_shape(coast) + 
+  #tm_lines(col = "green") + 
+  #tm_shape(pts) + 
+  #tm_dots()
 
 # Calculate distance for coast for used points
 
-used <- pts %>%
-  select(id, geometry) %>%
+dist_to_coast <- pts %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
 
-#saveRDS(used, './Data/used_bonepile.Rds')
+saveRDS(pts, './Data/Derived-data/bonepile_data_used_avail.Rds')
 
+# Check values in ArcGIS
+
+sample10 <- slice_sample(dist_to_coast, prop = .10, replace = FALSE) # randomly select 10% of observations
+st_write(sample10, paste0(arcgis, "/", "dist_to_coast.shp"))
+
+         

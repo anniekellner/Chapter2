@@ -35,4 +35,4 @@ all2 <- all %>%
 
 nobp <- filter(all2, bonepile == 0)
 
-saveRDS(nobp, './Data/all_non_bonepile_pts.Rds')
+#saveRDS(nobp, './Data/all_non_bonepile_pts.Rds')

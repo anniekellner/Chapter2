@@ -4,6 +4,8 @@
 
 library(dplyr)
 library(tidyr)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -34,5 +36,14 @@ all2 <- all %>%
   replace_na(list(bonepile = 0))
 
 nobp <- filter(all2, bonepile == 0)
+
+# Plot to be sure looks OK
+
+nobp.sf <- st_as_sf(nobp, coords = c('X', 'Y'), crs = 3338) # convert to sf object for plotting
+
+tmap_mode('view')
+
+tm_shape(nobp.sf) + 
+  tm_symbols()
 
 #saveRDS(nobp, './Data/all_non_bonepile_pts.Rds')

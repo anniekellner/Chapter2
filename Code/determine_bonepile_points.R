@@ -37,9 +37,6 @@ bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | id == "pb_32366.2014") %>%
   dplyr::select(id, geometry)
 
-bp.sp <- as_Spatial(bp_only)
-
-bp_only.mcp <- mcp(bp.sp, percent = 95) # creates spdf with one polygon for each bear
 
 # Plot
 

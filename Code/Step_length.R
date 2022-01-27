@@ -2,7 +2,8 @@
 ##    STEP LENGTH  #################
 ####################################
 
-# 10/18/2021
+# 10/18/2021 - initial commit
+# Updated 1/26/22
 
 rm(list = ls())
 
@@ -15,7 +16,7 @@ library(lubridate)
 
 # Load and prep data
 
-pb <- readRDS('./Data/bears_092921.Rds')
+pb <- readRDS('./Data/all_non_bonepile_pts.Rds')
 
 fix <- readRDS('./Data/Derived-data/akde_list.Rds')# to divide animals into groups according to median fix rate
 fix <- dplyr::select(fix, id, median_fix)

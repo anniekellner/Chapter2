@@ -1,0 +1,126 @@
+---
+title: "Summary_non_bonepile"
+author: "Annie Kellner"
+date: "1/27/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r libraries, include = FALSE, message=FALSE}
+
+rm(list = ls())
+
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(amt)
+library(sf)
+library(tmap)
+library(tmaptools)
+```
+
+# Summary for all non-bonepile points
+
+```{r load-data, include=FALSE, message=FALSE}
+
+# Bears
+
+used <- readRDS('./Data/all_non_bonepile_pts.Rds') # load all non-bonepile points
+
+used.sf <- st_as_sf(used, coords = c('X',"Y"), crs = 3338) # sf object for plotting all points
+
+# Alaska
+
+us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
+
+bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
+
+bb <- st_transform(bb, 3338)
+
+ak <- us %>%
+  filter(STATE_ABBR == "AK") %>%
+  st_transform(3338) 
+
+ak <- st_crop(ak, bb)
+
+# Bonepiles
+
+bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
+
+```
+
+```{r plot-all-points}
+
+tmap_mode('view')
+
+tm_shape(ak) + 
+  tm_polygons(col = "#ABF37E") + 
+  tm_shape(used.sf) + 
+  tm_symbols(size = 0.2, col = "id") + 
+  tm_shape(bone) + 
+  tm_symbols(size = 0.8, shape = 4, col = "black") +
+  tm_legend(show = FALSE)
+  
+
+```
+
+
+```{r prep-data}
+
+# Track
+
+
+track <- make_track(used, X, Y, datetime, id = id, crs = sp::CRS("+init=epsg:3338"))
+tr <- track %>% nest(data = -"id") 
+
+tr2 <- tr %>% # downsample to 2-hr fix rate
+  mutate(steps = map(data, function(x)
+    x %>% track_resample(rate = hours(2), tolerance = minutes(20)) %>% steps_by_burst()))
+
+# Dataframe
+
+df <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
+
+```
+
+# Summary stats for non-bonepile points
+
+```{r load-data}
+
+table(df$id)
+
+```
+Table showing number of locations per bear  
+
+```{r}
+
+first <- used %>%
+  group_by(id) %>%
+  slice_head() %>%
+  mutate(yr = year(datetime))
+
+ggplot(data = first, aes(x = year)) + 
+  geom_bar() + 
+  scale_x_continuous("Year", 
+                   breaks = c(2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015),
+                   labels = c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015"))
+```
+Histogram showing years represented  
+
+```{r steps-histogram}
+
+check <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
+
+
+ggplot(data = check, aes(sl_)) + 
+  geom_histogram()+ 
+  facet_wrap(~id) + 
+  xlab("step length (m)") + 
+  ylab("Number of steps")
+```
+
+
+

@@ -37,6 +37,10 @@ tmap_mode('view')
 tm_shape(us) + 
   tm_symbols()
 
+# Transform to epsg:3338
+
+us <- st_transform(us, 3338)
+
 # Save 
 
 saveRDS(us, './Data/all_non_bonepile_pts.Rds')

@@ -20,6 +20,7 @@ library(amt)
 library(sf)
 library(tmap)
 library(tmaptools)
+library(adehabitatLT)
 ```
 
 # Summary for all non-bonepile points
@@ -30,7 +31,7 @@ library(tmaptools)
 
 used <- readRDS('./Data/all_non_bonepile_pts.Rds') # load all non-bonepile points
 
-used.sf <- st_as_sf(used, coords = c('X',"Y"), crs = 3338) # sf object for plotting all points
+#used.sf <- st_as_sf(used, coords = c('X',"Y"), crs = 3338) # sf object for plotting all points
 
 # Alaska
 
@@ -70,8 +71,16 @@ tm_shape(ak) +
 
 ```{r prep-data}
 
-# Track
+source('./Code/MyFunctions.R')
 
+# Convert sf object to dataframe
+used <- cbind(used, st_coordinates(used)) # separate coords from geometry columns into X and Y columns
+
+used <- used %>%
+  st_drop_geometry() %>%
+  as.data.frame()
+
+# Make track
 
 track <- make_track(used, X, Y, datetime, id = id, crs = sp::CRS("+init=epsg:3338"))
 tr <- track %>% nest(data = -"id") 
@@ -88,32 +97,54 @@ df <- tr2 %>% select(id, steps) %>% unnest(cols = steps)
 
 # Summary stats for non-bonepile points
 
-```{r load-data}
+```{r number-of-points}
 
 table(df$id)
 
 ```
 Table showing number of locations per bear  
 
+```{r days-tracked}
+
+# Need to use adehabitatLT to get DaysTracked, so need to remove extra points (from 1-hr bears) from used df
+
+t <- df %>%
+  dplyr::select(id, t1_) %>%
+  rename(datetime = t1_)
+
+used2 <- used %>%
+  semi_join(t)
+
+# Create track in adehabitatLT
+
+ltraj <- as.ltraj(xy=used2[,c("X","Y")], date=used2$datetime, id=as.character(used2$id))
+summary <- summary(ltraj)
+
+summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)
+summary
+
+```
+Should I remove bears with 4-5 days of coverage?
+
 ```{r}
 
-first <- used %>%
+first <- used2 %>%
   group_by(id) %>%
   slice_head() %>%
   mutate(yr = year(datetime))
 
-ggplot(data = first, aes(x = year)) + 
+ggplot(data = first, aes(x = yr)) + 
   geom_bar() + 
   scale_x_continuous("Year", 
                    breaks = c(2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015),
                    labels = c("2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015"))
 ```
-Histogram showing years represented  
+Histogram showing years represented (count = number of bears)  
+
 
 ```{r steps-histogram}
 
 check <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
-
 
 ggplot(data = check, aes(sl_)) + 
   geom_histogram()+ 
@@ -122,5 +153,13 @@ ggplot(data = check, aes(sl_)) +
   ylab("Number of steps")
 ```
 
+```{r turning-angle}
 
+check <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
 
+ggplot(data = check, aes(ta_, fill = factor(id))) + 
+  geom_density(alpha = 0.4)
+
+```
+
+# Used and Available Points

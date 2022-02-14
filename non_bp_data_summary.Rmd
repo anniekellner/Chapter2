@@ -144,9 +144,9 @@ Histogram showing years represented (count = number of bears)
 
 ```{r steps-histogram}
 
-check <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
+steps <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
 
-ggplot(data = check, aes(sl_)) + 
+ggplot(data = steps, aes(sl_)) + 
   geom_histogram()+ 
   facet_wrap(~id) + 
   xlab("step length (m)") + 
@@ -155,13 +155,22 @@ ggplot(data = check, aes(sl_)) +
 
 ```{r turning-angle}
 
-check <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
-
-ggplot(data = check, aes(ta_, fill = factor(id))) + 
+ggplot(data = steps, aes(ta_, fill = factor(id))) + 
   geom_density(alpha = 0.4)
 
 ```
 
 # Used and Available Points
 
+```{r}
+
+ua <- steps %>% group_by(id) %>% random_steps(n_control = 20) # add random steps
+
+# Plot random v matched points
+ggplot(ua, aes(x2_, y2_, color=case_))+
+  geom_point()+
+  facet_wrap(~id, scales="free")
+
+saveRDS(ua, './non_bp_pts_used_avail.Rds')
+```
 

@@ -164,7 +164,7 @@ ggplot(data = steps, aes(ta_, fill = factor(id))) +
 
 ```{r}
 
-ua <- steps %>% group_by(id) %>% random_steps(n_control = 20) # add random steps
+ua <- steps %>% group_by(id) %>% random_steps(n_control = 20) # add random steps (gamma/von mises = default distributions)
 
 # Plot random v matched points
 ggplot(ua, aes(x2_, y2_, color=case_))+

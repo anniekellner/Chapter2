@@ -22,11 +22,12 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
 
-# ----------  Extract Values ------------------------------------------ #
+# ----------  Extract Values for Corridor Points ------------------------------------------ #
 
 corr <- st_intersection(corr, land)
+bone <- st_intersection(bone, land)
 
-
+unique(corr$COMM)
 
 
 

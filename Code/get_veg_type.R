@@ -77,6 +77,8 @@ corr3 <- corr2 %>%
     COMM == "S1.1" ~ "Dwarf-shrub tundra"
   ))
 
+# NOTE: could try consolidating all G's to "Graminoid tundra" and see how that goes 
+
 corr3 <- st_as_sf(corr3)
   
 # ---- Map again  ----- #
@@ -88,3 +90,8 @@ tm_shape(land) +
   tm_symbols(size = 0.5,popup.vars = c("veg"))
 
 # Looks great 2/16/22
+
+# ----- Save ---- #
+
+saveRDS(corr3, 'Data/Derived-data/corridor_data.Rds')
+saveRDS(bone2, './Data/Derived-data/bonepile_data.Rds') # Did not recategorize because will drop out

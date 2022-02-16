@@ -35,8 +35,9 @@ land <- st_crop(land, bb)
 
 # ----------  Extract Values ------------------------------------------ #
 
-corr <- st_intersection(corr, land)
-bone <- st_intersection(bone, land)
+corr.veg <- st_intersection(corr, land) # only returns rows with data
+bone.veg <- st_intersection(bone, land)
+
 
 # -----   Plot  -------------------------------------------------------- #
 
@@ -45,12 +46,45 @@ tmap_mode('view')
 tm_shape(land) + 
   tm_polygons(col = "COMM") + 
   tm_layout(legend.outside = TRUE) + 
-  tm_shape(corr) + 
+  tm_shape(bone.veg) + 
   tm_symbols(size = 0.5,popup.vars = c("COMM"))
+
+# ----- Join dataframes ----------------------------------------------- #
+
+# Convert sf objects to dataframes so can join
+
+corr <- as.data.frame(corr)
+bone <- as.data.frame(bone)
+corr.veg <- as.data.frame(corr.veg)
+bone.veg <- as.data.frame(bone.veg)
+
+corr2 <- left_join(corr, corr.veg)
+bone2 <- left_join(bone, bone.veg)
 
 # LOOKS GOOD!
 
+# ----- Consolidate categories -------- #
 
+unique(corr2$COMM)
+unique(bone2$COMM) # No veg in bonepile points!
 
+corr3 <- corr2 %>%
+  mutate(
+    veg = case_when(
+    COMM == "W2.2" | COMM == "W1.2" | COMM == "W1.1" | COMM == "W2.1" ~ "Wetlands",
+    COMM == "G3.1" | COMM == "G3.3" ~ "Non-tussock tundra",
+    COMM == "G4.1" | COMM == "G4.3" ~ "Tussock tundra",
+    COMM == "S1.1" ~ "Dwarf-shrub tundra"
+  ))
 
+corr3 <- st_as_sf(corr3)
+  
+# ---- Map again  ----- #
 
+tm_shape(land) + 
+  tm_polygons(col = "COMM") + 
+  tm_layout(legend.outside = TRUE) + 
+  tm_shape(corr3) + 
+  tm_symbols(size = 0.5,popup.vars = c("veg"))
+
+# Looks great 2/16/22

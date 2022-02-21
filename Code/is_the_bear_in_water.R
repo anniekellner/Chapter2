@@ -28,6 +28,7 @@ corr2 <- corr %>%
 bone2 <- bone %>%
   mutate(in_water = ifelse(on_island == "FALSE" & elevation == 0 | is.na(elevation),1,0))
 
+
 # -- Check by plotting  ----------- #
 
 # Randomly sample 5% of rows and make sf object to plot

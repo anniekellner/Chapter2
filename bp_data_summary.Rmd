@@ -115,12 +115,6 @@ library(adehabitatHR)
 used <- dplyr::select(used, id,geometry)
 used.sp <- as_Spatial(used)
 
-for(i in 1:length(ids)){
-  pbx <- used.sp$id[[i]]
-  pbx.mcp <- mcp(pbx, percent = 95)
-  
-}
-
 mcp95 <- mcp(used.sp, percent = 95)
 
 tm_shape(ak) + 
@@ -163,4 +157,6 @@ ggplot(rsf, aes(x_, y_, color=case_))+
   geom_point()+
   facet_wrap(~id, scales="free")
 ```
- Used and availale points for bonepile bears
+ Used and available points for bonepile bears
+ 
+ The 'blue' ("TRUE") points are more obvious here than in the step-selection. That makes sense because these points could be anywhere in the MCP whereas the step-selection available points are more limited?

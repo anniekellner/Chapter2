@@ -59,22 +59,22 @@ tmap_mode('view')
 
 tm_shape(ak) + 
   tm_polygons(col = "#ABF37E") + 
-  tm_shape(used.sf) + 
+  tm_shape(used) + 
   tm_symbols(size = 0.2, col = "id") + 
   tm_shape(bone) + 
   tm_symbols(size = 0.8, shape = 4, col = "black") +
-  tm_legend(show = FALSE)
+  tm_layout(legend.outside = TRUE, legend.outside.position = "right")
   
 
 ```
 
 
-```{r prep-data}
+```{r prep-data, message=FALSE, warning=FALSE}
 
 source('./Code/MyFunctions.R')
 
 # Convert sf object to dataframe
-used <- cbind(used, st_coordinates(used)) # separate coords from geometry columns into X and Y columns
+#used <- cbind(used, st_coordinates(used)) # separate coords from geometry columns into X and Y columns
 
 used <- used %>%
   st_drop_geometry() %>%
@@ -91,7 +91,7 @@ tr2 <- tr %>% # downsample to 2-hr fix rate
 
 # Dataframe
 
-df <- tr2 %>% select(id, steps) %>% unnest(cols = steps) 
+df <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
 
 ```
 
@@ -152,6 +152,7 @@ ggplot(data = steps, aes(sl_)) +
   xlab("step length (m)") + 
   ylab("Number of steps")
 ```
+Histogram showing step length
 
 ```{r turning-angle}
 
@@ -159,6 +160,8 @@ ggplot(data = steps, aes(ta_, fill = factor(id))) +
   geom_density(alpha = 0.4)
 
 ```
+Density distribution showing turning angles
+
 
 # Used and Available Points
 

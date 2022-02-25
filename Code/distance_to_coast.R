@@ -28,13 +28,16 @@ corr.sf <- st_as_sf(corr, crs = 3338)
 # --------  Calculate distance to coast for used points ------------------------- #
 
 corr.sf <- corr.sf %>%
-  #select(id, geometry) %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
+
+bone.sf <- bone.sf %>%
+  mutate(dist_to_coast = st_distance(., coast))
 
 # If in the water or on an island, make negative
 
 corr.sf$dist_to_coast <- ifelse(corr.sf$on_island == "TRUE" | corr.sf$in_water == 1, corr.sf$dist_to_coast*-1, corr.sf$dist_to_coast)
 
+bone.sf$dist_to_coast <- ifelse(bone.sf$on_island == "TRUE" | bone.sf$in_water == 1, bone.sf$dist_to_coast*-1, bone.sf$dist_to_coast)
 # Check using distance tool in ArcGIS
 
 arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test'
@@ -42,13 +45,15 @@ arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test'
 sample1 <- slice_sample(corr.sf, prop = .01, replace = FALSE) # randomly select 1% of observations
 st_write(sample1, paste0(arcgis, "/", "dist_to_coast.shp"))
 
+bone_sample1 <- slice_sample(bone.sf, prop = .01, replace = FALSE)
+
 # ------  Plot  ---------------------------------------------------------------- #
 
 tmap_mode('view')
 
 tm_shape(coast) + 
   tm_lines(col = "green") + 
-  tm_shape(corr.sf) + 
+  tm_shape(bone_sample1) + 
   tm_symbols(popup.vars = c('dist_to_coast'))
 
 

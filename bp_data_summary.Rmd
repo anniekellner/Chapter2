@@ -115,7 +115,7 @@ library(adehabitatHR)
 used <- dplyr::select(used, id,geometry)
 used.sp <- as_Spatial(used)
 
-mcp95 <- mcp(used.sp, percent = 95)
+mcp95 <- mcp(used.sp, percent = 99)
 
 tm_shape(ak) + 
   tm_polygons(col = "#ABF37E") + 
@@ -134,14 +134,14 @@ tm_shape(ak) +
 track <- make_track(used.df, X, Y, crs = sp::CRS("+init=epsg:3338"), id = id) # makes one big track with all animals
 trk <- track %>% nest(data = -"id") # creates dataframes for each individual
 
-# Create random points using 95 MCP for each individual
+# Create random points using 99 MCP for each individual
 
 rsf <- data.frame(case_ = logical(), x_ = double(), y_ = double(), id = character())
 ids <- unique(used.df$id)
 
 for(i in 1:length(ids)){
   bear_trk = trk$data[[i]]
-  hr = hr_mcp(bear_trk)
+  hr = hr_mcp(bear_trk, levels = 0.99)
   rsf_pts = random_points(hr, n = 20*nrow(bear_trk), presence = bear_trk)
   rsf_pts$id = ids[i]
   rsf = rbind(rsf, rsf_pts)

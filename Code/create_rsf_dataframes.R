@@ -32,7 +32,7 @@ ids <- unique(pts$id)
 
 for(i in 1:length(ids)){
   bear_trk = trk$data[[i]]
-  hr = hr_mcp(bear_trk)
+  hr = hr_mcp(bear_trk, levels = 0.99)
   rsf_pts = random_points(hr, n = 20*nrow(bear_trk), presence = bear_trk)
   rsf_pts$id = ids[i]
   rsf = rbind(rsf, rsf_pts)

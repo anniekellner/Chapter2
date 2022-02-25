@@ -10,7 +10,7 @@ rm(list = ls())
 
 # Bonepile
 
-bone <- readRDS('./Data/Derived-data/bonepile_data_used_avail.Rds')
+bone <- readRDS('./Data/Derived-data/bonepile_pts_used_avail.Rds')
 
 bone <- bone %>%
   mutate(Point_ID = row_number())

@@ -33,7 +33,7 @@ bone <- as.data.frame(bone)
 # Get rid of extraneous columns
 
 corr.gee <- select(corr.gee, elevation, aspect, Point_ID, slope)
-bone.gee <- select(bone.gee, elevation, aspect, Point_ID, slope)
+bone.gee <- dplyr::select(bone.gee, elevation, aspect, Point_ID, slope)
 
 # Join by Point_ID
 

@@ -12,13 +12,23 @@ rm(list = ls())
 # ---- Load data  ----------------------- #
 
 # GEE
-corr.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_corridor_pts.shp')
-bone.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_bonepile_pts.shp')
+corr.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_corridor_pts/terrain_corridor_pts.shp')
+bone.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_bonepile_pts/terrain_bonepile_pts.shp')
+
+# Take a peek
+
+plot(st_geometry(corr.gee))
+plot(st_geometry(bone.gee))
 
 # R
 
 corr <- readRDS('Data/Derived-data/corridor_data.Rds')
 bone <- readRDS('Data/Derived-data/bonepile_data.Rds')
+
+# Remove previous columns for elevation, aspect and slope
+
+corr <- select(corr, -c(elevation:slope))
+bone <- select(bone, -c(elevation:slope))
 
 # --- Join --------------------------- #
 

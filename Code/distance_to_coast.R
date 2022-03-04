@@ -22,7 +22,7 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 # Create sf objects 
 
-bone.sf <- st_as_sf(bone, crs = 3338)
+bone.sf <- st_as_sf(bone, coords = c('x_', 'y_'), crs = 3338)
 corr.sf <- st_as_sf(corr, crs = 3338)
 
 # --------  Calculate distance to coast for used points ------------------------- #
@@ -56,6 +56,9 @@ tm_shape(coast) +
   tm_shape(bone_sample1) + 
   tm_symbols(popup.vars = c('dist_to_coast'))
 
+# ----- Save  ------------------------------------------------------------------ #
+
+saveRDS(bone.sf, "./Data/Derived-data/bonepile_data.Rds")
 
 
 

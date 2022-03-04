@@ -39,7 +39,7 @@ corr_samp <- corr2 %>%
 
 bone_samp <- bone2 %>%
   sample_frac(size = .05, replace = FALSE) %>%
-  st_as_sf()
+  st_as_sf(., coords = c('x_', 'y_'), crs = 3338)
 
 # Plot
 

@@ -17,20 +17,23 @@ arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test' # to 'ground-
 
 islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp') # shapefile with all islands
 
-all <- readRDS('./Data/Derived-data/bonepile_data_used_avail.Rds') # sf object with all points - true and false
+bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
+
+bone.sf <- st_as_sf(bone, coords = c('x_', 'y_'), crs = 3338)
 
 # Visual check - looks good
 
-plot(st_geometry(all))
+plot(st_geometry(bone.sf))
 plot(st_geometry(islands), col = "green", add = TRUE)
 
-on_island = lengths(st_intersects(all, islands)) > 0 # creates a vector of whether or not point is on island
+on_island = lengths(st_intersects(bone.sf, islands)) > 0 # creates a vector of whether or not point is on island
 
-all <- cbind(all, on_island)
+bone <- cbind(bone, on_island)
+bone.sf <- cbind(bone.sf, on_island) # to check in ArcGIS
 
 # Send to ArcGIS to check
 
-#sample10 <- slice_sample(all, prop = .10, replace = FALSE) # randomly select 10% of observations
-#st_write(sample10, paste0(arcgis, "/", "islands_test.shp"))
+sample1 <- slice_sample(bone.sf, prop = .01, replace = FALSE) # randomly select 1% of observations
+st_write(sample1, paste0(arcgis, "/", "islands_test.shp"))
 
-saveRDS(all, file = './Data/Derived-data/bonepile_data_used_avail.Rds') # save sf dataframe with column for on island
+saveRDS(bone, file = './Data/Derived-data/bonepile_data.Rds') # save sf dataframe with column for on island

@@ -2,6 +2,9 @@
 ###   IS THE BEAR IN A PROTECTED NATURAL AREA?  ###########
 ###########################################################
 
+# Will need to amend this once I get industrial and municipal points.
+# Municipal/Industrial will override nature_preserve status
+
 library(sf)
 library(dplyr)
 library(tmap)
@@ -26,7 +29,7 @@ npra <- st_read('./Data/Spatial/NPRA/NPRA_Planning_Areas.shp')
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
-corr.sf <- st_as_sf(corr)
+corr.sf <- st_as_sf(corr, crs = 3338)
 
 # ----- ANALYSIS --------------------------------------------- #
 
@@ -66,5 +69,22 @@ corr.sf2 <- select(corr.sf2, -c(in_anwr, in_npra))
 
 # ------- PLOT  ----------------------------------------- #
 
+# Select smaller sample to test (1%)
 
+bone_samp <- slice_sample(bone2, prop = .01, replace = FALSE)
+corr_samp <- slice_sample(corr.sf2, prop = .01, replace = FALSE)   
+
+# Plot
+
+tmap_mode('view')
+
+tm_shape(anwr) +
+  tm_polygons() + 
+  tm_shape(npra) + 
+  tm_polygons() + 
+  tm_shape(bone_samp) + 
+  tm_symbols(col = "red", size = 0.1, popup.vars = "nature_preserve") + 
+  tm_shape(corr_samp) + 
+  tm_symbols(col = "blue", size = 0.1, popup.vars = c("nature_preserve", "in_water"))
+  
 

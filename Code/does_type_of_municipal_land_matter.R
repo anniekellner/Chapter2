@@ -8,7 +8,7 @@
 # Different types of municipal layers:
 # North Slope Villages = city centers for Kaktovik, Deadhorse, etc. 
 # Native Lands NPRA - Native territory within NPRA
-# Native Allotments_NS - individuallyowned Native-held lands
+# Native Allotments_NS - individually owned Native-held lands
 # Cabins - hunting/fishing camp cabins for subsistence activities
 # Village BND - municipal boundaries of Kaktovik, Barrow, Niuqsut, etc. 
 
@@ -21,19 +21,26 @@ library(dplyr)
 
 # Directories
 
-NSB <- './Data/Spatial/NSB'
+NSB <- './Data/Spatial/Municipal/NSB'
+NLB <- './Data/Spatial/Municipal/Native lands & boundaries'
 
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 # Villages
 
-vill <- st_read(paste(NSB, 'North Slope Villages.shp', sep = '/'))
+vill <- st_read('./Data/Spatial/Municipal/NSB/North Slope Villages.shp') # File not working - need to fix
 
 # Native Allotments
 
-na1 <- st_read('./Data/Spatial/NSB/Native_Allotments_NS.shp')
-na2 <- 
+na1 <- st_read('./Data/Spatial/Municipal/NSB/Native_Allotments_NS.shp')
+na2 <- st_read(paste(NLB, "native_allotments_east.shp", sep = '/'))
+
+native_allot <- st_join(na1, na2)
   
-  # Native lands
+# Native lands
   
-  native_muni <- st_read('./Data/Spatial/NSB/Native_lands_NPRA.shp')
+native_muni <- st_read('./Data/Spatial/NSB/Native_lands_NPRA.shp')
+
+# Cabins
+
+cabins <- st_read(paste(NLB, 'native_cabins.shp', sep = '/'))

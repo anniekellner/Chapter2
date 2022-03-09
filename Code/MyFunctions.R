@@ -27,3 +27,25 @@ st_drop_geometry <- function(x) {
   }
   return(x)
 }
+
+#' Separate geometry column into two columns for X and Y
+#' 
+#' @param x sf object with geometry columns
+
+geom_into_columns <- function(x){
+  x = cbind(x, st_coordinates(x))
+  x = st_drop_geometry(x)
+}
+
+  
+#' Dataframe to track (amt)
+#' Requires package amt
+#' @param x dataframe with X & Y coordinates, ID, timestamp, crs
+
+make_track_from_df <- function(df, x, y, crs, id){
+  track = make_track(df, x, y, crs, id)
+  trk = track %>% nest(data = -"id")
+}
+
+
+

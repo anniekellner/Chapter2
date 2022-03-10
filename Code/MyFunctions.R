@@ -38,14 +38,7 @@ geom_into_columns <- function(x){
 }
 
   
-#' Dataframe to track (amt)
-#' Requires package amt
-#' @param x dataframe with X & Y coordinates, ID, timestamp, crs
 
-make_track_from_df <- function(df, x, y, timestamp, id, crs){  # THIS DOESN'T WORK
-  track = make_track(df, x, y, timestamp, id, crs)
-  trk = track %>% nest(data = -"id")
-}
 
 
 

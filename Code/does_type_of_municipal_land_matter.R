@@ -25,10 +25,17 @@ source('./Code/MyFunctions.R')
 
 # --------  DATA ----------------------   #
 
+## Bears
+
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 corr.sf <- st_as_sf(corr, crs = 3338)
 
 corr.pl <- slice_sample(corr.sf, prop = .05, replace = FALSE) # So it doesn't take too long to plot
+
+# Make unique step ID's so can run at population level 
+
+corr.sf$unique_step_id <- paste(corr.sf$id, corr.sf$step_id_, sep = "_")
+
 
 # Villages
 
@@ -67,24 +74,35 @@ tm_shape(vill) +
 
 # ---- ANALYSIS --------------------------- #
 
-# Should I buffer the cities?
+## Do bears interact with villages?
+## NO
 
 vill_500m <- st_buffer(vill, 500)
 vill_1km <- st_buffer(vill, 1000)
 vill_5km <- st_buffer(vill, 5000)
 
-buf_500m <- lengths(st_intersects(corr.sf, vill_500m)) > 0
-buf_1km <-  lengths(st_intersects(corr.sf, vill_1km)) > 0 
-buf_5km <- lengths(st_intersects(corr.sf, vill_5km)) > 0
-
 corr.sf2 <- corr.sf %>%
   mutate(village_buffer500m = lengths(st_intersects(., vill_500m)) > 0) %>%
   mutate(village_buffer1km = lengths(st_intersects(., vill_1km)) > 0 ) %>%
-  mutate(village_buffer5km = lengths(st_intersects(., vill_1km)) > 0 )
+  mutate(village_buffer5km = lengths(st_intersects(., vill_5km)) > 0 )
 
-# Make track
+## Result: bears do not interact with village centers. Very few points are within 1 km of village centers
 
-df <- geom_into_columns(corr.sf2)
+## Do bears interact with native cabins?
+## NO
 
-track <- make_track(df, X, Y, t_, id = id, crs = sp::CRS("+init=epsg:3338"))
-track <- track %>% nest(data = -"id")
+cab_500m <- st_buffer(cabins, 500)
+
+corr.sf3 <- corr.sf %>%
+  mutate(cabins = lengths(st_intersects(., cab_500m)) > 0)
+
+which(corr.sf3$cabins == TRUE)
+
+## Do Municipal boundaries matter?
+
+
+
+
+
+
+

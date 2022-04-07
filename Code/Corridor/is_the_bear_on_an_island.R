@@ -27,32 +27,9 @@ plot(st_geometry(islands), col = "green", add = TRUE)
 
 # Use st_cast to convert multipolygons into polygons
 
-cast_test <- st_cast(examp, "POLYGON")
+cast <- st_cast(islands, "POLYGON")
 
-plot(st_geometry(cast_test))
-
-buff_cast <- st_buffer(cast_test, dist = 5)
-
-# See if it works
-
-tm_shape(buff_cast) + 
-  tm_polygons(col = "orange") + 
-  tm_shape(cast_test) + 
-  tm_polygons(col = "purple")
-
-
-# Take subsample so doesn't take so long to plot while figuring this out
-
-examp <- dplyr::filter(islands, Shape_Area < 5000)
-
-buff_ex <- sf::st_buffer(examp2, dist = 5)
-
-tmap_mode('view')
-
-tm_shape(cast_test) + 
-  tm_polygons()
-
-buff <- sf::st_buffer(islands, dist = 5, endCapStyle = "ROUND")
+buff <- st_buffer(cast, dist = 5000)
 
 # Plot to check
 
@@ -60,12 +37,21 @@ tmap_mode('view')
 
 tm_shape(buff) +
   tm_polygons(col = "orange") + 
-  tm_shape(islands) + 
+  tm_shape(cast) + 
   tm_polygons(col = "purple")
+
+# Join
+
+islands_w_buffer <- st_join(cast, buff)
+
+# Save because it takes time to create these buffers
+
+st_write(islands_w_buffer, './Data/Spatial/islands_w_5km_buffer.shp')
+
 
 # ------  Analysis  ----------------------------------------------------- #
 
-on_island = lengths(st_intersects(ua, islands)) > 0 # creates a vector of whether or not point is on island
+on_island = lengths(st_intersects(corr.sf, islands)) > 0 # creates a vector of whether or not point is on island
 
 ua <- cbind(ua, on_island)
 

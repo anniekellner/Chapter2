@@ -2,21 +2,66 @@
 ####      IS THE BEAR ON AN ISLAND?   ##########################
 ################################################################
 
+## Add a 5 km buffer to islands to account for GPS error and shoreline changes
+
 library(dplyr)
 library(sf)
+library(tmap)
+library(tmaptools)
 
 rm(list= ls())
 
 # --------- Load data ------------------------------------------------------- #
 
-ua <- readRDS('./Data/Derived-data/non_bp_ua_sf.Rds')
+corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
+corr.sf <- st_as_sf(corr, crs = 3338)
 
 islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp') # shapefile with all islands
 
 # ------- Plot  ---------------------------------------------------------- #
 
-plot(st_geometry(ua))
-plot(st_geometry(islands), col = "green")
+plot(st_geometry(corr.sf))
+plot(st_geometry(islands), col = "green", add = TRUE)
+
+# ------  Add 5 km buffer to islands ------------------------------------ #
+
+# Use st_cast to convert multipolygons into polygons
+
+cast_test <- st_cast(examp, "POLYGON")
+
+plot(st_geometry(cast_test))
+
+buff_cast <- st_buffer(cast_test, dist = 5)
+
+# See if it works
+
+tm_shape(buff_cast) + 
+  tm_polygons(col = "orange") + 
+  tm_shape(cast_test) + 
+  tm_polygons(col = "purple")
+
+
+# Take subsample so doesn't take so long to plot while figuring this out
+
+examp <- dplyr::filter(islands, Shape_Area < 5000)
+
+buff_ex <- sf::st_buffer(examp2, dist = 5)
+
+tmap_mode('view')
+
+tm_shape(cast_test) + 
+  tm_polygons()
+
+buff <- sf::st_buffer(islands, dist = 5, endCapStyle = "ROUND")
+
+# Plot to check
+
+tmap_mode('view')
+
+tm_shape(buff) +
+  tm_polygons(col = "orange") + 
+  tm_shape(islands) + 
+  tm_polygons(col = "purple")
 
 # ------  Analysis  ----------------------------------------------------- #
 

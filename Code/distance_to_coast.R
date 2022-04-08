@@ -43,7 +43,7 @@ bone.sf$dist_to_coast <- ifelse(bone.sf$on_island == "TRUE" | bone.sf$in_water =
 arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test'
 
 sample1 <- slice_sample(corr.sf, prop = .01, replace = FALSE) # randomly select 1% of observations
-st_write(sample1, paste0(arcgis, "/", "dist_to_coast.shp"))
+st_write(sample1, paste0(arcgis, "/", "dist_to_coast.shp"), append = FALSE)
 
 bone_sample1 <- slice_sample(bone.sf, prop = .01, replace = FALSE)
 
@@ -53,7 +53,7 @@ tmap_mode('view')
 
 tm_shape(coast) + 
   tm_lines(col = "green") + 
-  tm_shape(bone_sample1) + 
+  tm_shape(sample1) + 
   tm_symbols(popup.vars = c('dist_to_coast'))
 
 # ----- Save  ------------------------------------------------------------------ #

@@ -19,6 +19,7 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
+islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp')
 
 # -- Assign Water ---------------- #
 
@@ -28,16 +29,26 @@ corr2 <- corr %>%
 bone2 <- bone %>%
   mutate(in_water = ifelse(on_island == "FALSE" & elevation == 0 | is.na(elevation),1,0))
 
+# Remove previous on_island designation and replace with new one (that uses island buffer) - 4/12/22
+
+corr3 <- corr2 %>%
+  select(-on_island) %>%
+  rename(on_island = on_island.1)
+
+bone3 <- bone2 %>%
+  select(-on_island) %>%
+  rename(on_island = on_island.1)
+
 
 # -- Check by plotting  ----------- #
 
 # Randomly sample 5% of rows and make sf object to plot
 
-corr_samp <- corr2 %>%
+corr_samp <- corr3 %>%
   sample_frac(size = .05, replace = FALSE) %>%
   st_as_sf()
 
-bone_samp <- bone2 %>%
+bone_samp <- bone3 %>%
   sample_frac(size = .05, replace = FALSE) %>%
   st_as_sf(., coords = c('x_', 'y_'), crs = 3338)
 
@@ -45,14 +56,18 @@ bone_samp <- bone2 %>%
 
 tmap_mode('view')
 
+tm_shape(islands) + 
+  tm_polygons(col = "green") +
 tm_shape(corr_samp) + 
   tm_symbols(size = 0.1, popup.vars = c('in_water')) # Looks good
 
 tm_shape(bone_samp) + 
   tm_symbols(size = 0.1, popup.vars = c('in_water')) # Looks good
 
+
+
 # Save
 
-saveRDS(corr2, './Data/Derived-data/corridor_data.Rds')
-saveRDS(bone2, './Data/Derived-data/bonepile_data.Rds')
+saveRDS(corr3, './Data/Derived-data/corridor_data.Rds')
+saveRDS(bone3, './Data/Derived-data/bonepile_data.Rds')
 

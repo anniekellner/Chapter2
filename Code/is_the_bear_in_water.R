@@ -65,7 +65,6 @@ tm_shape(bone_samp) +
   tm_symbols(size = 0.1, popup.vars = c('in_water')) # Looks good
 
 
-
 # Save
 
 saveRDS(corr3, './Data/Derived-data/corridor_data.Rds')

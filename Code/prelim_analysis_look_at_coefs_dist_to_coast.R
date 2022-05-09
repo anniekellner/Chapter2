@@ -3,7 +3,7 @@
 ###   DISTANCE TO COAST         #######################
 #######################################################
 
-## What do coefficients look like when using + and - designations for onshore/offshore in disance to coast metric 
+## What do coefficients look like when using + and - designations for onshore/offshore in distance to coast metric 
 
 library(dplyr)
 
@@ -13,6 +13,8 @@ rm(list =ls())
 
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
-corr <- corr %>% 
+corr <- corr %>%    # remove previous column and replace with new once since adding buffer to islands
   select(-on_island) %>%
   rename(on_island = on_island.1)
+
+

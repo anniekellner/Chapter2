@@ -19,7 +19,8 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
-islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp')
+islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp') # just for plotting - NO BUFFER
+
 
 # -- Assign Water ---------------- #
 
@@ -29,18 +30,13 @@ corr2 <- corr %>%
 bone2 <- bone %>%
   mutate(in_water = ifelse(on_island == "FALSE" & elevation == 0 | is.na(elevation),1,0))
 
-# Remove previous on_island designation and replace with new one (that uses island buffer) - 4/12/22
 
-corr3 <- corr2 %>%
-  select(-on_island) %>%
-  rename(on_island = on_island.1)
+# -- Check  ----------- #
 
-bone3 <- bone2 %>%
-  select(-on_island) %>%
-  rename(on_island = on_island.1)
+# Are there bears for which on_island == TRUE & in_water == TRUE?
 
+corr2$in_water <- ifelse(corr2$on_island == TRUE, 0, corr2$in_water)
 
-# -- Check by plotting  ----------- #
 
 # Randomly sample 5% of rows and make sf object to plot
 

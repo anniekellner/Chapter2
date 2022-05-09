@@ -54,7 +54,7 @@ tmap_mode('view')
 tm_shape(coast) + 
   tm_lines(col = "green") + 
   tm_shape(sample1) + 
-  tm_symbols(popup.vars = c('dist_to_coast'))
+  tm_symbols(popup.vars = c('dist_to_coast', 'on_island', 'in_water'))
 
 # ----- Save  ------------------------------------------------------------------ #
 

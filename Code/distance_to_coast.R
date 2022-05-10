@@ -2,7 +2,10 @@
 ###   DISTANCE TO MAINLAND COAST   #####################
 ########################################################
 
-# Coast = mainland coast
+## Only calculating distance to coast for mainland points (decided at meeting with GW 4/13/22)
+## This metric is really only relevant for mainland points, anyway, and the positive/negative denotation meses with coefficients
+
+# Coast = mainland coast. Digitized using combo of shapefile and IfSAR.
 
 library(dplyr)
 library(sf)
@@ -25,6 +28,9 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 bone.sf <- st_as_sf(bone, coords = c('x_', 'y_'), crs = 3338)
 corr.sf <- st_as_sf(corr, crs = 3338)
 
+
+
+
 # --------  Calculate distance to coast for used points ------------------------- #
 
 corr.sf <- corr.sf %>%
@@ -33,11 +39,6 @@ corr.sf <- corr.sf %>%
 bone.sf <- bone.sf %>%
   mutate(dist_to_coast = st_distance(., coast))
 
-# If in the water or on an island, make negative
-
-corr.sf$dist_to_coast <- ifelse(corr.sf$on_island == "TRUE" | corr.sf$in_water == 1, corr.sf$dist_to_coast*-1, corr.sf$dist_to_coast)
-
-bone.sf$dist_to_coast <- ifelse(bone.sf$on_island == "TRUE" | bone.sf$in_water == 1, bone.sf$dist_to_coast*-1, bone.sf$dist_to_coast)
 # Check using distance tool in ArcGIS
 
 arcgis <- 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Test'

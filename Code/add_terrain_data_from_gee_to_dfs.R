@@ -6,6 +6,7 @@
 
 library(sf)
 library(dplyr)
+library(tidyr)
 
 rm(list = ls())
 
@@ -49,6 +50,11 @@ bone.gee <- dplyr::select(bone.gee, elevation, aspect, Point_ID, slope)
 
 corr2 <- left_join(corr, corr.gee)
 bone2 <- left_join(bone, bone.gee)
+
+# Make NA values 0 for elevation (because are typically deep sea points)
+
+corr2$elevation <- replace_na(0)
+bone2$elevation <- replace_na(0)
 
 # Save
 

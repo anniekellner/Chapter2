@@ -19,50 +19,48 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
-islands <- st_read('./Data/Spatial/Barrier_Islands/all_islands.shp') # just for plotting - NO BUFFER
+islands <- st_read('./Data/Spatial/Barrier_Islands/islands_w_1500m_buffer.shp') 
 
 
 # -- Assign Water ---------------- #
 
 corr2 <- corr %>%
-  mutate(in_water = ifelse(on_island == "FALSE" & is.na(veg) & elevation == 0 | is.na(elevation),1,0))
+  mutate(in_water = ifelse(on_island == "TRUE" | !is.na(veg) | elevation > 0, 0, 1))
 
 bone2 <- bone %>%
-  mutate(in_water = ifelse(on_island == "FALSE" & elevation == 0 | is.na(elevation),1,0))
+  mutate(in_water = ifelse(on_island == "TRUE" | elevation > 0, 0, 1))
 
 
 # -- Check  ----------- #
 
-# Are there bears for which on_island == TRUE & in_water == TRUE?
-
-corr2$in_water <- ifelse(corr2$on_island == TRUE, 0, corr2$in_water)
-
-
 # Randomly sample 5% of rows and make sf object to plot
 
-corr_samp <- corr3 %>%
+corr_samp <- corr2 %>%
   sample_frac(size = .05, replace = FALSE) %>%
   st_as_sf()
 
-bone_samp <- bone3 %>%
+bone_samp <- bone2 %>%
   sample_frac(size = .05, replace = FALSE) %>%
   st_as_sf(., coords = c('x_', 'y_'), crs = 3338)
 
 # Plot
+# Looks good! 5-12-2022
 
 tmap_mode('view')
 
 tm_shape(islands) + 
   tm_polygons(col = "green") +
 tm_shape(corr_samp) + 
-  tm_symbols(size = 0.1, popup.vars = c('in_water')) # Looks good
+  tm_symbols(col = "in_water", popup.vars = c("elevation", "veg", "aspect", "on_island")) 
 
-tm_shape(bone_samp) + 
-  tm_symbols(size = 0.1, popup.vars = c('in_water')) # Looks good
+tm_shape(islands) + 
+  tm_polygons(col = "green") +
+  tm_shape(bone_samp) + 
+  tm_symbols(col = "in_water") 
 
 
 # Save
 
-saveRDS(corr3, './Data/Derived-data/corridor_data.Rds')
-saveRDS(bone3, './Data/Derived-data/bonepile_data.Rds')
+saveRDS(corr2, './Data/Derived-data/corridor_data.Rds')
+saveRDS(bone2, './Data/Derived-data/bonepile_data.Rds')
 

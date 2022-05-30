@@ -11,7 +11,7 @@ library(sf)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(ggmap)
+library(ggmap) # square maps - a little annoying in a place where rectangluar would be better
 
 rm(list = ls())
 
@@ -86,7 +86,7 @@ st_bbox(other_shp)
 
 # Alaska
 
-ak_map <- get_map(location = c(lon = -148.4, lat = 70.2269), zoom = 8, maptype = 'terrain-background', source = 'stamen')
+ak_map <- get_map(location = c(lon = -148.4, lat = 70.2269), zoom = 7, maptype = 'terrain-background', source = 'stamen')
 
 ggmap(ak_map)
 

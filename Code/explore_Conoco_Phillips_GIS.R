@@ -11,34 +11,34 @@ library(tmaptools)
 
 rm(list = ls())
 
-setwd('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/GIS_from_Todd/Industry_GIS/CP_Infrastructure/CP_Infrastructure') #  When working from laptop
+#setwd('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/GIS_from_Todd/Industry_GIS/CP_Infrastructure/CP_Infrastructure/CP_Infrastructure') #  When working from laptop
 
 ## Badami-Thompson Pipeline
 
-bt_pipe <- st_read('./Badami_Thomson_pipeline.shp')
+bt_pipe <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Badami_Thomson_pipeline.shp')
 plot(st_geometry(bt_pipe))
 
 ## Haul Road
 
-haul_road <- st_read('./haul_road.shp')
+haul_road <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/haul_road.shp')
 plot(st_geometry(haul_road))
 
 #### ---- KUPARUK -------------  ####
 
 ## Additional 'gravel' shapefile looks like additional gravel pads. Not very many, no need to ask. 
 
-gravel <- st_read('./Kuparuk_Gravel.shp')
+gravel <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Gravel.shp')
 plot(st_geometry(gravel))
 
-gravel_pads <- st_read('./Kuparuk_Gravel_Pads.shp')
+gravel_pads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Gravel_Pads.shp')
 plot(st_geometry(gravel_pads))
 
-gravel_roads <- st_read('./Kuparuk_Gravel_Roads.shp')
+gravel_roads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Gravel_Roads.shp')
 plot(st_geometry(gravel_roads))
 
-pipelines <- st_read('./Kuparuk_Pipelines.shp')
+pipelines <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Pipelines.shp')
 
-roads <- st_read('./Kuparuk_Roads.shp')
+roads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Roads.shp')
 
 # Plot all Kuparuk together
 

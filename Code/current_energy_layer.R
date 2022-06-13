@@ -68,5 +68,5 @@ airports <- st_crop(airports, bb)
 plot(st_geometry(runways))
 plot(st_geometry(airports), add = TRUE)
 
-st_write(runways, './Data/Spatial/Industry_GIS/NSSI/runways.shp') 
-st_write(airports, './Data/Spatial/Industry_GIS/NSSI/airports.shp')
+st_write(runways, './Data/Derived-data/Spatial/NSSI/runways.shp') 
+st_write(airports, './Data/Derived-data/Spatial/NSSI/airports.shp')

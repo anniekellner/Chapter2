@@ -6,6 +6,7 @@ library(sf)
 library(dplyr)
 library(tidyr)
 
+
 # Compare Hilcorp and Conoco to NSSI
 # Cannot merge Hilcorp and Conoco into a single shapefile
 
@@ -86,4 +87,6 @@ NSRoads <- st_transform(NSRoads, 3338)
 NSDev <- st_transform(NSDev, 3338)
 transak <- st_transform(transak, 3338)
 
+# ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
+plot()

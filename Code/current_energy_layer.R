@@ -5,12 +5,16 @@
 library(sf)
 library(dplyr)
 library(tidyr)
-
+library(maps)
+library(googleway) # can pull geographic coords from Google
+theme_set(theme_bw())
 
 # Compare Hilcorp and Conoco to NSSI
 # Cannot merge Hilcorp and Conoco into a single shapefile
 
 rm(list = ls())
+
+key <- "AIzaSyDSOPDGRNBNE-ZoLj4PM608-dpDrQ0VNgg" # Google API key
 
 ## Load Conoco-Phillips
 
@@ -50,33 +54,19 @@ plot(st_geometry(cp2), add = TRUE)
 
 ## Load NSSI
 
-# Airports and Runways
+airports <- st_read('./Data/Derived-data/Spatial/NSSI/airports.shp')
+runways <- st_read('./Data/Derived-data/Spatial/NSSI/runways.shp')
 
-runways <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/alaska-airports-and-runways-faa/Transportation - Airports and Runways - FAA_LINE.shp')
-airports <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/alaska-airports-and-runways-faa/Transportation - Airports and Runways - FAA_POINT.shp')
+faa <- st_union(airports, runways)
 
-runways <- st_transform(runways, 3338)
-airports <- st_transform(airports, 3338)
-
-plot(st_geometry(runways))
-plot(st_geometry(airports), add = TRUE) # Need to crop
-
-bb <- st_read('./Data/Spatial/Bounding_box/rectangle.shp')
-
-runways <- st_crop(runways, bb)
-airports <- st_crop(airports, bb)
-
-plot(st_geometry(runways))
-plot(st_geometry(airports), add = TRUE)
-
-st_write(runways, './Data/Derived-data/Spatial/NSSI/runways.shp') 
-st_write(airports, './Data/Derived-data/Spatial/NSSI/airports.shp')
 
 # Roads, pipelines, and developed areas
 
 NSpipes <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSPiplines_V10.shp')
 NSRoads <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSRoads_V10.shp')
 NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
+
+ns <- st_union(NSpipes, NSRoads) # Not including development areas - ask Todd whether these should be included
 
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
 
@@ -89,4 +79,40 @@ transak <- st_transform(transak, 3338)
 
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
-plot()
+plot(st_geometry(cp2), col = "red")
+plot(st_geometry(hil2), col = "red", add = TRUE)
+plot(st_geometry(airports), col = "blue", add = TRUE)
+plot(st_geometry(runways), col = "blue", add = TRUE)
+plot(st_geometry(NSpipes), col = "orange", add = TRUE)
+#plot(st_geometry(NSRoads), col = "green", add = TRUE)
+plot(st_geometry(NSDev), col = "yellow", add = TRUE)
+plot(st_geometry(transak), col= "purple", add = TRUE)
+
+states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
+
+## ggplot
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+cp2 <- st_as_sf(cp2, coords = c("longitude", "latitude"), 
+                  crs = 4326, agr = "constant")
+
+hil2 <- st_as_sf(hil2, coords = c("longitude", "latitude"), 
+                 crs = 4326, agr = "constant")
+
+faa <- st_as_sf(faa, coords = c("longitude", "latitude"), 
+                crs = 4326, agr = "constant")
+
+ns <- st_as_sf(ns, coords = c("longitude", "latitude"), 
+               crs = 4326, agr = "constant")
+
+sf_use_s2(FALSE) # Otherwise get error; https://github.com/r-spatial/sf/issues/1856
+
+ggplot(data = world) +
+  geom_sf() +
+  geom_sf(data = states, fill = NA) + 
+  geom_sf(data = cp2, color = "red") +
+  geom_sf(data = hil2, color = "red") +
+  geom_sf(data = faa, color = "blue") +
+  geom_sf(data = ns, color = "green") +
+  coord_sf(xlim = c(-156, -141), ylim = c(69,71), expand = FALSE)
+

@@ -77,4 +77,13 @@ NSpipes <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_
 NSRoads <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSRoads_V10.shp')
 NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
 
+transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
+
+# Transform to 3338 
+
+NSpipes <- st_transform(NSpipes, 3338)
+NSRoads <- st_transform(NSRoads, 3338)
+NSDev <- st_transform(NSDev, 3338)
+transak <- st_transform(transak, 3338)
+
 

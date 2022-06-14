@@ -70,3 +70,11 @@ plot(st_geometry(airports), add = TRUE)
 
 st_write(runways, './Data/Derived-data/Spatial/NSSI/runways.shp') 
 st_write(airports, './Data/Derived-data/Spatial/NSSI/airports.shp')
+
+# Roads, pipelines, and developed areas
+
+NSpipes <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSPiplines_V10.shp')
+NSRoads <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSRoads_V10.shp')
+NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
+
+

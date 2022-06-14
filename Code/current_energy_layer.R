@@ -6,6 +6,7 @@ library(sf)
 library(dplyr)
 library(tidyr)
 library(maps)
+library(ggplot2)
 library(googleway) # can pull geographic coords from Google
 theme_set(theme_bw())
 
@@ -68,14 +69,9 @@ NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_in
 
 ns <- st_union(NSpipes, NSRoads) # Not including development areas - ask Todd whether these should be included
 
+st_write(ns, './Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp') # Takes a bit of time to combine 
+
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
-
-# Transform to 3338 
-
-NSpipes <- st_transform(NSpipes, 3338)
-NSRoads <- st_transform(NSRoads, 3338)
-NSDev <- st_transform(NSDev, 3338)
-transak <- st_transform(transak, 3338)
 
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
@@ -84,7 +80,7 @@ states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
 ## ggplot
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
-cp2 <- st_as_sf(cp2, coords = c("longitude", "latitude"), 
+cp2 <- st_as_sf(cp2, coords = c("longitude", "latitude"), # Needs to be in lat/long to be compatible with ggplot features
                   crs = 4326, agr = "constant")
 
 hil2 <- st_as_sf(hil2, coords = c("longitude", "latitude"), 

@@ -79,15 +79,6 @@ transak <- st_transform(transak, 3338)
 
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
-plot(st_geometry(cp2), col = "red")
-plot(st_geometry(hil2), col = "red", add = TRUE)
-plot(st_geometry(airports), col = "blue", add = TRUE)
-plot(st_geometry(runways), col = "blue", add = TRUE)
-plot(st_geometry(NSpipes), col = "orange", add = TRUE)
-#plot(st_geometry(NSRoads), col = "green", add = TRUE)
-plot(st_geometry(NSDev), col = "yellow", add = TRUE)
-plot(st_geometry(transak), col= "purple", add = TRUE)
-
 states <- st_as_sf(map("state", plot = FALSE, fill = TRUE))
 
 ## ggplot

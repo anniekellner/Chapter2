@@ -12,7 +12,7 @@ theme_set(theme_bw())
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggrepel)
-
+library(tidyverse)
 
 # Compare Hilcorp and Conoco to NSSI
 # Cannot merge Hilcorp and Conoco into a single shapefile
@@ -59,8 +59,6 @@ plot(st_geometry(cp2), add = TRUE)
 
 ## Load NSSI
 
-faa <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp') # why is this file so large?
-
 airports <- st_read('./Data/Derived-data/Spatial/NSSI/airports.shp')
 runways <- st_read('./Data/Derived-data/Spatial/NSSI/runways.shp')
 
@@ -70,7 +68,7 @@ faa <- bind_rows(airports, runways)
 
 NSpipes <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSPiplines_V10.shp')
 NSRoads <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSRoads_V10.shp')
-NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
+#NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
 
 NSpipes$NAME <- "NA"
 NSpipes$Route_Name <- "NA"
@@ -78,7 +76,7 @@ NSpipes$Unit_Name <- "NA"
 
 ns <- bind_rows(NSpipes, NSRoads) # Not including development areas - ask Todd whether these should be included
 
-#st_write(ns, './Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp') # Takes a bit of time to combine 
+st_write(ns, './Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp') # Takes a bit of time to combine 
 
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
 
@@ -134,17 +132,44 @@ ggplot(data = world) +
   geom_sf(data = ns, color = "green") +
   coord_sf(xlim = c(-152, -143), ylim = c(70.0,70.8), expand = FALSE)
 
+# ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #
+
+## Compare NSSI to CP/Hilcorp Industry data
+
+unique(ns$NAME)
 
 
+## Exclude ice roads
 
+iceroad <- st_read('C:/Users/akell/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/IceRoads/iceroad.shp') %>%
+  st_set_crs(4326)
 
+npra_icerd <- st_read('C:/Users/akell/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/IceRoads/npra_2000_2001.shp') %>%
+  st_set_crs(4326)
+
+iceroad <- st_as_sf(iceroad, coords = c("longitude", "latitude"), # Needs to be in lat/long to be compatible with ggplot features
+                crs = 4326, agr = "constant")
+
+npra_icerd <- st_as_sf(npra_icerd, coords = c("longitude", "latitude"), 
+                 crs = 4326, agr = "constant")
 
 ggplot(data = world) +
   geom_sf() +
-  geom_sf(data = states, fill = NA) + 
+  geom_sf(data = akcities) +
+  geom_text_repel(data= akcities, aes(x = lng, y = lat, label = city),
+                  size = 3.0, fontface = "bold", nudge_y = c(-0.25, -0.25, 0.25)) + # package ggrepel = flexible approach to label placement
   geom_sf(data = cp2, color = "red") +
   geom_sf(data = hil2, color = "red") +
   geom_sf(data = faa, color = "blue") +
   geom_sf(data = ns, color = "green") +
-  coord_sf(xlim = c(-156, -141), ylim = c(69,71), expand = FALSE)
+  geom_sf(data = iceroad, color = "#C5E9F6") +
+  geom_sf(data = npra_icerd, color = "#C5E9F6") +
+  coord_sf(xlim = c(-152, -143), ylim = c(70.0,70.8), expand = FALSE)
 
+
+tmap_mode('view')
+tm_shape(iceroad) + 
+  tm_lines()
+
+ns %>%
+  filter(str_detect(Route_Name, 'thom')) 

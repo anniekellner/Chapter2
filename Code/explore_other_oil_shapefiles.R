@@ -13,7 +13,7 @@ rm(list = ls())
 
 # Directories
 
-setwd('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/GIS_from_Todd/Industry_GIS') #  When working from laptop
+#setwd('C:/Users/akell/Documents/ArcGIS/Polar_Bears_GIS/GIS_from_Todd/Industry_GIS') #  When working from laptop
 
 # Industry GIS (from TA)
 
@@ -23,8 +23,13 @@ facilities <- st_read('./Facilities/Faciliites.shp')
 
 ## ICE ROADS
 
-ice_roads <- st_read('./OIL/IceRoads/iceroad.shp')
-plot(st_geometry(ice_roads))
+iceroad <- st_read('C:/Users/akell/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/IceRoads/iceroad.shp')
+plot(st_geometry(iceroad))
+
+tmap_mode('view')
+tm_shape(iceroad) + 
+  tm_lines()
+
 
 ## FACILITIES
 

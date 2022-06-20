@@ -2,83 +2,59 @@
 ###     CREATE CURRENT ENERGY LAYERS    #########################
 #################################################################
 
+# It is much easier to compare layers in ArcGIS over R
+
+library(tidyverse)
 library(sf)
-library(dplyr)
-library(tidyr)
 library(maps)
-library(ggplot2)
 library(googleway) # can pull geographic coords from Google
 theme_set(theme_bw())
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggrepel)
-library(tidyverse)
-
-# Compare Hilcorp and Conoco to NSSI
-# Cannot merge Hilcorp and Conoco into a single shapefile
 
 rm(list = ls())
 
 # --------- LOAD DATA ---------------------------------------------- #
 
-## Load Conoco-Phillips
-
-cp <- list.files(path = './Data/Spatial/Industry_GIS/CP_Infrastructure', pattern = "[.]shp$", full.names = TRUE)
-
-cp_shp <- list()
-
-for(i in 1:length(cp)){
-  shp = st_read(cp[i])
-  shp = st_transform(shp, 3338)
-  cp_shp[[i]] = shp
-}
-
-cp2 <- bind_rows(cp_shp)
-
-cp2 <- cp2 %>%
-  drop_na(geometry)
-
-plot(st_geometry(cp2))
-
-## Load Hilcorp
-
-hil <- list.files(path = './Data/Spatial/Industry_GIS/Hilcorp', pattern = "[.]shp$", full.names = TRUE)
-
-hil_shp <- list()
-
-for(i in 1:length(hil)){
-  shp = st_read(hil[i])
-  shp = st_transform(shp, 3338)
-  hil_shp[[i]] = shp
-}
-
-hil2 <- bind_rows(hil_shp)
-
-plot(st_geometry(hil2))
-plot(st_geometry(cp2), add = TRUE)
-
-## Load NSSI
-
-airports <- st_read('./Data/Derived-data/Spatial/NSSI/airports.shp')
-runways <- st_read('./Data/Derived-data/Spatial/NSSI/runways.shp')
-
-faa <- bind_rows(airports, runways)
-
-# Roads, pipelines, and developed areas
-
-NSpipes <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSPiplines_V10.shp')
-NSRoads <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSRoads_V10.shp')
-#NSDev <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp')
-
-NSpipes$NAME <- "NA"
-NSpipes$Route_Name <- "NA"
-NSpipes$Unit_Name <- "NA"
-
-ns <- bind_rows(NSpipes, NSRoads) # Not including development areas - ask Todd whether these should be included
-
-st_write(ns, './Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp') # Takes a bit of time to combine 
+ns <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp')
+ns <- st_transform(ns, 3338)
 
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
+
+hil <- readRDS('./Data/Derived-data/Spatial/hil_all.Rds')
+cp <- readRDS('./Data/Derived-data/Spatial/cp_all.Rds')
+
+
+# ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #
+
+## Compare NSSI to CP/Hilcorp Industry data
+
+# Combine CP and Hilcorp
+
+cp$OPERATOR <- "CP"
+
+cp <- cp %>%
+  select(NAME, OPERATOR, Type, LABEL, geometry) %>%
+  rename(TYPE = Type)
+
+hil <- hil %>%
+  select(NAME, OPERATOR, TYPE, LABEL, geometry)
+
+hil$TYPE <- as.character(hil$TYPE) # Change from integer to character in order to use bind_rows()
+
+ind <- bind_rows(cp, hil)
+
+# Get intersection
+
+inter <- st_intersection(ind, ns, tolerance = 1000) # Looked at distance between Hilcorp shp and NS shp in Arcmap. Very rough estimate. 
+
+
+plot(st_geometry(inter))
+plot(st_geometry(ns), col = "red", add = TRUE) # Can manually assess differences because there are not too many. 
+
+plot(st_geometry(ns), col = "red", add = TRUE)
+plot(st_geometry(ind), col = "blue", add = TRUE)
 
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
@@ -106,17 +82,19 @@ akcities <- st_as_sf(akcities, coords = c("lng", "lat"), remove = FALSE, # Conve
                      crs = 4326, agr = "constant")
 
 # Oil and gas data
+# Not sure this works or is necessary...
 
-cp2 <- st_as_sf(cp2, coords = c("longitude", "latitude"), # Needs to be in lat/long to be compatible with ggplot features
+cp2 <- st_as_sf(cp, coords = c("longitude", "latitude"), # Needs to be in lat/long to be compatible with ggplot features
                 crs = 4326, agr = "constant")
 
-hil2 <- st_as_sf(hil2, coords = c("longitude", "latitude"), 
+hil2 <- st_as_sf(hil, coords = c("longitude", "latitude"), 
                  crs = 4326, agr = "constant")
 
 faa <- st_as_sf(faa, coords = c("longitude", "latitude"), 
                 crs = 4326, agr = "constant")
 
-ns <- st_as_sf(ns, coords = c("longitude", "latitude"), 
+ns2 <- ns %>% 
+  st_as_sf(ns, coords = c("longitude", "latitude"), 
                crs = 4326, agr = "constant")
 
 ## ggplot
@@ -126,17 +104,24 @@ ggplot(data = world) +
   geom_sf(data = akcities) +
   geom_text_repel(data= akcities, aes(x = lng, y = lat, label = city),
             size = 3.0, fontface = "bold", nudge_y = c(-0.25, -0.25, 0.25)) + # package ggrepel = flexible approach to label placement
-  geom_sf(data = cp2, color = "red") +
-  geom_sf(data = hil2, color = "red") +
-  geom_sf(data = faa, color = "blue") +
-  geom_sf(data = ns, color = "green") +
+  geom_sf(data = inter, color = "red") +
+  geom_sf(data = ns, color = "blue") +
   coord_sf(xlim = c(-152, -143), ylim = c(70.0,70.8), expand = FALSE)
 
-# ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #
 
-## Compare NSSI to CP/Hilcorp Industry data
 
-unique(ns$NAME)
+
+
+plot(st_geometry(ind))
+plot(st_geometry(ns)), add = TRUE)
+
+# Intersect industry with NSSI
+
+inter <- st_intersection(ind, )
+
+# Combine cp and hil
+
+
 
 
 ## Exclude ice roads

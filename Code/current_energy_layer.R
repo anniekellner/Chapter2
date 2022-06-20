@@ -3,6 +3,7 @@
 #################################################################
 
 # It is much easier to compare layers in ArcGIS over R
+# Use NSDev shapefile as well
 
 library(tidyverse)
 library(sf)
@@ -17,6 +18,8 @@ rm(list = ls())
 
 # --------- LOAD DATA ---------------------------------------------- #
 
+## Roads and Pipelines
+
 ns <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp')
 ns <- st_transform(ns, 3338)
 
@@ -25,12 +28,27 @@ transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska
 hil <- readRDS('./Data/Derived-data/Spatial/hil_all.Rds')
 cp <- readRDS('./Data/Derived-data/Spatial/cp_all.Rds')
 
+## Facilities
+
+# Kuparuk (CP)
+
+gravel <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Gravel.shp')
+gravel_pads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Gravel_Pads.shp')
+
+cpfac <- st_union(gravel, gravel_pads) %>% st_transform(3338)
+
+hil_fac <- st_read('./Data/Spatial/Industry_GIS/Hilcorp/Facilities_Hilcorp.shp') %>%
+  st_transform(3338)
+
+nsfac <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp') %>% 
+  st_transform(3338)
+
 
 # ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #
 
 ## Compare NSSI to CP/Hilcorp Industry data
 
-# Combine CP and Hilcorp
+# Combine CP and Hilcorp pipes/roads
 
 cp$OPERATOR <- "CP"
 
@@ -49,12 +67,24 @@ ind <- bind_rows(cp, hil)
 
 inter <- st_intersection(ind, ns, tolerance = 1000) # Looked at distance between Hilcorp shp and NS shp in Arcmap. Very rough estimate. 
 
-
 plot(st_geometry(inter))
 plot(st_geometry(ns), col = "red", add = TRUE) # Can manually assess differences because there are not too many. 
 
-plot(st_geometry(ns), col = "red", add = TRUE)
-plot(st_geometry(ind), col = "blue", add = TRUE)
+# Overlay NS facilities with CP/Hilcorp facilities
+
+cpfac$OPERATOR <- "CP"
+
+cpfac <- cpfac %>%
+  select(NAME, OPERATOR, geometry) 
+
+# Hilcorp
+
+hil_fac <- hil_fac %>%
+  select(NAME, OPERATOR, geometry)
+
+indfac <- bind_rows(cpfac, hil_fac)
+
+interfac <- st_intersection(indfac, nsfac)
 
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
@@ -110,16 +140,9 @@ ggplot(data = world) +
 
 
 
+plot(st_geometry(interfac), col = "red")
+plot(st_geometry(nsfac), col = "blue", add = TRUE)
 
-
-plot(st_geometry(ind))
-plot(st_geometry(ns)), add = TRUE)
-
-# Intersect industry with NSSI
-
-inter <- st_intersection(ind, )
-
-# Combine cp and hil
 
 
 

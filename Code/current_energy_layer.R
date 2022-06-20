@@ -143,7 +143,9 @@ ggplot(data = world) +
 plot(st_geometry(interfac), col = "red")
 plot(st_geometry(nsfac), col = "blue", add = TRUE)
 
+# Save intersection .shp for use with ArcGIS
 
+st_write(interfac, 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Energy/North Slope Science/Derived-data/inter_fac.shp')
 
 
 

@@ -13,8 +13,11 @@ theme_set(theme_bw())
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggrepel)
+<<<<<<< HEAD
 library(tmap)
 library(tmaptools)
+=======
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 
 rm(list = ls())
 
@@ -25,8 +28,11 @@ rm(list = ls())
 ns <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp')
 ns <- st_transform(ns, 3338)
 
+<<<<<<< HEAD
 diff <- st_read('./Data/Derived-data/Spatial/diff.shp')
 
+=======
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
 
 hil <- readRDS('./Data/Derived-data/Spatial/hil_all.Rds')
@@ -34,8 +40,11 @@ cp <- readRDS('./Data/Derived-data/Spatial/cp_all.Rds')
 
 ## Facilities
 
+<<<<<<< HEAD
 nsind <- readRDS('./Data/Derived-data/Spatial/NSSI/NSDev_industrial.Rds') # NSSI facilities
 
+=======
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 # Kuparuk (CP)
 
 gravel <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Gravel.shp')
@@ -47,10 +56,14 @@ hil_fac <- st_read('./Data/Spatial/Industry_GIS/Hilcorp/Facilities_Hilcorp.shp')
   st_transform(3338)
 
 nsfac <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp') %>% 
+<<<<<<< HEAD
   st_transform(3338) # roads and pipelines in NS layer that are not in Ind data
 
 diffac <- st_read('./Data/Derived-data/Spatial/diff_fac.shp') %>% # Created using ArcGIS Pro. 
   st_transform(3338) # Developed areas from NSDev that do not appear in CP or Hilcorp data
+=======
+  st_transform(3338)
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 
 
 # ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #
@@ -95,6 +108,7 @@ indfac <- bind_rows(cpfac, hil_fac)
 
 interfac <- st_intersection(indfac, nsfac)
 
+<<<<<<< HEAD
 # ----- SEPARATE RESIDENTIAL FROM INDUSTRIAL AREAS IN NSSI DATA  ------------------------------ #
 
 ## Developed areas
@@ -123,6 +137,8 @@ tm_shape(ns_industrial) +
   tm_symbols()
 
 
+=======
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
 sf_use_s2(FALSE) # Otherwise get errors; https://github.com/r-spatial/sf/issues/1856
@@ -182,7 +198,11 @@ plot(st_geometry(nsfac), col = "blue", add = TRUE)
 
 # Save intersection .shp for use with ArcGIS
 
+<<<<<<< HEAD
 #st_write(interfac, 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Energy/North Slope Science/Derived-data/inter_fac.shp')
+=======
+st_write(interfac, 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Energy/North Slope Science/Derived-data/inter_fac.shp')
+>>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 
 
 

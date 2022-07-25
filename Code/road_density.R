@@ -11,6 +11,8 @@
 library(sf)
 library(dplyr)
 library(terra)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -22,7 +24,7 @@ r <- st_transform(r, 3338)
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
-# --- ANALYSIS  ----------------------- #
+# --- CREATE ROAD DENSITY GRID  ----------------------- #
 
 v <- vect(r)
 roads <- as.lines(v)
@@ -45,3 +47,7 @@ r[as.integer(names(x))] <- as.vector(x)
 
 plot(r)
 lines(roads)
+
+tm_shape(r) +  # terra objects can be plotted in tmap
+  tm_raster()
+

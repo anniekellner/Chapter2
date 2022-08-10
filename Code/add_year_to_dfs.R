@@ -26,3 +26,4 @@ saveRDS(corr, './Data/Derived-data/corridor_data.Rds')
 saveRDS(bone2, './Data/Derived-data/bonepile_data.Rds')
 
 unique(corr$year)
+unique(bone2$year)

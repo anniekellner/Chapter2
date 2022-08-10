@@ -13,11 +13,6 @@ theme_set(theme_bw())
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggrepel)
-<<<<<<< HEAD
-library(tmap)
-library(tmaptools)
-=======
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 
 rm(list = ls())
 
@@ -28,11 +23,8 @@ rm(list = ls())
 ns <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp')
 ns <- st_transform(ns, 3338)
 
-<<<<<<< HEAD
 diff <- st_read('./Data/Derived-data/Spatial/diff.shp')
 
-=======
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
 
 hil <- readRDS('./Data/Derived-data/Spatial/hil_all.Rds')
@@ -40,11 +32,8 @@ cp <- readRDS('./Data/Derived-data/Spatial/cp_all.Rds')
 
 ## Facilities
 
-<<<<<<< HEAD
 nsind <- readRDS('./Data/Derived-data/Spatial/NSSI/NSDev_industrial.Rds') # NSSI facilities
 
-=======
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 # Kuparuk (CP)
 
 gravel <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Gravel.shp')

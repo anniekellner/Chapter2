@@ -17,7 +17,15 @@ rm(list = ls())
 
 # --  CONOCO-PHILLIPS ----------------------- #
 
-# Read in all .shp files from a directory
+kup_pipes <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Pipelines.shp') %>%
+  st_transform(3338)
+
+kup_roads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Roads.shp') %>%
+  st_transform(3338)
+
+kup_pads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Roads.shp') %>%
+  st_transform(3338)
+
 
 cp <- list.files(path = './Data/Spatial/Industry_GIS/CP_Infrastructure', pattern = "[.]shp$", full.names = TRUE)
 

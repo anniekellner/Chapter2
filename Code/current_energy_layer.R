@@ -3,7 +3,7 @@
 #################################################################
 
 # It is much easier to compare layers in ArcGIS over R
-# Use NSDev shapefile as well
+
 
 library(tidyverse)
 library(sf)
@@ -18,41 +18,77 @@ rm(list = ls())
 
 # --------- LOAD DATA ---------------------------------------------- #
 
-## Roads and Pipelines
-
-ns <- st_read('./Data/Derived-data/Spatial/NSSI/NS_pipes_roads.shp')
-ns <- st_transform(ns, 3338)
-
-diff <- st_read('./Data/Derived-data/Spatial/diff.shp')
-
-transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
+# Hilcorp and CP
 
 hil <- readRDS('./Data/Derived-data/Spatial/hil_all.Rds')
 cp <- readRDS('./Data/Derived-data/Spatial/cp_all.Rds')
 
-## Facilities
+## Industry data not CP or Hilcorp
+# Most directories refer to location on home desktop
 
-nsind <- readRDS('./Data/Derived-data/Spatial/NSSI/NSDev_industrial.Rds') # NSSI facilities
+fac <- st_read('./Data/Spatial/Industry_GIS/Facilities/Faciliites.shp') %>% # Checked in ArcGIS - small coastal facility
+  st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer = "fac")
 
-# Kuparuk (CP)
+end <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/BP_GIS/infrastructure_eofendicott.shp') %>% 
+  st_transform(3338) %>% 
+  select(geometry) %>%
+  mutate(layer = "endicott")
 
-gravel <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure/Kuparuk_Gravel.shp')
-gravel_pads <- st_read('./Data/Spatial/Industry_GIS/CP_Infrastructure//Kuparuk_Gravel_Pads.shp')
+other_ind <- st_union(fac, end)
+  
+fac2 <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/FAC.shp') %>% 
+  st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer = "fac2_3")
 
-cpfac <- st_union(gravel, gravel_pads) %>% st_transform(3338)
+other_ind <- st_union(other_ind, fac2)
 
-hil_fac <- st_read('./Data/Spatial/Industry_GIS/Hilcorp/Facilities_Hilcorp.shp') %>%
-  st_transform(3338)
+pipes <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/PIPES.shp') %>%
+  st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer = "pipes")
 
-nsfac <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/North_slope_infrastructure_roads_pipelines_developed_areas/NSDevAreas_V10.shp') %>% 
-<<<<<<< HEAD
-  st_transform(3338) # roads and pipelines in NS layer that are not in Ind data
+other_ind <- st_union(other_ind, pipes)
 
-diffac <- st_read('./Data/Derived-data/Spatial/diff_fac.shp') %>% # Created using ArcGIS Pro. 
-  st_transform(3338) # Developed areas from NSDev that do not appear in CP or Hilcorp data
-=======
-  st_transform(3338)
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
+prop_fac <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/PROP_FAC.shp') %>%
+  st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer = "PROP_FAC")
+
+other_ind <- st_union(other_ind, prop_fac)
+
+roads <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/ROADS.shp') %>%
+  st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer = "roads")
+
+other_ind <- st_union(other_ind, roads)
+
+tiger_rds <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/tiger_roads.shp') %>%
+  st_set_crs(4326) %>% st_transform(3338) %>%
+  select(geometry) %>%
+  mutate(layer= "tiger roads")
+
+other_ind <- st_union(other_ind, tiger_rds)
+
+# Plot
+
+plot(st_geometry(other_ind))
+
+# Other facilities
+
+
+
+fac2_3 <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/FAC2_3.shp')
+fac23 <- st_transform(fac2_3, 3338)
+
+transak <- st_read('./Data/Spatial/Industry_GIS/North Slope Science/trans_alaska_pipeline/Transportation - Pipelines - Trans Alaska Pipeline System_LINE.shp')
+
+
+
+
 
 
 # ------------ CHECK AGAINST TODD EMAIL --------------------------------------- #

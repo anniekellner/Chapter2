@@ -112,11 +112,29 @@ invalid <- st_is_valid(oldfac, reason = TRUE); unique(invalid) # "too few points
 
 oldfac <- st_make_valid(oldfac) # Works
 
+oldfac_poly <- oldfac %>%
+  filter(st_geometry_type(.)
+%in% c("POLYGON"))
+
+oldfac_lines <- oldfac %>%
+  filter(st_geometry_type(.)
+         %in% c("LINESTRING"))
+
 # Plot
+
 
 plot(st_geometry(oldfac))
 
-tm_shape(ind_fac) + 
+# oldfac - polygons
+
+tm_shape(ind_fac) +  # Polygons from oldfac are redundant
   tm_polygons(col = "blue") + 
-  tm_shape(oldfac) + 
-  tm_polygons(col = "red")
+  tm_shape(oldfac_poly) + 
+  tm_polygons(col = "red") 
+
+# oldfac - lines
+
+tm_shape(ind_pipes) + 
+  tm_lines(col = "blue") +
+  tm_shape(oldfac_lines) + 
+  tm_lines(col = "red")

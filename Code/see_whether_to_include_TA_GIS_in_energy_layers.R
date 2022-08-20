@@ -133,8 +133,12 @@ tm_shape(ind_fac) +  # Polygons from oldfac are redundant
   tm_polygons(col = "red") 
 
 # oldfac - lines
+# NOT redundant 
 
 tm_shape(ind_pipes) + 
   tm_lines(col = "blue") +
   tm_shape(oldfac_lines) + 
   tm_lines(col = "red")
+
+st_write(ind_pipes, 'C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/Projects/Chapter2/Energy/Derived/ind_pipes.shp')
+st_write(oldfac_lines, 'C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/Projects/Chapter2/Energy/Derived/old_pipes.shp')

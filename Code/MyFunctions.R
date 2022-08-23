@@ -37,8 +37,10 @@ geom_into_columns <- function(x){
   x = st_drop_geometry(x)
 }
 
-  
-
+#' Erase one spatial file from another (erase y from x)
+#' 
+#' @param x,y sf objects  
+st_erase = function(x, y) st_difference(x, st_union(st_combine(y)))
 
 
 

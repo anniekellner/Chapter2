@@ -140,5 +140,7 @@ tm_shape(ind_pipes) +
   tm_shape(oldfac_lines) + 
   tm_lines(col = "red")
 
+# Send old lines shp to ArcGIS
+
 st_write(ind_pipes, 'C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/Projects/Chapter2/Energy/Derived/ind_pipes.shp')
 st_write(oldfac_lines, 'C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/Projects/Chapter2/Energy/Derived/old_pipes.shp')

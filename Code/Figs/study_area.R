@@ -10,7 +10,7 @@ library(dplyr)
 
 # ----  LOAD DATA ----------------------------------------------------------------------------------------------- #
 
-dem_poly <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/North_Slope_DEM/dem_poly/dem_poly.shp')
+dem_poly <- st_read('C:/Users/akell/OneDrive - Colostate/Documents/ArcGIS/North_Slope_DEM/dem_poly/dem_poly.shp') ## Change location to dem_poly on repo
 
 land <- dem_poly %>%
   filter(gridcode != 27) %>%

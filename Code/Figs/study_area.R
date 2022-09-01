@@ -2,6 +2,9 @@
 ########    CHAPTER 2: STUDY AREA FIG   #########################
 #################################################################
 
+## TO DO: 
+  # Add landfills, airports
+
 rm(list = ls())
 
 library(sf)

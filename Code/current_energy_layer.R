@@ -133,7 +133,6 @@ indfac <- bind_rows(cpfac, hil_fac)
 
 interfac <- st_intersection(indfac, nsfac)
 
-<<<<<<< HEAD
 # ----- SEPARATE RESIDENTIAL FROM INDUSTRIAL AREAS IN NSSI DATA  ------------------------------ #
 
 ## Developed areas
@@ -162,8 +161,6 @@ tm_shape(ns_industrial) +
   tm_symbols()
 
 
-=======
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 # ------  PLOT TO SEE DIFFERENCES BTW CP/HILCORP AND NSSI   ------------------------------ #
 
 sf_use_s2(FALSE) # Otherwise get errors; https://github.com/r-spatial/sf/issues/1856
@@ -223,27 +220,10 @@ plot(st_geometry(nsfac), col = "blue", add = TRUE)
 
 # Save intersection .shp for use with ArcGIS
 
-<<<<<<< HEAD
 #st_write(interfac, 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Energy/North Slope Science/Derived-data/inter_fac.shp')
-=======
 st_write(interfac, 'C:/Users/akell/Documents/ArcGIS/Projects/Chapter2/Energy/North Slope Science/Derived-data/inter_fac.shp')
->>>>>>> b0107126da90cea19fe703cac11b6e3e2130053c
 
 
-
-## Exclude ice roads
-
-iceroad <- st_read('C:/Users/akell/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/IceRoads/iceroad.shp') %>%
-  st_set_crs(4326)
-
-npra_icerd <- st_read('C:/Users/akell/Documents/ArcGIS/GIS from Todd/Industry GIS/OIL/IceRoads/npra_2000_2001.shp') %>%
-  st_set_crs(4326)
-
-iceroad <- st_as_sf(iceroad, coords = c("longitude", "latitude"), # Needs to be in lat/long to be compatible with ggplot features
-                crs = 4326, agr = "constant")
-
-npra_icerd <- st_as_sf(npra_icerd, coords = c("longitude", "latitude"), 
-                 crs = 4326, agr = "constant")
 
 ggplot(data = world) +
   geom_sf() +

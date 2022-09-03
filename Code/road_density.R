@@ -2,9 +2,17 @@
 #########   ROAD DENSITY - RESIDENTIAL  ############
 ####################################################
 
+## NEED TO FIGURE OUT WHETHER ROADS ARE RESIDENTIAL OR INDUSTRIAL
+
 # Tiger roads were obtained from TIGER US Census Roads from the 2016 release. 
 # Acquired via Google Earth Engine 2/17/22.
-# I am assuming these are municipal/residential roads
+# See TIGER_road_codes_mtfccs_2016.pdf for road codes
+  # S1400 = local neighborhood road, rural road, city street
+  # S1500 = 4WD vehicular trail (these may be service roads for oil/gas)
+  # S1640 = Service Drive (these may be for servicing pipelines)
+  # S1710 = Walkway/Pedestrian path (no vehicles)
+  # S1740 = Private oil road
+  # S1200 = Secondary road (US Hwy, AK Hwy)
 
 # https://stackoverflow.com/questions/69035297/calculating-road-density-raster-from-road-shapefile
 
@@ -18,8 +26,14 @@ rm(list = ls())
 
 # ------- DATA  ------------------------ #
 
-r <- st_read('./Data/Spatial/Roads/tiger-roads.shp')
-r <- st_transform(r, 3338)
+## TIGER roads from GEE
+
+tig <- st_read('./Data/Spatial/Roads/tiger-roads.shp') %>% st_transform(3338)
+unique(tig$mtfcc)
+
+## NSRoads_V10 from NSSI
+
+st_read('./NSRoads')
 
 corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')

@@ -16,6 +16,8 @@ library(tmaptools)
 
 rm(list = ls())
 
+source('./Code/MyFunctions.R')
+
 # ----- Load data ---------------------------------- #
 
 coast <- st_read('./Data/Spatial/coastline/digitized_coastline.shp') # Used .shp of coastline as digitized from IFSAR images on GEE
@@ -27,6 +29,10 @@ corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
 
 # --------  Calculate distance to coast  ------------------------- #
 
+corr <- corr %>%
+  st_as_sf() %>%
+  st_set_crs(3338) 
+  
 corr <- corr %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
   

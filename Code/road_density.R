@@ -20,3 +20,11 @@ x <- tapply(rp$length, rp$rast, sum) # calculates the length of road in each cel
 
 r <- rast(rs)
 r[as.integer(names(x))] <- as.vector(x)
+
+# ---- PLOT ------------------------ #
+
+plot(r)
+lines(roads)
+
+tm_shape(r) +  # terra objects can be plotted in tmap
+  tm_raster()

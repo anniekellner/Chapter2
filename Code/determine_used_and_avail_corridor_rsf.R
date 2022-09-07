@@ -77,7 +77,8 @@ tm_shape(coast) +
 sum(corr$in_water) # 502 (18%)
 sum(corr$on_island) # 1510 (54%)
 # mainland = 778 (28%)
-  
+
+unique(corr$id)
   
   
   

@@ -5,9 +5,12 @@
 library(amt)
 library(dplyr)
 library(sf)
+library(ggplot2)
+#library(maps)
+#library(rnaturalearth)
+#library(rnaturalearthdata)
 library(tmap)
 library(tmaptools)
-library(ggplot2)
 
 rm(list = ls())
 
@@ -37,13 +40,15 @@ for(i in 1:length(ids)){
   rsf = rbind(rsf, rsf_pts)
 }
 
-# Plot random vs. matched points
+## Plot random vs. matched points
 
 ggplot(rsf, aes(x_, y_, color = case_)) +
   geom_point() +
   facet_wrap(~id, scales = "free")
 
-# Plot MCP's
+## Plot MCP's
+
+# Create MCP's
 
 cor.sf <- cor %>%
   st_as_sf(., coords = c('x1_', 'y1_'), crs = 3338) %>%
@@ -55,5 +60,17 @@ mcps <- mcp(cor.sp, percent = 99)
 
 mcp.sf <- st_as_sf(mcps) # because I hate sp
 
-ggplot(data = mcp.sf) +
-  geom_sf(mapping = aes(fill = id, alpha = 0.5))
+tmap_mode('view')
+
+tm_shape(mcps) + 
+  tm_borders(lwd = 2) + 
+  tm_fill(col = "id", alpha = 0.25, palette = "Accent")
+
+
+
+
+
+
+
+
+

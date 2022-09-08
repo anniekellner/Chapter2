@@ -5,10 +5,6 @@
 library(amt)
 library(dplyr)
 library(sf)
-library(ggplot2)
-#library(maps)
-#library(rnaturalearth)
-#library(rnaturalearthdata)
 library(tmap)
 library(tmaptools)
 
@@ -60,17 +56,46 @@ mcps <- mcp(cor.sp, percent = 99)
 
 mcp.sf <- st_as_sf(mcps) # because I hate sp
 
+# Plot
+
 tmap_mode('view')
 
 tm_shape(mcps) + 
   tm_borders(lwd = 2) + 
   tm_fill(col = "id", alpha = 0.25, palette = "Accent")
 
+###################################################################################################
 
+#####   GUT CHECK   #####################################################################
 
+# Look at a few bears to see what their points look like
 
+# 20414.2009
 
+test <- dplyr::filter(cor.sf, id == "pb_20414.2009")
 
+tm_shape(test) + 
+  tm_symbols()
 
+# Is 20414.2009 a bonepile bear?
+# No 
 
+bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
 
+bone.sf <- st_as_sf(bone)
+bone_ids <- unique(bone$id)
+
+# All data
+
+all <- readRDS('./Data/bears_092921.Rds')
+
+pb20845_all <- dplyr::filter(all, id == "pb_20845.2015")
+pb20845_cor <- dplyr::filter(cor.sf, id == "pb_20845.2015")
+pb20845_bone <- dplyr::filter(bone.sf, id == "pb_20845.2015")
+
+tm_shape(pb20845_all) + 
+  tm_symbols(col = "blue") + 
+  tm_shape(pb20845_cor) +
+  tm_symbols(col = "orange") +
+  tm_shape(pb20845_bone) + 
+  tm_symbols(col = "yellow")

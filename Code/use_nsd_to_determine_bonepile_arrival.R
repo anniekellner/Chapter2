@@ -44,8 +44,8 @@ for(i in 1:length(uni)){
 
 # Look at plots manually and use interactive view to determine bonepile arrival 
 
-plotlist[[13]]
-uni[[13]]
+plotlist[[21]]
+uni[[21]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 

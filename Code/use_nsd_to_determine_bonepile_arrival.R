@@ -59,6 +59,8 @@ bone <- st_transform(bone, 3338)
 
 pbx <- filter(pb, id == "pb_20982.2008")
 
+tmap_mode('view')
+
 tm_shape(bone) + 
   tm_symbols(shape = 2, col = "purple") + 
   tm_shape(pbx) + 

@@ -42,19 +42,16 @@ all2 <- all %>%
   left_join(bonedf) %>%
   replace_na(list(bonepile = 0))
 
-# Add bears that never go to bonepile
 
-
-
-# Plot to be sure looks OK
+# Plot corridor points
 
 all.sf <- st_as_sf(all2, coords = c('X', 'Y'), crs = 3338) # convert to sf object for plotting
 
-corr <- filter(all.sf, bonepile == )
+corr <- dplyr::filter(all.sf, bonepile == 0) 
 
 tmap_mode('view')
 
-tm_shape(nobp.sf) + 
-  tm_symbols()
+tm_shape(corr) + 
+  tm_symbols(col == "id")
 
 #saveRDS(nobp, './Data/all_non_bonepile_pts.Rds')

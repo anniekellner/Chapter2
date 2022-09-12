@@ -13,7 +13,7 @@ source('./Code/MyFunctions.R') # for st_drop_geometry
 
 # Read in data
 
-bone <- readRDS('./Data/all_bonepile_points.Rds')
+bone <- bp #readRDS('./Data/all_bonepile_points.Rds')
 all <- readRDS('./Data/bears_092921.Rds')
 
 all <- all %>%
@@ -22,9 +22,7 @@ all <- all %>%
            id == "pb_20333_2008" | id == "pb_21368.2014" | id == "pb_32282.2008" | 
            id == "pb_32608.2008" | id == "20414.2009" | id == "pb_21237.2011")
 
-bp$bonepile <- 1
-
-bone <- bp
+bone$bonepile <- 1
 
 # Change both sf objects to regular dataframes
 
@@ -47,7 +45,9 @@ all2 <- all %>%
 
 all.sf <- st_as_sf(all2, coords = c('X', 'Y'), crs = 3338) # convert to sf object for plotting
 
-corr <- dplyr::filter(all.sf, bonepile == 0) 
+saveRDS(all.sf, './Data/Test/temp.Rds')
+
+
 
 tmap_mode('view')
 

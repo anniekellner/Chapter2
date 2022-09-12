@@ -16,8 +16,15 @@ source('./Code/MyFunctions.R') # for st_drop_geometry
 bone <- readRDS('./Data/all_bonepile_points.Rds')
 all <- readRDS('./Data/bears_092921.Rds')
 
-all <- select(all, id, datetime, geometry)
-bone$bonepile <- 1
+all <- all %>%
+  select(id, datetime, geometry) %>%
+  filter(id == "pb_20525.2013" | id == "pb_20586.2008" | id == "pb_06810.2008" | 
+           id == "pb_20333_2008" | id == "pb_21368.2014" | id == "pb_32282.2008" | 
+           id == "pb_32608.2008" | id == "20414.2009" | id == "pb_21237.2011")
+
+bp$bonepile <- 1
+
+bone <- bp
 
 # Change both sf objects to regular dataframes
 
@@ -35,11 +42,15 @@ all2 <- all %>%
   left_join(bonedf) %>%
   replace_na(list(bonepile = 0))
 
-nobp <- filter(all2, bonepile == 0)
+# Add bears that never go to bonepile
+
+
 
 # Plot to be sure looks OK
 
-nobp.sf <- st_as_sf(nobp, coords = c('X', 'Y'), crs = 3338) # convert to sf object for plotting
+all.sf <- st_as_sf(all2, coords = c('X', 'Y'), crs = 3338) # convert to sf object for plotting
+
+corr <- filter(all.sf, bonepile == )
 
 tmap_mode('view')
 

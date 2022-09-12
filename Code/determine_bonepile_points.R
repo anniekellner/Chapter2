@@ -15,6 +15,8 @@ library(sf)
 library(dplyr)
 library(sp)
 library(ggplot2)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -33,17 +35,28 @@ pb <- readRDS('./Data/bears_092921.Rds') # reads in as sf object
 
 # Bears with all points at bonepile (reference: bonepile_denning_info.xlsx)
 
+# Example bears for demonstration at GW and SB meeting
+
 bp_only <- pb %>%
-  filter(id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | id == "pb_32366.2014") %>%
+  filter(id == "pb_20525.2013" | id == "pb_20586.2008") %>%
   dplyr::select(id, geometry)
+
+bp <- bind_rows(
+  bp_only,
+  pb06810,
+  pb20333,
+  pb21368,
+  pb32282,
+  pb32608
+)
 
 
 # Plot
 
-plot(bp.sp, col = as.factor(bp.sp@data$id), pch = 16)
-plot(bp_only.mcp, col = alpha(1:4, 0.5), add = TRUE)
+tmap_mode('view')
 
-
+tm_shape(bp) + 
+  tm_symbols(col = "id")
 
 # ------------------ Bonepile bears at the bonepile ------------------------ #
 
@@ -81,7 +94,7 @@ pb21368 <- pb %>%
 
 pb32282 <- pb %>%
   filter(id == "pb_32282.2008") %>%
-  filter(datetime > "2008-08-31 16:00:00")
+  filter(datetime > "2008-08-31 15:00:00")
 
 pb32366_2011 <- pb %>%
   filter(id == "pb_32366.2011") %>%
@@ -93,7 +106,7 @@ pb32608 <- pb %>%
 
 pb20333 <- pb %>%
   filter(id == "pb_20333.2008") %>%
-  filter(datetime < "2008-09-29 19:00:00")
+  filter(datetime < "2008-10-03 08:00:00")
 
 pb20982 <- pb %>%
   filter(id == "pb_20982.2008") %>%

@@ -5,13 +5,16 @@
 
 #' Dataframe to SF
 #' 
-#' @param df Dataframe with lat/long (EPSG: 4326)
-#' @param projection what I want the data projected to
+#' @param df Dataframe 
+#' @param x Column name of x coordinate (character)
+#' @param y Column name of y coordinate (character)
+#' @param setCRS CRS df should be set to initially
+#' @param toCRS Desired CRS
 
-DFtoSF <- function(df, projection) {
+DFtoSF <- function(df, x, y, setCRS, toCRS) {
   df <- droplevels(df)
-  sf.wgs <- st_as_sf(df, coords = c('gps_lon', 'gps_lat'), crs = 4326, dim = 'XY')
-  sf.project <- st_transform(sf.wgs, projection)
+  df.sf <- st_as_sf(df, coords = c('x', 'y'), crs = setCRS, dim = 'XY')
+  sf.project <- st_transform(df.sf, toCRS)
   return(sf.project)
 }
 

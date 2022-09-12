@@ -22,7 +22,7 @@ all <- all %>%
            id == "pb_20333_2008" | id == "pb_21368.2014" | id == "pb_32282.2008" | 
            id == "pb_32608.2008" | id == "20414.2009" | id == "pb_21237.2011")
 
-bone$bonepile <- 1
+#bone$bonepile <- 1
 
 # Change both sf objects to regular dataframes
 
@@ -30,16 +30,21 @@ all <- cbind(all, st_coordinates(all)) # separate coords from geometry columns i
 all <- st_drop_geometry(all)
 alldf <- as.data.frame(all)
 
+
 bone <- cbind(bone, st_coordinates(bone))
 bone <- st_drop_geometry(bone)
 bonedf <- as.data.frame(bone)
 
+bonedf <- select(bonedf, id, bonepile, X,Y)
+
 # Join dataframes
 
-all2 <- all %>%
-  left_join(bonedf) %>%
-  replace_na(list(bonepile = 0))
+all2 <- alldf %>%
+  full_join(bonedf) 
 
+all2$bonepile <- ifelse(all2$bonepile == 1, 1, 0)
+
+all2$bonepile[is.na(all2$bonepile)] <- 0
 
 # Plot corridor points
 
@@ -47,7 +52,7 @@ all.sf <- st_as_sf(all2, coords = c('X', 'Y'), crs = 3338) # convert to sf objec
 
 saveRDS(all.sf, './Data/Test/temp.Rds')
 
-
+corr <- dplyr::filter(all.sf, bonepile == 0)
 
 tmap_mode('view')
 

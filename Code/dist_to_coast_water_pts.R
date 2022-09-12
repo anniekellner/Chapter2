@@ -25,6 +25,7 @@ corr <- corr %>%
   st_set_crs(3338) 
 
 corr <- corr %>%
+  filter(case_ == "TRUE") %>%
   mutate(dist_to_coast = st_distance(., coast)) # will not work without . 
 
 corr2 <- corr %>%
@@ -40,11 +41,13 @@ tmap_mode('view')
 
 tm_shape(coast) + # Looks OK but did not verify using Measure tool in ArcGIS
   tm_lines(col = "green") + 
-  tm_shape(sample_corr) + 
-  tm_symbols(popup.vars = 'dist_to_coast')
+  tm_shape(corr) + 
+  tm_symbols(col = popup.vars = 'dist_to_coast')
 
 corr2$dist_to_coast <- as.numeric(corr2$dist_to_coast)
 
-max(corr2$dist_to_coast, na.rm = TRUE) # 67 km
-mean(corr2$dist_to_coast, na.rm = TRUE) # 10 km
-sd(corr2$dist_to_coast, na.rm = TRUE) # 14 km 
+max(corr2$dist_to_coast, na.rm = TRUE) # 58 km
+mean(corr2$dist_to_coast, na.rm = TRUE) # 11 km
+sd(corr2$dist_to_coast, na.rm = TRUE) # 16 km 
+
+

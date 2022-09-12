@@ -12,7 +12,7 @@
 library(adehabitatLT)
 library(adehabitatHR)
 library(sf)
-library(dplyr)
+library(tidyverse)
 library(sp)
 library(ggplot2)
 library(tmap)

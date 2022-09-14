@@ -14,9 +14,9 @@ library(adehabitatHR)
 library(sf)
 library(tidyverse)
 library(sp)
-library(ggplot2)
 library(tmap)
 library(tmaptools)
+library(lubridate)
 
 rm(list = ls())
 
@@ -34,43 +34,37 @@ pb <- readRDS('./Data/bears_092921.Rds') # reads in as sf object
 # --------------------  MCP's for bears who only have info at BP    ---------- #
 
 # Bears with all points at bonepile (reference: bonepile_denning_info.xlsx)
+  # pb_20686.2008
+  # pb_20525.2013
+  # pb_20525.2014
+  # pb_32366.2014
 
-# Example bears for demonstration at GW and SB meeting
 
 bp_only <- pb %>%
-  filter(id == "pb_20525.2013" | id == "pb_20586.2008") %>%
+  filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
+           id == "pb_20686.2008" | id == "pb_2525.2014") %>%
   dplyr::select(id, geometry)
 
-bp <- bind_rows(
-  bp_only,
-  pb06810,
-  pb20333,
-  pb21368,
-  pb32282,
-  pb32608
-)
-
-
-# Plot
-
-tmap_mode('view')
-
-tm_shape(bp) + 
-  tm_symbols(col = "id")
 
 # ------------------ Bonepile bears at the bonepile ------------------------ #
 
 pb06810 <- pb %>%
   dplyr::filter(id == "pb_06810.2008") %>%
-  dplyr::filter(datetime > "2008-09-16 18:00:37")
+  dplyr::filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = 'US/Alaska')) # DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct()
+
+pb20333 <- pb %>%
+  filter(id == "pb_20333.2008") %>%
+  filter(datetime >= as.POSIXct("2008-10-03 08:00:00"))
+
+pb20492 <- pb %>%
+  filter(id == "pb_20492.2008") %>%
+  filter(datetime <= as.POSIXct("2008-10-16"))
 
 pb20966 <- pb %>%
   filter(id == "pb_20966.2008") %>%
   filter(datetime > "2008-08-26 16:00:00")
 
-pb20492 <- pb %>%
-  filter(id == "pb_20492.2008") %>%
-  filter(datetime < "2008-10-16")
+
 
 pb20520 <- pb %>% 
   filter(id == "pb_20520.2012") %>%
@@ -104,9 +98,7 @@ pb32608 <- pb %>%
   filter(id == "pb_32608.2008") %>%
   filter(datetime > "2008-08-30 10:00:00" & datetime < "2008-10-15 07:00:00") 
 
-pb20333 <- pb %>%
-  filter(id == "pb_20333.2008") %>%
-  filter(datetime < "2008-10-03 08:00:00")
+
 
 pb20982 <- pb %>%
   filter(id == "pb_20982.2008") %>%
@@ -128,4 +120,9 @@ all.bp <- bind_rows(bp_only,
                     pb20982)
 
 #saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
+
+# -------- PLOT CHECKS ------------------------------------- #
+
+tm_shape(pb20492) + 
+  tm_symbols()
 

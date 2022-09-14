@@ -7,8 +7,8 @@ library(sf)
 library(ggplot2)
 library(plotly)
 library(dplyr)
-#library(tmap)
-#library(tmaptools)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -27,7 +27,7 @@ traj.df <- ld(traj.pb)
 
 # Play around with r2n
 
-uni <- unique(traj.df$burst)
+uni <- unique(traj.df$id)
 #test <- subset(traj.df, burst == uni[1]) # good
 
 # Create individual interactive plots so can assess dates for bp arrival and departure
@@ -35,7 +35,7 @@ uni <- unique(traj.df$burst)
 plotlist <- list()
 
 for(i in 1:length(uni)){
-  temp <- subset(x = traj.df, burst== uni[[i]])
+  temp <- subset(x = traj.df, id== uni[[i]])
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
@@ -44,22 +44,19 @@ for(i in 1:length(uni)){
   #group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   #subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
-plotlist[[1]]
-uni[[1]]
+plotlist[[7]]
+uni[[7]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
 tmap_mode('view')
-tmaptools::palette_explorer()
 
 bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 
 bone <- st_transform(bone, 3338)
 
 
-pbx <- filter(pb, id == "pb_20982.2008")
-
-tmap_mode('view')
+pbx <- filter(pb, id == "pb_20525.2013")
 
 tm_shape(bone) + 
   tm_symbols(shape = 2, col = "purple") + 

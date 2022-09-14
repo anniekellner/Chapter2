@@ -7,8 +7,8 @@ library(sf)
 library(ggplot2)
 library(plotly)
 library(dplyr)
-library(tmap)
-library(tmaptools)
+#library(tmap)
+#library(tmaptools)
 
 rm(list = ls())
 
@@ -30,11 +30,13 @@ traj.df <- ld(traj.pb)
 uni <- unique(traj.df$burst)
 #test <- subset(traj.df, burst == uni[1]) # good
 
+# Create individual interactive plots so can assess dates for bp arrival and departure
+
 plotlist <- list()
 
 for(i in 1:length(uni)){
   temp <- subset(x = traj.df, burst== uni[[i]])
-  plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n)
+  plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
 #traj.df %>%
@@ -42,10 +44,8 @@ for(i in 1:length(uni)){
   #group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   #subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
-# Look at plots manually and use interactive view to determine bonepile arrival 
-
-plotlist[[15]]
-uni[[15]]
+plotlist[[1]]
+uni[[1]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
@@ -68,5 +68,22 @@ tm_shape(bone) +
   
 
 # recorded data bonepile_denning_info.xlsx
+
+## All NSD Plots for SuppInfo
+
+ex <- filter(temp, id == "pb_32608.2008")
+
+theme_set(theme_bw()) 
+
+ggtemp = ggplot(data = ex, aes(x = date, y = R2n)) +
+  geom_point() 
+
+#axis.title.y = element_blank(),  # Initially thought I would not want these in the plots, but changed my mind
+        #axis.text.y = element_blank()),
+        #axis.ticks.y = element_blank() + 
+
+
+
+
 
 

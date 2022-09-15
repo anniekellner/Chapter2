@@ -18,19 +18,6 @@ DFtoSF <- function(df, x, y, setCRS, toCRS) {
   return(sf.project)
 }
 
-
-#' Drop geometry from sf object and return dataframe
-#' 
-#' @param x sf object
-
-st_drop_geometry <- function(x) {
-  if(inherits(x,"sf")) {
-    x <- st_set_geometry(x, NULL)
-    class(x) <- 'data.frame'
-  }
-  return(x)
-}
-
 #' Separate geometry column into two columns for X and Y
 #' 
 #' @param x sf object with geometry columns

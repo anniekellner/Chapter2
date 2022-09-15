@@ -68,7 +68,12 @@ tm_shape(bone) +
 
 ## All NSD Plots for SuppInfo
 
-theme_set(theme_bw()) 
+# Add identifiers for facet-wrapping - NEED TO FINISH GOING THROUGH BEARS BEFORE I CAN DO THIS
+
+traj.df2 <- traj.df %>%
+  mutate(bear_type = case_when(
+    id == ""
+  ))
 
 ggtemp = ggplot(data = temp, aes(x = date, y = R2n)) + # Example bear is 32608
   geom_point() + 

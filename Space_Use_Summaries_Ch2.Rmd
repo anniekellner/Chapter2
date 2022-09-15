@@ -28,7 +28,7 @@ pb2 <- pb %>%
 
 ind <- pb2 %>%
   group_by(id) %>%
-  fi() 
+  slice_head() 
 
 ```
 

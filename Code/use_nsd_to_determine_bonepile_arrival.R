@@ -69,7 +69,7 @@ tm_shape(bone) +
 
 ## All NSD Plots for SuppInfo
 
-# Add identifiers for facet-wrapping - NEED TO FINISH GOING THROUGH BEARS BEFORE I CAN DO THIS
+# Add identifiers for facet-wrapping
 
 traj.df2 <- traj.df %>%
   mutate(bear_type = case_when(
@@ -82,11 +82,6 @@ ggtemp = ggplot(data = temp, aes(x = date, y = R2n)) + # Example bear is 32608
   ylab("Net Squared Displacement from Arrival Point (m)\n") +
   theme_minimal() 
 
-#axis.title.y = element_blank(),  # Initially thought I would not want these in the plots, but changed my mind
-        #axis.text.y = element_blank()),
-        #axis.ticks.y = element_blank() + 
-
-as_tibble(temp)
 
 
 

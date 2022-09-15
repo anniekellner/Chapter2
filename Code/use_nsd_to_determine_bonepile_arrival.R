@@ -44,8 +44,8 @@ for(i in 1:length(uni)){
   #group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   #subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
-plotlist[[7]]
-uni[[7]]
+plotlist[[21]]
+uni[[21]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
@@ -56,7 +56,7 @@ bone <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 bone <- st_transform(bone, 3338)
 
 
-pbx <- filter(pb, id == "pb_20525.2013")
+pbx <- filter(pb, id == "pb_32255.2008")
 
 tm_shape(bone) + 
   tm_symbols(shape = 2, col = "purple") + 

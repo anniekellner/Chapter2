@@ -16,6 +16,8 @@ rm(list = ls())
 
 ```
 
+ADD NSD ANALYSIS HERE SO CAN SHOW AK PEEPS
+
 
 ```{r load-and-prep-data, include=FALSE}
 
@@ -24,10 +26,10 @@ pb <- readRDS('./Data/bears_092921.Rds')
 pb2 <- pb %>%
   mutate(bear_type = case_when(
     id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | 
-      id == "pb_32366.2014" ~ "bp_only",
+      id == "pb_32366.2014" ~ "bonepile_only",
     id == "pb_32255.2008" | id == "pb_pb_21237.2011" | id == "pb_20418.2005" | 
-      id == "pb_20414.2009" ~ "natural",
-    TRUE ~ "bonepile"
+      id == "pb_20414.2009" ~ "coast",
+    TRUE ~ "coast_and_bonepile"
   ))
 
 # Individual bears
@@ -59,5 +61,5 @@ table(ind$bear_type)
 
 ```
 
-
+### What is the reproductive status and age associated with each type of bear
 

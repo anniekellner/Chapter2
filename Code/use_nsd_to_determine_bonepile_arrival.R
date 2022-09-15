@@ -35,7 +35,7 @@ uni <- unique(traj.df$id)
 plotlist <- list()
 
 for(i in 1:length(uni)){
-  temp <- subset(x = traj.df, id== uni[[i]])
+  temp = subset(x = traj.df, id== uni[[i]])
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
@@ -68,17 +68,19 @@ tm_shape(bone) +
 
 ## All NSD Plots for SuppInfo
 
-ex <- filter(temp, id == "pb_32608.2008")
-
 theme_set(theme_bw()) 
 
-ggtemp = ggplot(data = ex, aes(x = date, y = R2n)) +
-  geom_point() 
+ggtemp = ggplot(data = temp, aes(x = date, y = R2n)) + # Example bear is 32608
+  geom_point() + 
+  xlab("\nCalendar Date") + 
+  ylab("Net Squared Displacement from Arrival Point (m)\n") +
+  theme_minimal() 
 
 #axis.title.y = element_blank(),  # Initially thought I would not want these in the plots, but changed my mind
         #axis.text.y = element_blank()),
         #axis.ticks.y = element_blank() + 
 
+as_tibble(temp)
 
 
 

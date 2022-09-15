@@ -66,6 +66,7 @@ tm_shape(bone) +
 
 # recorded data bonepile_denning_info.xlsx
 
+
 ## All NSD Plots for SuppInfo
 
 # Add identifiers for facet-wrapping - NEED TO FINISH GOING THROUGH BEARS BEFORE I CAN DO THIS

@@ -5,10 +5,16 @@ date: "2022-09-15"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+```{r setup, include=FALSE, message=FALSE}
 
+library(dplyr)
+library(sf)
+
+rm(list = ls())
+
+#knitr::opts_chunk$set(echo = TRUE)
+
+```
 
 
 ```{r load-and-prep-data, include=FALSE}
@@ -27,15 +33,31 @@ pb2 <- pb %>%
 # Individual bears
 
 ind <- pb2 %>%
+  st_drop_geometry() %>%
   group_by(id) %>%
   slice_head() 
 
 ```
 
+Upon completing the NSD analysis and visually inspecting each interactive plot, I divided the bears into three categories:
 
+  * Coast & Bonepile Bears = Bears with 'dispersing' NSD patterns
+    + These bears typically arrive on land and travel along the coast to the bonepile,
+    | or arrive at the bonepile and then travel along the coast after they leave
+    
+  * Bonepile-only Bears = Bears with 'home range' NSD patterns
+    + These bears arrive at the bonepile and do not leave for the duration of the study
+    
+  * Coast Bears = Bears who do not visit any bonepiles
+    + These bears can exhibit any type of NSD pattern
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+The breakdown of individuals who fall into these categories is: 
+
+```{r echo=FALSE}
+
+table(ind$bear_type)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+

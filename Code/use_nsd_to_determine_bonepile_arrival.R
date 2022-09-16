@@ -12,8 +12,6 @@ library(tmaptools)
 
 rm(list = ls())
 
-source('./Code/MyFunctions.R') # for st_drop_geometry
-
 # Load data and create traj object
 
 pb <- readRDS('./Data/bears_092921.Rds')
@@ -28,7 +26,6 @@ traj.df <- ld(traj.pb)
 # Play around with r2n
 
 uni <- unique(traj.df$id)
-#test <- subset(traj.df, burst == uni[1]) # good
 
 # Create individual interactive plots so can assess dates for bp arrival and departure
 
@@ -66,21 +63,6 @@ tm_shape(bone) +
 
 # recorded data bonepile_denning_info.xlsx
 
-
-## All NSD Plots for SuppInfo
-
-# Add identifiers for facet-wrapping
-
-traj.df2 <- traj.df %>%
-  mutate(bear_type = case_when(
-    id == ""
-  ))
-
-ggtemp = ggplot(data = temp, aes(x = date, y = R2n)) + # Example bear is 32608
-  geom_point() + 
-  xlab("\nCalendar Date") + 
-  ylab("Net Squared Displacement from Arrival Point (m)\n") +
-  theme_minimal() 
 
 
 

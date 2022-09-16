@@ -68,6 +68,9 @@ pb2 <- pb %>%
 
 pb2 <- select(pb2, -c(data_origin, birthyear))
 
+saveRDS(pb2, './Data/bears_091622.Rds')
+
+
 # ----- Looked to see if any of the three bears without age data were listed in Kate's data as cubs ---------------- #
 
 #unique(age$mom.id) 

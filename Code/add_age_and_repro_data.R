@@ -24,12 +24,18 @@ age <- dplyr::select(age, mom.id, cap.date, mom.age, cub.1, age.class.1, cub.2, 
 
 age <- age[!is.na(age$mom.id),]
 
-# Add 'pb_' to animal id's
+## Add 'pb_' to animal id's
+
+# Moms
 
 age$mom.id <- as.character(age$mom.id)
 age$mom.id <- paste0("pb_", age$mom.id)
 
-age[9:11, 1] <- "pb_06810" # add 0 because was just 6810 
+age[9:11, 1] <- "pb_06810" # add 0 because was just 6810
+
+
+
+## Format dates
 
 age <- separate(age, cap.date, into = c("mdy", "time"), sep = "^\\S*\\K\\s+")
 
@@ -39,9 +45,24 @@ age$year <- year(age$mdy)
 # Select relevant rows in Kate data
 
 ak <- unique(pb$animal)
-age <- age[age$mom.id %in% ak,]
-unique(age$mom.id) # Have age info on 16/19 individuals
 
-setdiff(ak, unique(age$mom.id)) # pb_20982, pb_21237, pb_32608
+age <- age[age$mom.id %in% ak,] # Have age info on 16/19 bears
 
 
+
+
+# ----- Looked to see if any of the three bears without age data were listed in Kate's data as cubs ---------------- #
+
+#unique(age$mom.id) 
+#setdiff(ak, unique(age$mom.id)) # pb_20982, pb_21237, pb_32608
+
+# See if any of the missing id's can be found in the cub categories
+
+#age$cub.1 <- as.character(age$cub.1)
+#age$cub.1 <- paste0("pb_", age$cub.1) 
+
+#age$cub.2 <- as.character(age$cub.2)
+#age$cub.2 <- paste0("pb_", age$cub.2) 
+
+#age[age$cub.1 %in% ak,] # not any of the missing ones
+#age[age$cub.2 %in% ak,] # not any of the missing ones

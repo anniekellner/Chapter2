@@ -14,9 +14,8 @@ rm(list = ls())
 
 # ----- LOAD DATA ------------------------------- #
 
-pb <- readRDS('./Data/bears_092921.Rds') 
+pb <- readRDS('./Data/Derived-data/DFs/Old/bears_092921.Rds') 
 
-repro <- readRDS('./Data/Derived-data/Repro.Rds')
 age <- read.csv('./Data/kate_offspring_info.csv')
 
 ## Edit Kate spreadsheet so plays nice with mine
@@ -63,12 +62,40 @@ age2 <- age %>%
 pb <- st_drop_geometry(pb)
 
 pb2 <- pb %>%
-  left_join(age2) %>%
+  left_join(age2) 
+
+# ---- ADD ADDITIONAL AGE DATA FROM TODD (email 9/16/22)  ---------------------- #
+
+miss <- pb2 %>%
+  filter(animal == "pb_21237" | animal == "pb_32608" | animal == "pb_20982") # animals missing from Kate's data
+
+miss2 <- miss %>%
+  group_by(animal) %>%
+  slice_head() %>%
+  mutate(birthyear = NA) %>%
+  select(1, 18)
+
+miss2[1,2] <- 2006
+miss2[2,2] <- 2006
+miss2[3,2] <- 2005
+
+# Join with my data
+
+pb2
+
+%>%
   mutate(age = year - birthyear)
 
-pb2 <- select(pb2, -c(data_origin, birthyear))
+miss2 <- miss2 %>% mutate(miss2, age = year - birthyear)
 
-saveRDS(pb2, './Data/Derived-data/bears_ch2_091622.Rds')
+miss2 <- miss2 %>%
+  select(animal, age)
+
+pb2 <- pb %>%
+  
+  pb2 <- select(pb2, -c(data_origin, birthyear)) 
+
+#saveRDS(pb2, './Data/Derived-data/bears_ch2_091622.Rds')
 
 
 # ----- Looked to see if any of the three bears without age data were listed in Kate's data as cubs ---------------- #

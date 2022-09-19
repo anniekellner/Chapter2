@@ -1,8 +1,8 @@
 #############################################################
-######  ADD BEAR BIOLOGICAL DATA  ###########################
+######  ADD AGE DATA   ######################################
 #############################################################
 
-# Add age and reproductive status to pb dataframes
+# Add age to pb dataframes
 
 library(dplyr)
 library(stringr)

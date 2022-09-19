@@ -1,45 +1,29 @@
-##############################################
-##    ADD REPRO DATA TO RSF DF'S  ############
-##############################################
+#########################################
+#####   ADD REPRO DATA TO DATAFRAME #####
+#########################################
 
 library(dplyr)
-library(sf)
 
 rm(list = ls())
 
-source('Code/MyFunctions.R')
+# ------ Load and prep data  -------------- #
 
-# ----------  Load data -------------------- #
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds')
+repro <- readRDS('./Data/Derived-data/DFs/repro.Rds') # From Chapter 1
 
-# Chapter 1 data
+ids <- unique(pb$id)
 
-ch1 <- readRDS('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/ch1_landing/data/derived-data/all.Rds')
+repro2 <- repro %>%
+  filter(id %in% ids) %>%
+  select(id, repro)
 
-repro <- select(ch1, id, repro)
+# ---- Join ------------------------------- #
 
-repro <- repro %>%
+pb2 <- pb %>%
+  full_join(repro2)
+
+pb2 %>%
   group_by(id) %>%
-  slice_head()
-
-# Chapter 2 data
-
-corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
-bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
-
-# ----  Join  ---------------------------- #
-
-corr2 <- st_drop_geometry(corr)
-corr2 <- corr2 %>% left_join(repro)
-
-bone2 <- st_drop_geometry(bone)
-bone2 <- bone2 %>% left_join(repro)
-
-# Add geometry data back into df's
-
-bone3 <- left_join(bone2, bone)
-corr3 <- left_join(corr2, corr)
-
-# ---------- Save -------------------- #
-
-saveRDS(bone3, './Data/Derived-data/bonepile_data.Rds')
-saveRDS(corr3, './Data/Derived-data/corridor_data.Rds')
+  slice_head() %>%
+  select(id, repro, age) %>%
+  print(n = 21)

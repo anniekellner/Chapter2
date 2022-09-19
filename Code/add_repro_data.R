@@ -42,3 +42,15 @@ ch1 %>%
   filter(animal == "pb_20418")
 
 # In 2004, pb_20418 had a coy. Missing data is for 2005. Possibly had a yearling. 
+# Adding this repro data to dataframe, but need to check to see what is extrapolated and what is not. 
+
+# Add extrapolated data to 20418
+
+repro2[4,2] <- "yearling"
+
+# Then re-run lines 27 & 28 
+
+# Save repro data but need to figure out what is extrapolated 
+  
+saveRDS(pb2, 'Data/Derived-data/DFs/bears_ch2_091922.Rds')
+

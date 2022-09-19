@@ -33,8 +33,6 @@ age$mom.id <- paste0("pb_", age$mom.id)
 
 age[9:11, 1] <- "pb_06810" # add 0 because was just 6810
 
-
-
 ## Format dates
 
 age <- separate(age, cap.date, into = c("mdy", "time"), sep = "^\\S*\\K\\s+")
@@ -64,6 +62,12 @@ pb <- st_drop_geometry(pb)
 pb2 <- pb %>%
   left_join(age2) 
 
+pb2 %>%
+  group_by(animal) %>%
+  slice_head() %>%
+  select(animal, birthyear) %>%
+  print(n = 20)
+
 # ---- ADD ADDITIONAL AGE DATA FROM TODD (email 9/16/22)  ---------------------- #
 
 bears <- pb2 %>%
@@ -75,22 +79,24 @@ bears[12,3] <- 2006 # 20982
 bears[14,3] <- 2006 # 21237
 bears[19,3] <- 2005 # 32608
 
-bears <- rename(bears, year_of_birth = birthyear) # Because won't overwrite NA's
+bears <- select(bears, -year)
 
 # Join with my data
 
+pb2 <- select(pb2, -birthyear) # Because won't overwrite NA's
+
 pb3 <- pb2 %>%
-  left_join(bears) %>%
-  mutate(age = year - year_of_birth) %>%
-  select(-c(data_origin, birthyear, year_of_birth))
+  full_join(bears) %>%
+  mutate(age = year - birthyear) %>%
+  select(-c(data_origin, birthyear))
 
 pb3 %>%
-  group_by(animal) %>%
+  group_by(id) %>%
   slice_head() %>%
-  select(animal, age) %>%
-  print(n = 19)
+  select(id, age) %>%
+  print(n = 21)
 
-saveRDS(pb3, './Data/Derived-data/bears_ch2_091922.Rds')
+saveRDS(pb3, './Data/Derived-data/DFs/bears_ch2_091922.Rds')
 
 
 # ----- Looked to see if any of the three bears without age data were listed in Kate's data as cubs ---------------- #

@@ -66,36 +66,31 @@ pb2 <- pb %>%
 
 # ---- ADD ADDITIONAL AGE DATA FROM TODD (email 9/16/22)  ---------------------- #
 
-miss <- pb2 %>%
-  filter(animal == "pb_21237" | animal == "pb_32608" | animal == "pb_20982") # animals missing from Kate's data
-
-miss2 <- miss %>%
+bears <- pb2 %>%
   group_by(animal) %>%
   slice_head() %>%
-  mutate(birthyear = NA) %>%
-  select(1, 18)
+  select(animal, year, birthyear)
 
-miss2[1,2] <- 2006
-miss2[2,2] <- 2006
-miss2[3,2] <- 2005
+bears[12,3] <- 2006 # 20982
+bears[14,3] <- 2006 # 21237
+bears[19,3] <- 2005 # 32608
+
+bears <- rename(bears, year_of_birth = birthyear) # Because won't overwrite NA's
 
 # Join with my data
 
-pb2
+pb3 <- pb2 %>%
+  left_join(bears) %>%
+  mutate(age = year - year_of_birth) %>%
+  select(-c(data_origin, birthyear, year_of_birth))
 
-%>%
-  mutate(age = year - birthyear)
+pb3 %>%
+  group_by(animal) %>%
+  slice_head() %>%
+  select(animal, age) %>%
+  print(n = 19)
 
-miss2 <- miss2 %>% mutate(miss2, age = year - birthyear)
-
-miss2 <- miss2 %>%
-  select(animal, age)
-
-pb2 <- pb %>%
-  
-  pb2 <- select(pb2, -c(data_origin, birthyear)) 
-
-#saveRDS(pb2, './Data/Derived-data/bears_ch2_091622.Rds')
+saveRDS(pb3, './Data/Derived-data/bears_ch2_091922.Rds')
 
 
 # ----- Looked to see if any of the three bears without age data were listed in Kate's data as cubs ---------------- #

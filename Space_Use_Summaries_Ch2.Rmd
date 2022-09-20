@@ -7,41 +7,78 @@ output: html_document
 
 ```{r setup, include=FALSE, message=FALSE}
 
+library(knitr)
 library(dplyr)
 library(sf)
 
 rm(list = ls())
 
-#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 ```
 
-ADD NSD ANALYSIS HERE SO CAN SHOW AK PEEPS
+# Basic summary tables for bears that visit the bonepile and those that do not
+
+## How many bears visit the bonepile and how many do not?
+
+Hereafter, bears that visit the bonepile are called "Bonepile" bears. Bears that do not are called "Natural" bears. 
 
 
 ```{r load-and-prep-data, include=FALSE}
 
-pb <- readRDS('./Data/bears_092921.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds')
 
 pb2 <- pb %>%
-  mutate(bear_type = case_when(
+  mutate(points = case_when(
     id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | 
-      id == "pb_32366.2014" ~ "bonepile_only",
+      id == "pb_32366.2014" ~ "bonepile_only", # Bonepile ONLY
     id == "pb_32255.2008" | id == "pb_pb_21237.2011" | id == "pb_20418.2005" | 
-      id == "pb_20414.2009" ~ "coast",
+      id == "pb_20414.2009" ~ "coast_only",
     TRUE ~ "coast_and_bonepile"
   ))
 
+pb3 <- pb2 %>%
+  mutate(bear_type = case_when(
+    points == "coast_only" ~ "Natural",
+    TRUE ~ "Bonepile"
+  ))
+
+
 # Individual bears
 
-ind <- pb2 %>%
-  st_drop_geometry() %>%
+ind <- pb3 %>%
   group_by(id) %>%
   slice_head() 
 
+kable(table(ind$bear_type), col.names = NULL)
+
 ```
 
-Upon completing the NSD analysis and visually inspecting each interactive plot, I divided the bears into three categories:
+# What is the age breakdown associated with each bear type?
+
+```{r}
+
+ind2 <- ind %>%
+  mutate(age_class = 
+           case_when(
+             age < 5 ~ "Subadult",
+             TRUE ~ "Adult"
+           ))
+kable(table(ind2$age_class, ind2$bear_type))
+
+```
+
+# What is the reproductive status associated with each bear type?
+
+```{r}
+
+kable(table(ind2$repro, ind2$bear_type)[c(2,1,3),])
+
+```
+
+Because the bonepile acts as a focal attractant, we predict 'bonepile' bears will exhibit distinct behavior when foraging at the bonepile relative to other activities (i.e., resting or traveling along the coastal corridor). 
+
+To separate 'bonepile' locations from others, we plotted net-squared distance (NSD) values over time for each individual, expecting the following patterns (adapted from Bunnefeld et al. 2011 - PROVIDE HYPERLINK): 
 
   * Coast & Bonepile Bears = Bears with 'dispersing' NSD patterns
     + These bears typically arrive on land and travel along the coast to the bonepile,
@@ -53,13 +90,13 @@ Upon completing the NSD analysis and visually inspecting each interactive plot, 
   * Coast Bears = Bears who do not visit any bonepiles
     + These bears can exhibit any type of NSD pattern
 
-The breakdown of individuals who fall into these categories is: 
+We then validated our methodology by mapping the geographic locations of each category of point, and also identified animals who a) arrived on land directly at the bonepile or b) stayed for an extended time in a location that was not the bonepile. 
 
-```{r echo=FALSE}
+[insert NSD plot here]
 
-table(ind$bear_type)
 
-```
 
-### What is the reproductive status and age associated with each type of bear
+
+
+
 

@@ -8,12 +8,8 @@
 # First look at NSD (script above) and see whether there is a clear asymptote (likely bonepile)
 # Then check with script above and use tmap to plot bear locations and bp locations on map to verify
 
-
-library(adehabitatLT)
-library(adehabitatHR)
 library(sf)
-library(tidyverse)
-library(sp)
+library(dplyr)
 library(tmap)
 library(tmaptools)
 library(lubridate)
@@ -133,12 +129,12 @@ unique(all.bp$id) # 17 bear ids - this is correct because there are 4 non-bonepi
 g <- readRDS('./Data/Derived-data/DFs/Old/bears_092921.Rds') 
 g <- select(g, id, datetime, geometry)
 
-pb3 <- pb %>%
-  inner_join(g)
-
-saveRDS(pb3, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
-
 all.bp2 <- all.bp %>%
   inner_join(g)
+
+# Plot
+
+
+
   
 

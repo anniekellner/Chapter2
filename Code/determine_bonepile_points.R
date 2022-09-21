@@ -126,5 +126,19 @@ unique(all.bp$id) # 17 bear ids - this is correct because there are 4 non-bonepi
 
 # -------- PLOT CHECKS ------------------------------------- #
 
+# Geometry disappeared from points because the st_drop_geometry() fx in {sf} does not separate the coordinates into columns first
 
+# Add back geometry 
+
+g <- readRDS('./Data/Derived-data/DFs/Old/bears_092921.Rds') 
+g <- select(g, id, datetime, geometry)
+
+pb3 <- pb %>%
+  inner_join(g)
+
+saveRDS(pb3, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
+
+all.bp2 <- all.bp %>%
+  inner_join(g)
+  
 

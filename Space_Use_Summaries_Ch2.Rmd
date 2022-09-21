@@ -76,7 +76,7 @@ kable(table(ind2$repro, ind2$bear_type)[c(2,1,3),])
 
 ```
 
-Because the bonepile acts as a focal attractant, we predict 'bonepile' bears will exhibit distinct behavior when foraging at the bonepile relative to other activities (i.e., resting or traveling along the coastal corridor). 
+Because the bonepile acts as a focal attractant, we predict bears will exhibit distinct behavior when foraging at the bonepile relative to other activities (i.e., resting or traveling along the coastal corridor). 
 
 To separate 'bonepile' locations from others, we plotted net-squared distance (NSD) values over time for each individual, expecting the following patterns (adapted from Bunnefeld et al. 2011 - PROVIDE HYPERLINK): 
 
@@ -94,6 +94,31 @@ We then validated our methodology by mapping the geographic locations of each ca
 
 [insert NSD plot here]
 
+
+After conducting NSD analysis, we can validate the methodology visually by mapping the two types of points
+
+```{r}
+
+## Could make three-part static plot if I have time with bp points, corridor points, and both
+
+nsd <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # df with at_bonepile
+
+bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp') %>% # bonepile shp
+  st_transform(3338)
+
+nsd <- st_as_sf(nsd) %>% # make into sf object
+  st_set_crs(3338) 
+
+nsd$at_bonepile <- as.factor(nsd$at_bonepile) # so legend shows 0 and 1 rather than 0-1 continuous scale
+
+tmap_mode('view') # interactive map
+
+tm_shape(bones) + 
+  tm_dots(col = "blue", size = 0.5) + 
+  tm_shape(pbsf) + 
+  tm_dots(col = "at_bonepile")
+
+```
 
 
 

@@ -35,8 +35,7 @@ pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds') # reads in as df
 
 bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_32366.2014" | id == "pb_20525.2014") %>%
-  dplyr::select(id, geometry)
+           id == "pb_32366.2014" | id == "pb_20525.2014") 
 
 
 # ------------------ Bonepile points for bears that travel ------------------------ #
@@ -103,28 +102,29 @@ pb32608.2008 <- pb %>%
   filter(datetime >= as.POSIXct("2008-08-30 10:00:00", tz = tz) & datetime < as.POSIXct("2008-10-15 07:00:00", tz = tz)) 
 
 
-
-
+# Combine
 
 all.bp <- bind_rows(bp_only, 
-                    pb06810, 
-                    pb20492, 
-                    pb20520, 
-                    pb20735, 
-                    pb20845, 
-                    pb20966, 
-                    pb21015, 
-                    pb21368, 
-                    pb32282, 
-                    pb32366_2011,
-                    pb32608,
-                    pb20333,
-                    pb20982)
+                    pb06810.2008,
+                    pb20333.2008,
+                    pb20492.2008, 
+                    pb20520.2012, 
+                    pb20735.2009, 
+                    pb20845.2015, 
+                    pb20966.2008, 
+                    pb21015.2013, 
+                    pb21368.2014, 
+                    pb32282.2008, 
+                    pb32366.2011,
+                    pb32608.2008,
+                    pb20982.2008)
 
-#saveRDS(all.bp, file = "./Data/all_bonepile_points.Rds")
+# Check that everything is there
+
+unique(all.bp$id) # 17 bear ids - this is correct because there are 4 non-bonepile bears
+
 
 # -------- PLOT CHECKS ------------------------------------- #
 
-tm_shape(pb20492) + 
-  tm_symbols()
+
 

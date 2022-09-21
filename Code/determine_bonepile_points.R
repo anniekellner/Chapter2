@@ -174,5 +174,5 @@ tm_shape(bones) +
 
 # ------------------- Save dataframe  ---------------------------------------- #
 
-saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
+#saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
 

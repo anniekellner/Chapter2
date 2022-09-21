@@ -14,9 +14,10 @@ rm(list = ls())
 
 # Load data and create traj object
 
-pb <- readRDS('./Data/bears_092921.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
+pbsf <- st_as_sf(pb) %>% st_set_crs(3338)
 
-pb <- cbind(pb, st_coordinates(pb)) # separate coords from geometry columns into X and Y columns
+pb <- cbind(pbsf, st_coordinates(pbsf)) # separate coords from geometry columns into X and Y columns
 
 pbdf <- as.data.frame(pb)
 
@@ -41,8 +42,8 @@ for(i in 1:length(uni)){
   #group_map(~ plot_ly(data = ., x = ~time, y = ~R2n, color = burst, type = "scatter")) %>%
   #subplot(nrows = 3, shareX = FALSE, shareY = FALSE)
 
-plotlist[[21]]
-uni[[21]]
+plotlist[[5]]
+uni[[5]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 

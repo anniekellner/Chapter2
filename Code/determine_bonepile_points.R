@@ -22,19 +22,12 @@ rm(list = ls())
 
 # ----------------------- Load Data  ----------------------------------------- #
 
-source('./Code/MyFunctions.R') # for st_drop_geometry
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds') # reads in as df 
 
-pb <- readRDS('./Data/bears_092921.Rds') # reads in as sf object
 
-#pb <- cbind(pb, st_coordinates(pb)) # separate coords from geometry columns into X and Y columns
+# --------------------  Bonepile-only Bears   ---------- #
 
-#pb <- st_drop_geometry(pb)
-#pbdf <- as.data.frame(pb)
-
-# --------------------  MCP's for bears who only have info at BP    ---------- #
-
-# Bears with all points at bonepile (reference: bonepile_denning_info.xlsx)
-  # pb_20686.2008
+  # pb_20586.2008
   # pb_20525.2013
   # pb_20525.2014
   # pb_32366.2014
@@ -42,67 +35,76 @@ pb <- readRDS('./Data/bears_092921.Rds') # reads in as sf object
 
 bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_20686.2008" | id == "pb_2525.2014") %>%
+           id == "pb_32366.2014" | id == "pb_20525.2014") %>%
   dplyr::select(id, geometry)
 
 
-# ------------------ Bonepile bears at the bonepile ------------------------ #
+# ------------------ Bonepile points for bears that travel ------------------------ #
 
-pb06810 <- pb %>%
+# DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct() AND SPECIFY TIMEZONE
+
+tz <- 'US/Alaska'
+
+pb06810.2008 <- pb %>%
   dplyr::filter(id == "pb_06810.2008") %>%
-  dplyr::filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = 'US/Alaska')) # DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct()
+  dplyr::filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = 'US/Alaska')) 
 
-pb20333 <- pb %>%
+pb20333.2008 <- pb %>%
   filter(id == "pb_20333.2008") %>%
-  filter(datetime >= as.POSIXct("2008-10-03 08:00:00"))
+  filter(datetime >= as.POSIXct("2008-10-03 08:00:00", tz = tz))
 
-pb20492 <- pb %>%
+pb20492.2008 <- pb %>%
   filter(id == "pb_20492.2008") %>%
-  filter(datetime <= as.POSIXct("2008-10-16"))
+  filter(datetime <= as.POSIXct("2008-10-17", tz = tz))
 
-pb20966 <- pb %>%
-  filter(id == "pb_20966.2008") %>%
-  filter(datetime > "2008-08-26 16:00:00")
-
-
-
-pb20520 <- pb %>% 
+pb20520.2012 <- pb %>% 
   filter(id == "pb_20520.2012") %>%
-  filter(datetime > "2012-08-27 20:00:00" & datetime < "2012-10-19 08:00:00")
+  filter(datetime >= as.POSIXct("2012-08-27 17:00:00", tz = 'US/Alaska') & 
+           datetime <= as.POSIXct("2012-10-19 08:00:00", tz = 'US/Alaska'))
 
-pb20735 <- pb %>%
+pb20735.2009 <- pb %>%
   filter(id == "pb_20735.2009") %>%
-  filter(datetime > "2009-08-09 22:00:00" & datetime < "2009-08-29 21:00:00" | datetime > "2009-09-16 01:00:00")
+  filter(datetime >= as.POSIXct("2009-08-09 22:00:00", tz = tz) &
+           datetime < as.POSIXct("2009-08-30 08:00:00", tz = tz) |
+           datetime >= as.POSIXct("2009-09-16 01:00:00", tz = tz))
 
-pb20845 <- pb %>%
+pb20845.2015 <- pb %>%
   filter(id == "pb_20845.2015") %>%
-  filter(datetime > "2015-09-23 20:01:29" & datetime < "2015-10-02 15:00:09")
+  filter(datetime >= as.POSIXct("2015-09-23 20:01:29", tz = tz) & datetime < as.POSIXct("2015-10-03 05:00:19", tz = tz))
+  
 
-pb21015 <- pb %>%
-  filter(id == "pb_21015.2013") %>%
-  filter(datetime > "2013-08-20 08:00:31" & datetime < "2013-09-27 04:00")
+pb20966.2008 <- pb %>%
+  filter(id == "pb_20966.2008") %>%
+  filter(datetime >= as.POSIXct("2008-08-26 10:00:00", tz = tz))
 
-pb21368 <- pb %>%
-  filter(id == "pb_21368.2014") %>%
-  filter(datetime > "2014-08-26 04:00:00") 
-
-pb32282 <- pb %>%
-  filter(id == "pb_32282.2008") %>%
-  filter(datetime > "2008-08-31 15:00:00")
-
-pb32366_2011 <- pb %>%
-  filter(id == "pb_32366.2011") %>%
-  filter(datetime > "2011-08-30 12:00:00")
-
-pb32608 <- pb %>%
-  filter(id == "pb_32608.2008") %>%
-  filter(datetime > "2008-08-30 10:00:00" & datetime < "2008-10-15 07:00:00") 
-
-
-
-pb20982 <- pb %>%
+pb20982.2008 <- pb %>%
   filter(id == "pb_20982.2008") %>%
-  filter(datetime > "2008-09-20 16:00:00" & datetime < "2008-10-10 10:00:00")
+  filter(datetime >= as.POSIXct("2008-09-20 16:00:00", tz = tz) & datetime < as.POSIXct("2008-10-16 11:00:00", tz = tz))
+
+
+pb21015.2013 <- pb %>%
+  filter(id == "pb_21015.2013") %>%
+  filter(datetime >= as.POSIXct("2013-08-20 12:00:30", tz = tz) & datetime < as.POSIXct("2013-09-27 06:00", tz = tz))
+
+pb21368.2014 <- pb %>%
+  filter(id == "pb_21368.2014") %>%
+  filter(datetime >= as.POSIXct("2014-08-26 04:00:00", tz = tz)) 
+
+pb32282.2008 <- pb %>%
+  filter(id == "pb_32282.2008") %>%
+  filter(datetime >= as.POSIXct("2008-08-31 15:00:00", tz = tz))
+
+pb32366.2011 <- pb %>%
+  filter(id == "pb_32366.2011") %>%
+  filter(datetime >= as.POSIXct("2011-08-30 12:00:00", tz = tz))
+
+pb32608.2008 <- pb %>%
+  filter(id == "pb_32608.2008") %>%
+  filter(datetime >= as.POSIXct("2008-08-30 10:00:00", tz = tz) & datetime < as.POSIXct("2008-10-15 07:00:00", tz = tz)) 
+
+
+
+
 
 all.bp <- bind_rows(bp_only, 
                     pb06810, 

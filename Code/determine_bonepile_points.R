@@ -10,6 +10,7 @@
 
 library(sf)
 library(dplyr)
+library(tidyr)
 library(tmap)
 library(tmaptools)
 library(lubridate)
@@ -136,17 +137,42 @@ all.bp2 <- all.bp %>%
 bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp') %>%
   st_transform(3338)
 
-# Plot
+# Plot - looks good 9/21/22
 
 tmap_mode('view')
 
-tm_shape(bones) + 
-  tm_dots(col = "blue", size = 1) + 
-  tm_shape(all.bp2) + 
-  tm_dots(col = "purple")
+#tm_shape(bones) + 
+  #tm_dots(col = "blue", size = 0.5) + 
+  #tm_shape(all.bp2) + 
+  #tm_dots(col = "purple")
 
 # Points that look strange
 
 # pb_20520.2012 - A one-day jaunt. OK. 
-# pb_20982 - 
+# pb_20982 - revised
+# pb_20492 - OK
+
+# ------- Add 'at_bonepile' column to main df -------------------------------- #
+
+all.bp$at_bonepile <- 1
+
+pb2 <- pb %>%
+  left_join(all.bp) %>%
+  replace_na(list(at_bonepile = 0))
+
+pbsf <- st_as_sf(pb2) %>%
+  st_set_crs(3338) 
+
+pbsf$at_bonepile <- as.factor(pbsf$at_bonepile)
+
+# Plot again
+
+tm_shape(bones) + 
+  tm_dots(col = "blue", size = 0.5) + 
+  tm_shape(pbsf) + 
+  tm_dots(col = "at_bonepile")
+
+# ------------------- Save dataframe  ---------------------------------------- #
+
+saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
 

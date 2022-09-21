@@ -18,7 +18,7 @@ rm(list = ls())
 
 # ----------------------- Load Data  ----------------------------------------- #
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds') # reads in as df 
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # reads in as df 
 
 
 # --------------------  Bonepile-only Bears   ---------- #
@@ -74,7 +74,7 @@ pb20966.2008 <- pb %>%
 
 pb20982.2008 <- pb %>%
   filter(id == "pb_20982.2008") %>%
-  filter(datetime >= as.POSIXct("2008-09-20 16:00:00", tz = tz) & datetime < as.POSIXct("2008-10-16 11:00:00", tz = tz))
+  filter(datetime >= as.POSIXct("2008-09-21 17:00:00", tz = tz) & datetime < as.POSIXct("2008-10-05 03:00:00", tz = tz))
 
 
 pb21015.2013 <- pb %>%
@@ -126,11 +126,7 @@ unique(all.bp$id) # 17 bear ids - this is correct because there are 4 non-bonepi
 
 # Add back geometry 
 
-g <- readRDS('./Data/Derived-data/DFs/Old/bears_092921.Rds') 
-g <- select(g, id, datetime, geometry)
-
 all.bp2 <- all.bp %>%
-  inner_join(g) %>%
   st_as_sf() %>%
   st_set_crs(3338)
 
@@ -148,4 +144,9 @@ tm_shape(bones) +
   tm_dots(col = "blue", size = 1) + 
   tm_shape(all.bp2) + 
   tm_dots(col = "purple")
+
+# Points that look strange
+
+# pb_20520.2012 - A one-day jaunt. OK. 
+# pb_20982 - 
 

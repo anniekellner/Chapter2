@@ -130,11 +130,22 @@ g <- readRDS('./Data/Derived-data/DFs/Old/bears_092921.Rds')
 g <- select(g, id, datetime, geometry)
 
 all.bp2 <- all.bp %>%
-  inner_join(g)
+  inner_join(g) %>%
+  st_as_sf() %>%
+  st_set_crs(3338)
+
+
+# Add bonepile shp
+
+bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp') %>%
+  st_transform(3338)
 
 # Plot
 
+tmap_mode('view')
 
-
-  
+tm_shape(bones) + 
+  tm_dots(col = "blue", size = 1) + 
+  tm_shape(all.bp2) + 
+  tm_dots(col = "purple")
 

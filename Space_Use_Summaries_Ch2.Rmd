@@ -26,7 +26,7 @@ Hereafter, bears that visit the bonepile are called "Bonepile" bears. Bears that
 
 ```{r load-and-prep-data, include=FALSE}
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_091922.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
 
 pb2 <- pb %>%
   mutate(points = case_when(
@@ -53,6 +53,19 @@ ind <- pb3 %>%
 kable(table(ind$bear_type), col.names = NULL)
 
 ```
+
+# How much time do bears spend at the bonepile vs. along the coastal corridor?
+
+```{r}
+
+```
+
+
+
+
+
+
+
 
 # What is the age breakdown associated with each bear type?
 

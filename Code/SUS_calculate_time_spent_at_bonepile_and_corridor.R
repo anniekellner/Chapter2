@@ -20,6 +20,8 @@ tz <- 'US/Alaska'
 bonepts <- filter(pb, at_bonepile == 1)
 corrpts <- filter(pb, at_bonepile == 0)
 
+#########################   BONEPILES   ####################################
+
 time_bone <- bonepts %>%
   group_by(id) %>%
   arrange(id, datetime) %>%
@@ -50,31 +52,15 @@ time_bone2 <- bind_rows(time_bone, pb20735_1, pb20735_2)
 time_bone2[35,1] <- "pb_20735.2009.2" # so that id isn't duplicated
 time_bone2[36,1] <- "pb_20735.2009.2"
 
-piv_bone <- time_bone2 %>% 
+piv_bone <- time_bone2 %>% # might want to retain this data that has 20735 divided into two stints
   pivot_wider(names_from = phase, values_from = datetime) %>%
   mutate(time_spent = difftime(end, start, tz = tz, units = "days"))
 
-# Add 20735 back together and remove second entry
+#saveRDS(piv_bone, './Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
 
-piv_bone$time_spent <- as.numeric(piv_bone$time_spent)
-piv_bone[17,4] <- sum(piv_bone[17,4] + piv_bone[18,4])
 
-piv_bone[-18,] -> piv_bone
 
-# Merge R2n with pb df
 
-traj.df2 <- traj.df %>%
-  dplyr::select(id, date, R2n) %>%
-  rename(datetime = date)
-
-pb2 <- pb %>%
-  left_join(traj.df2) 
-
-bonepts <- pb2 %>% # Filter bonepile points
-  filter(at_bonepile == 1) %>%
-  group_by(id) %>%
-  arrange(id, datetime) %>%
-  mutate(NSDmod1 = ifelse(row_number()==1, ))
 
 
   

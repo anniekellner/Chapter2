@@ -6,7 +6,6 @@
 library(dplyr)
 library(tidyr)
 library(sf)
-library(adehabitatLT)
 library(lubridate)
 
 rm(list = ls())

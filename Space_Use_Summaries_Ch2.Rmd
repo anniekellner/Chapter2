@@ -54,13 +54,24 @@ kable(table(ind$bear_type), col.names = NULL)
 
 ```
 
-# How much time do bears spend at the bonepile vs. along the coastal corridor?
+# How much time do bears spend at the bonepile (in days)?
 
 ```{r}
 
+bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
+
+## To get summary of time spent, have to add 20735's stints together and remove second entry
+
+bpt$time_spent <- as.numeric(bpt$time_spent)
+bpt[17,4] <- sum(bpt[17,4] + bpt[18,4])
+
+bpt[-18,] -> bpt
+
+summary(bpt$time_spent)
+
 ```
 
-
+# How much time do bears spend along the coastal corridor (in days)?
 
 
 

@@ -54,8 +54,12 @@ piv_bone <- time_bone2 %>%
   pivot_wider(names_from = phase, values_from = datetime) %>%
   mutate(time_spent = difftime(end, start, tz = tz, units = "days"))
 
-# Add 20735 back together
+# Add 20735 back together and remove second entry
 
+piv_bone$time_spent <- as.numeric(piv_bone$time_spent)
+piv_bone[17,4] <- sum(piv_bone[17,4] + piv_bone[18,4])
+
+piv_bone[-18,] -> piv_bone
 
 # Merge R2n with pb df
 

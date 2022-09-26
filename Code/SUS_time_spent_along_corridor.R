@@ -60,7 +60,7 @@ cor_only_sum <- cor_only %>%
   
 cor_time <- bind_rows(time, cor_only_sum)
 
-saveRDS(cor_time, './Data/Derived-data/DFs/Space_Use_Summaries/time_along_corr.Rds')
+#saveRDS(cor_time, './Data/Derived-data/DFs/Space_Use_Summaries/time_along_corr.Rds')
 
 
 

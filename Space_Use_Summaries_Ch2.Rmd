@@ -10,6 +10,8 @@ output: html_document
 library(knitr)
 library(dplyr)
 library(sf)
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -29,24 +31,15 @@ Hereafter, bears that visit the bonepile are called "Bonepile" bears. Bears that
 pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
 
 pb2 <- pb %>%
-  mutate(points = case_when(
-    id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | 
-      id == "pb_32366.2014" ~ "bonepile_only", # Bonepile ONLY
-    id == "pb_32255.2008" | id == "pb_pb_21237.2011" | id == "pb_20418.2005" | 
-      id == "pb_20414.2009" ~ "coast_only",
-    TRUE ~ "coast_and_bonepile"
-  ))
-
-pb3 <- pb2 %>%
   mutate(bear_type = case_when(
-    points == "coast_only" ~ "Natural",
-    TRUE ~ "Bonepile"
+    id == "pb_32255.2008" | id == "pb_21237.2011" | id == "pb_20418.2005" | 
+      id == "pb_20414.2009" ~ "Do Not Visit Bonepile",
+    TRUE ~ "Visit Bonepile"
   ))
-
 
 # Individual bears
 
-ind <- pb3 %>%
+ind <- pb2 %>%
   group_by(id) %>%
   slice_head() 
 
@@ -73,10 +66,14 @@ summary(bpt$time_spent)
 
 # How much time do bears spend along the coastal corridor (in days)?
 
+```{r}
 
+cor <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_along_corr.Rds')
 
+cor$time <- as.numeric(cor$time)
+summary(cor$time)
 
-
+```
 
 # What is the age breakdown associated with each bear type?
 
@@ -99,6 +96,30 @@ kable(table(ind2$age_class, ind2$bear_type))
 kable(table(ind2$repro, ind2$bear_type)[c(2,1,3),])
 
 ```
+
+# Look at time spent 
+
+```{r}
+ind3 <- select(ind2, id, year, age, repro, bear_type, age_class)
+
+bpt2 <- bpt %>%
+  left_join(ind3)
+
+bpt2 %>%
+  group_by(repro) %>%
+  summarize(mean(time_spent))
+  
+bpt2 %>%
+  group_by(age_class) %>%
+  summarize(mean(time_spent))
+
+```
+
+
+
+
+
+
 
 Because the bonepile acts as a focal attractant, we predict bears will exhibit distinct behavior when foraging at the bonepile relative to other activities (i.e., resting or traveling along the coastal corridor). 
 
@@ -139,7 +160,7 @@ tmap_mode('view') # interactive map
 
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
-  tm_shape(pbsf) + 
+  tm_shape(nsd) + 
   tm_dots(col = "at_bonepile")
 
 ```

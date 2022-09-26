@@ -8,6 +8,8 @@ library(sf)
 library(lubridate)
 library(adehabitatLT)
 
+rm(list = ls())
+
 # ----------------- LOAD AND PREP DATA   ---------------------- #
 
 pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
@@ -16,86 +18,51 @@ tz <- 'US/Alaska'
 
 corrpts <- filter(pb, at_bonepile == 0)
 
+# Remove corridor-only bears (because all time will count even if there are lapses)
+
+corr2 <- corrpts %>%
+  filter(!(id == "pb_20414.2009" | id == "pb_20418.2005" | id == "pb_32255.2008" | id == "pb_21237.2011"))
+
+# ------  CALCULATE TIME SPENT  ----------------------------- #
+
 # Look for large lapses in time
 
-diff <- corrpts %>%
+diff <- corr2 %>%
   group_by(id) %>%
   arrange(id, datetime) %>%
-  mutate(timediff = difftime(datetime, lag(datetime), units = 'days'))
+  mutate(timediff = difftime(datetime, lag(datetime), units = 'days')) %>%
+  glimpse()
 
-which(diff$timediff > 2)
+# Remove large time lapses from totals
 
-diff[4234:4235,]
+time <- diff %>%
+  filter(timediff < 2) %>% # Removes NA rows and rows with timediff > 2 days
+  group_by(id) %>%
+  arrange(id, datetime) %>%
+  summarize(time = sum(timediff))
 
-# 2 is not a bonepile bear
-# 9 is not a bonepile bear
-# 
+# Add back corridor-only bears
 
-## 20520.2012
+cor_only <- corrpts %>%
+  filter(id == "pb_20414.2009" | id == "pb_20418.2005" | id == "pb_32255.2008" | id == "pb_21237.2011")
 
-pb20520_1 <- corrpts %>% # Prior to bonepile 
-  filter(id == "pb_20520.2012" & datetime <= as.POSIXct("2012-08-27 16:00:00", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
+cor_only <- cor_only %>%
+  group_by(id) %>%
+  arrange(id, datetime) %>%
+  mutate(timediff = difftime(datetime, lag(datetime), units = 'days')) %>%
+  drop_na(timediff) %>%
+  glimpse()
+  
+cor_only_sum <- cor_only %>%
+  group_by(id) %>%
+  arrange(id, datetime) %>%
+  summarize(time = sum(timediff))
+  
+cor_time <- bind_rows(time, cor_only_sum)
 
-pb20520_2 <- corrpts %>% # After bonepile 
-  filter(id == "pb_20520.2012" & datetime >= as.POSIXct("2012-10-19 10:00:00", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
 
-## 20735.2009
 
-pb20735_1 <- corrpts %>% # Prior to bonepile 
-  filter(id == "pb_20735.2009" & datetime <= as.POSIXct("2009-08-09 21:00:00", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
 
-pb20735_2 <- corrpts %>% # After leaving bonepile and before returning 
-  filter(id == "pb_20735.2009" & datetime >= as.POSIXct("2009-08-30 08:00:00", tz = tz) &
-           as.POSIXct(datetime < as.POSIXct("2009-09-16 01:00:00", tz = tz))) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
 
-## 20845.2015
 
-pb20845_1 <- corrpts %>% # Prior to bonepile 
-  filter(id == "pb_20845.2015" & datetime < as.POSIXct("2015-09-23 19:03:03", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
 
-pb20845_2 <- corrpts %>% # After bonepile 
-  filter(id == "pb_20845.2015" & datetime >= as.POSIXct("2015-10-03 05:00:19", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
-
-## 20982.2008
-
-pb20982_1 <- corrpts %>% # Prior to bonepile 
-  filter(id == "pb_20982.2008" & datetime <= as.POSIXct("2008-09-21 07:00:00", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
-
-pb20982_2 <- corrpts %>% # After bonepile 
-  filter(id == "pb_20982.2008" & datetime >= as.POSIXct("2008-10-05 03:00:00", tz = tz)) %>%
-  arrange(datetime) %>%
-  filter(row_number()==1 | row_number()==n()) %>%
-  dplyr::select(id, datetime) %>%
-  mutate(phase = ifelse(row_number()==1, "start", "end"))
-
-## 21015.2013
-
-pb21015

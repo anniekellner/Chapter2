@@ -10,6 +10,7 @@ output: html_document
 library(knitr)
 library(dplyr)
 library(sf)
+library(lubridate)
 library(tmap)
 library(tmaptools)
 
@@ -22,8 +23,6 @@ knitr::opts_chunk$set(echo = FALSE)
 # Basic summary tables for bears that visit the bonepile and those that do not
 
 ## How many bears visit the bonepile and how many do not?
-
-Hereafter, bears that visit the bonepile are called "Bonepile" bears. Bears that do not are called "Natural" bears. 
 
 
 ```{r load-and-prep-data, include=FALSE}
@@ -115,7 +114,38 @@ bpt2 %>%
 
 ```
 
+# How many bears visit each bonepile?
 
+```{r}
+
+b <- bpt2 %>%
+  mutate(bonepile = if_else(
+    id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
+      id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
+    "Kaktovik", "Cross"
+  )) %>%
+  glimpse()
+
+table(b$bonepile)
+```
+
+```{r}
+
+years <- unique(b$year)
+
+harvest <- read.csv('./Data/Bonepile_Dates.csv')
+
+harvest$Dates <- mdy(harvest$Dates)
+harvest$Year <- year(harvest$Dates)
+
+h <- harvest %>%
+  filter(Year %in% years) 
+
+h <- h %>%
+  filter(!(Bonepile == "Barrow"))
+
+
+```
 
 
 

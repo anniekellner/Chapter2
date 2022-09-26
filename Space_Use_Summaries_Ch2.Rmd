@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE, message=FALSE}
 
 library(knitr)
+library(kableExtra)
 library(dplyr)
 library(sf)
 library(lubridate)
@@ -25,7 +26,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## How many bears visit the bonepile and how many do not?
 
 
-```{r load-and-prep-data, include=FALSE}
+```{r bonepile-vs-not}
 
 pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
 
@@ -42,7 +43,9 @@ ind <- pb2 %>%
   group_by(id) %>%
   slice_head() 
 
-kable(table(ind$bear_type), col.names = NULL)
+t <- as.data.frame(table(ind$bear_type))[c(2,1),]
+
+kable(t, col.names = NULL, row.names = FALSE)
 
 ```
 

@@ -72,7 +72,27 @@ tm_shape(bonepiles) +
 
 # ------------- CALCULATE DISTANCE  ----------------- #
 
+bonepiles <- dplyr::select(bonepiles, Location, geometry)
 
+cross <- filter(bonepiles, Location == "Cross Island")
+kak <- filter(bonepiles, Location == "Barter Island (Kaktovik)")
+
+# Cross Island
+crossdf <- arrival %>%
+  filter(which_bonepile == "Cross") 
+
+dist_to_cross <- as.numeric(st_distance(arrival, cross))
+
+crossdf <- cbind(arrival, dist_to_cross)
+crossdf$nsd_to_cross <- (crossdf$dist_to_cross)^2
+
+# Kaktovik
+
+kakdf <- arrival %>% filter(which_bonepile == "Kaktovik")
+
+dist_to_kak <- as.numeric(st_distance(arrival, kak))
+
+kakdf <- 
 
 uni <- unique(traj.df$id)
 

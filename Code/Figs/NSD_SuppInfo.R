@@ -33,16 +33,38 @@ traj.df2 <- traj.df %>%
   mutate(bear_type = case_when(
     id == "pb_20525.2013" | id == "pb_20525.2014" | id == "pb_20586.2008" | 
       id == "pb_32366.2014" ~ "bonepile_only",
-    id == "pb_32255.2008" | id == "pb_pb_21237.2011" | id == "pb_20418.2005" | 
+    id == "pb_32255.2008" | id == "pb_21237.2011" | id == "pb_20418.2005" | 
       id == "pb_20414.2009" ~ "coast",
     TRUE ~ "coast_and_bonepile"
   ))
+
+# Add column for which bonepile
+
+arrival <- traj.df2 %>%
+  group_by(id) %>%
+  slice_head() %>%
+  filter(bear_type == "bonepile_only" | bear_type == "coast_and_bonepile") %>%
+  mutate(which_bonepile = if_else(
+  id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
+    id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
+  "Kaktovik", "Cross")) %>%
+  dplyr::select(x, y, date, id, bear_type, which_bonepile) %>%
+  st_as_sf(coords = c('x', 'y'), crs = 3338) %>%
+  glimpse()
 
 # Bonepiles
 
 bonepiles <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 
-# ----------- PLOT -------------------------- #
+# ----------- PLOTS -------------------------- #
+
+# plot bonepiles and arrival locations to make sure they look right
+
+
+
+
+
+
 
 uni <- unique(traj.df$id)
 
@@ -50,13 +72,6 @@ traj.df2$R2n <- traj.df2$R2n/1000 # Change NSD scale to km
 
 cb <- filter(traj.df2, bear_type == "coast_and_bonepile")
 
-# Add lat/long coords to other y-axis
-
-cbsf <- st_as_sf(cb, coords = c('x', 'y'), crs = 3338)
-cbsf <- st_transform(cbsf, 4326)
-
-cbsf <- cbind(cbsf, st_coordinates(cbsf))
-cbt <- as_tibble(cbsf)
 
 
 boneplot <- ggplot(data = cb, aes(x = date, y = R2n)) + 

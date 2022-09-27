@@ -15,7 +15,8 @@ rm(list = ls())
 
 # -------------  DATA PREP  ------------------  #
 
-pb <- readRDS('./Data/bears_092921.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # loads as df
+pb <- st_as_sf(pb)
 
 # Create traj df
 
@@ -37,6 +38,10 @@ traj.df2 <- traj.df %>%
     TRUE ~ "coast_and_bonepile"
   ))
 
+# Bonepiles
+
+bonepiles <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
+
 # ----------- PLOT -------------------------- #
 
 uni <- unique(traj.df$id)
@@ -44,6 +49,15 @@ uni <- unique(traj.df$id)
 traj.df2$R2n <- traj.df2$R2n/1000 # Change NSD scale to km 
 
 cb <- filter(traj.df2, bear_type == "coast_and_bonepile")
+
+# Add lat/long coords to other y-axis
+
+cbsf <- st_as_sf(cb, coords = c('x', 'y'), crs = 3338)
+cbsf <- st_transform(cbsf, 4326)
+
+cbsf <- cbind(cbsf, st_coordinates(cbsf))
+cbt <- as_tibble(cbsf)
+
 
 boneplot <- ggplot(data = cb, aes(x = date, y = R2n)) + 
   geom_line(size = 1) +

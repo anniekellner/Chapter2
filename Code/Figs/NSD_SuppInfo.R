@@ -9,6 +9,8 @@ library(adehabitatLT)
 library(sf)
 library(ggplot2)
 library(scales)
+library(tmap)
+library(tmaptools)
 
 
 rm(list = ls())
@@ -59,10 +61,16 @@ bonepiles <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 # ----------- PLOTS -------------------------- #
 
 # plot bonepiles and arrival locations to make sure they look right
+# Look good 9/27/22
 
+tmap_mode('view')
 
+tm_shape(bonepiles) + 
+  tm_dots(col = "blue", size = 0.5) + 
+  tm_shape(arrival) +
+  tm_dots(col = "red")
 
-
+# ------------- CALCULATE DISTANCE  ----------------- #
 
 
 

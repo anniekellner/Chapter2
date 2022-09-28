@@ -152,7 +152,6 @@ b <- bpt2 %>%
 
 `r table(b$bonepile)`
 
-
 ```{r}
 
 years <- unique(b$year)
@@ -167,8 +166,6 @@ h <- harvest %>%
 
 h <- h %>%
   filter(!(Bonepile == "Barrow"))
-
-
 ```
 
 

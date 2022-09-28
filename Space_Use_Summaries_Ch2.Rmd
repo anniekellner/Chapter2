@@ -10,7 +10,9 @@ output: html_document
 library(knitr)
 library(kableExtra)
 library(dplyr)
+library(plyr)
 library(sf)
+library(ggplot2)
 library(lubridate)
 library(tmap)
 library(tmaptools)
@@ -49,34 +51,6 @@ kable(t, col.names = NULL, row.names = FALSE)
 
 ```
 
-# How much time do bears spend at the bonepile (in days)?
-
-```{r}
-
-bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
-
-## To get summary of time spent, have to add 20735's stints together and remove second entry
-
-bpt$time_spent <- as.numeric(bpt$time_spent)
-bpt[17,4] <- sum(bpt[17,4] + bpt[18,4])
-
-bpt[-18,] -> bpt
-
-summary(bpt$time_spent)
-
-```
-
-# How much time do bears spend along the coastal corridor (in days)?
-
-```{r}
-
-cor <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_along_corr.Rds')
-
-cor$time <- as.numeric(cor$time)
-summary(cor$time)
-
-```
-
 # What is the age breakdown associated with each bear type?
 
 ```{r}
@@ -91,13 +65,91 @@ kable(table(ind2$age_class, ind2$bear_type))
 
 ```
 
+A Fisher's Exact Test shows no association between age class and whether or not the bear stays at the bonepile: 
+`r fisher.test(ind2$age_class, ind2$bear_type)`
+
+
 # What is the reproductive status associated with each bear type?
+
 
 ```{r}
 
 kable(table(ind2$repro, ind2$bear_type)[c(2,1,3),])
 
 ```
+
+It is noteworthy that all females with COYS visit the bonepile. This makes sense, as COYs are vulnerable to starvation and infanticide is not likely to be a threat when food is abundant. Interesting to conjecture that the demographic benefit of the bonepile could possibly be due to enhanced COY survival. Seems like it would be possible to look at this. Hmmm. Idea for chapter 3. 
+
+If yearlings and COYs are combined, is there an association with 'dependent young' or 'has coy' and the bonepile?
+
+```{r}
+
+r <- ind2 %>%
+  dplyr::select(id, repro, bear_type, age_class) 
+
+r <- r %>%
+  dplyr::mutate(young = case_when( 
+    repro == "coy" | repro == "yearling" ~ "yes",
+    TRUE ~ "no"
+  ))
+
+fisher.test(r$young, r$bear_type)
+```
+
+There is not an association between having dependent young and the bonepile. How about having a COY?
+
+```{r}
+
+r <- r %>%
+  dplyr::mutate(coy = case_when( 
+    repro == "coy" ~ "yes",
+    TRUE ~ "no"
+  ))
+
+fisher.test(r$bear_type, r$coy)
+
+```
+
+Nope, no association. 
+
+
+# How much time do bears spend at the bonepile vs. along the coastal corridor?
+
+```{r}
+
+# Bonepile
+bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
+
+## To get summary of time spent, have to add 20735's stints together and remove second entry
+
+bpt$time_spent <- as.numeric(bpt$time_spent)
+bpt[17,4] <- sum(bpt[17,4] + bpt[18,4])
+
+bpt[-18,] -> bpt
+
+bpt2 <- bpt %>%
+  select(id, time_spent) %>%
+  mutate(where = "Bonepile") %>%
+  dplyr::rename(time = time_spent) # because also in Plyr so gives error
+
+# Corridor
+cor <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_along_corr.Rds')
+
+cor$time <- as.numeric(cor$time)
+cor$where <- "Corridor"
+
+```
+
+Summary stats for time at the bonepile: `r summary(bpt2$time)`
+Summary stats for time along the coastal corridor: `r summary(cor$time)`
+
+Results of a t-test comparing the means: `r t.test(bpt2$time, cor$time)`
+
+Conclusion: bears spend more time onshore at the bonepile than they do along the coastal corridor.
+
+
+
+
 
 # Look at time spent 
 

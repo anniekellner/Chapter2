@@ -61,6 +61,7 @@ ind2 <- ind %>%
              age < 5 ~ "Subadult",
              TRUE ~ "Adult"
            ))
+
 kable(table(ind2$age_class, ind2$bear_type))
 
 ```
@@ -136,30 +137,9 @@ Results of a t-test comparing the means: `r t.test(bpt2$time, cor$time)`
 Conclusion: bears spend more time onshore at the bonepile than they do along the coastal corridor.
 
 
-
-
-
-# Look at time spent 
-
-```{r}
-ind3 <- select(ind2, id, year, age, repro, bear_type, age_class)
-
-bpt2 <- bpt %>%
-  left_join(ind3)
-
-bpt2 %>%
-  group_by(repro) %>%
-  summarize(mean(time_spent))
-  
-bpt2 %>%
-  group_by(age_class) %>%
-  summarize(mean(time_spent))
-
-```
-
 # How many bears visit each bonepile?
 
-```{r}
+```{r, include=FALSE}
 
 b <- bpt2 %>%
   mutate(bonepile = if_else(
@@ -168,9 +148,10 @@ b <- bpt2 %>%
     "Kaktovik", "Cross"
   )) %>%
   glimpse()
-
-table(b$bonepile)
 ```
+
+`r table(b$bonepile)`
+
 
 ```{r}
 

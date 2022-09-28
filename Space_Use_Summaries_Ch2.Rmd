@@ -78,9 +78,9 @@ kable(table(ind2$repro, ind2$bear_type)[c(2,1,3),])
 
 ```
 
-It is noteworthy that all females with COYS visit the bonepile. This makes sense, as COYs are vulnerable to starvation and infanticide is not likely to be a threat when food is abundant. Interesting to conjecture that the demographic benefit of the bonepile could possibly be due to enhanced COY survival. Seems like it would be possible to look at this. Hmmm. Idea for chapter 3. 
+It is noteworthy that all females with COYS visit the bonepile. This makes sense, as COYs are vulnerable to starvation and infanticide is not likely to be a threat when food is abundant. 
 
-If yearlings and COYs are combined, is there an association with 'dependent young' or 'has coy' and the bonepile?
+If yearlings and COYs are combined, is there an association with 'dependent young' and the bonepile?
 
 ```{r}
 
@@ -96,21 +96,9 @@ r <- r %>%
 fisher.test(r$young, r$bear_type)
 ```
 
-There is not an association between having dependent young and the bonepile. How about having a COY?
+There is not an association between having dependent young and the bonepile. Cannot test for having a COY in particular because the sample size is too small. 
 
-```{r}
-
-r <- r %>%
-  dplyr::mutate(coy = case_when( 
-    repro == "coy" ~ "yes",
-    TRUE ~ "no"
-  ))
-
-fisher.test(r$bear_type, r$coy)
-
-```
-
-Nope, no association. 
+# Is there an association between age and the bonepile
 
 
 # How much time do bears spend at the bonepile vs. along the coastal corridor?

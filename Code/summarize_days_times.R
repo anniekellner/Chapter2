@@ -1,21 +1,29 @@
 ####################################################
-##    Summarize dataset       ######################
+##    Summarize Days Tracked       ######################
 #####################################################
 
 library(dplyr)
+library(tidyr)
+library(lubridate)
 library(adehabitatLT)
 library(sf)
 
 rm(list = ls())
 
-# Summarize dataset for bonepile 
+# ------------- LOAD AND PREP DATA  ------------------ #
 
-bears <- readRDS('./Data/all_bonepile_points.Rds')
-pb <- cbind(bears, st_coordinates(bears)) # separate coords from geometry columns into X and Y columns
+bears <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
+
+pb <- st_as_sf(bears, crs = 3338)
+
+pb <- cbind(pb, st_coordinates(pb)) # separate coords from geometry columns into X and Y columns
 
 pbdf <- as.data.frame(pb)
 
+# ---------- TRAJ -------------------------------------- #
+
 traj.pb<-as.ltraj(xy=pbdf[,c("X","Y")], date=pbdf$datetime, id=as.character(pbdf$id))
+
 Summary.traj.pb <- summary(traj.pb)
 
 Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj.pb$date.begin, units="days"),digits=1)
@@ -25,7 +33,24 @@ Summary.traj.pb$PctComplete <- round((Summary.traj.pb$nb.reloc-Summary.traj.pb$N
 Summary.traj.pb %>%
   dplyr::select(id, date.begin, date.end, DaysTrack) -> summary
 
+# ----- SUMMARIZE --------------------------------- #
 
+# Days tracked
+
+summary$DaysTrack <- as.numeric(summary$DaysTrack)
+
+summary(summary$DaysTrack)
+sd(summary$DaysTrack)
+
+# Deal with dates and times
+
+s <- summary %>%
+  separate(date.begin, into = c("date.begin", "time.begin"), sep = ' ', remove = TRUE) %>% # remove = FALSE will keep original column
+  separate(date.end, into = c('date.end', 'time.end'), sep = ' ', remove = TRUE) 
+  
+s <- s %>%
+  mutate(ordinal.begin = yday(date.begin)) %>%
+  mutate(ordinal.end = yday(date.end))
 
 
 

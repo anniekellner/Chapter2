@@ -10,12 +10,12 @@ output: html_document
 library(knitr)
 library(kableExtra)
 library(plyr)
-library(dplyr)
+library(dplyr) # always load plyr before dplyr
 library(sf)
 library(ggplot2)
 library(lubridate)
-library(tmap)
-library(tmaptools)
+#library(tmap)
+#library(tmaptools)
 
 rm(list = ls())
 
@@ -148,13 +148,17 @@ b <- bpt2 %>%
     "Kaktovik", "Cross"
   )) %>%
   glimpse()
+
 ```
 
 `r table(b$bonepile)`
 
 ```{r}
 
-years <- unique(b$year)
+bpt$year <- year(bpt$start)
+years <- unique(bpt$year)
+
+# Load harvest data
 
 harvest <- read.csv('./Data/Bonepile_Dates.csv')
 
@@ -166,6 +170,28 @@ h <- harvest %>%
 
 h <- h %>%
   filter(!(Bonepile == "Barrow"))
+
+bpt2 <- bpt2 %>% # df with start and end dates
+  mutate(bonepile = if_else(
+    id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
+      id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
+    "Kaktovik", "Cross"
+  )) %>%
+  glimpse()
+
+# Do the bears' time intervals at the bonepile overlap the harvest dates?
+# interval() works for 
+
+h$Dates <- ymd(h$Dates)
+
+h2 <- h %>%
+  dplyr::mutate(h, twoDays = interval(Dates + days(2)))
+
+test <- ymd("2008-05-13")
+
+i <- interval(test, test + days(2)) # sweet - this works
+
+test %within% i # good
 ```
 
 

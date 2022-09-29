@@ -52,6 +52,9 @@ s <- s %>%
   mutate(ordinal.begin = yday(date.begin)) %>%
   mutate(ordinal.end = yday(date.end))
 
+mean(s$ordinal.begin)
+
+
 
 
 # Fix rates

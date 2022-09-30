@@ -154,7 +154,7 @@ b <- bpt2 %>%
 
 `r table(b$bonepile)`
 
-```{r}
+```{r harvest-data}
 
 bpt$year <- year(bpt$start)
 years <- unique(bpt$year)
@@ -187,15 +187,20 @@ bpt <- bpt %>%
     "Kaktovik", "Cross"
   ))
 
+```
+
+```{r time-intervals}
+
 # Do the bears' time intervals at the bonepile overlap the harvest dates?
 # interval() works for ymd and ymd_hms
 
-# I can't figure out best way to match and determine whether intervals overlap. Maybe go to Stack Overflow. 
+bpt.t <- bpt %>% 
+  mutate(interval = interval(start, end))
 
-h2 <- h %>%
-  mutate(if)
+h$interval <- 
 
-h$Dates <- ymd(h$Dates)
+t <- bpt.t %>%
+  pivot_wider(names_from = interval, values_from = )
 
 h2 <- h %>%
   dplyr::mutate(h, twoDays = interval(Dates + days(2)))
@@ -206,7 +211,6 @@ i <- interval(test, test + days(2)) # sweet - this works
 
 test %within% i # good
 ```
-
 
 
 

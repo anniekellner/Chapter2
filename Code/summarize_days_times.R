@@ -2,6 +2,10 @@
 ##    Summarize Days Tracked       ######################
 #####################################################
 
+# 21237.2011 was not collared on land, but bear is missing data between July and September. Bear appears on land in September.  
+# 20525.2014 did not really swim, but walked off ice onto land.  
+
+
 library(dplyr)
 library(tidyr)
 library(lubridate)
@@ -13,6 +17,7 @@ rm(list = ls())
 # ------------- LOAD AND PREP DATA  ------------------ #
 
 bears <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
+all.v2 <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # to get landing points
 
 pb <- st_as_sf(bears, crs = 3338)
 
@@ -44,11 +49,32 @@ sd(summary$DaysTrack)
 
 # Deal with dates and times
 
+# Landfall
+
+l <- bears %>% # 'landfall' is misnamed for bears that were collared on land - change
+  filter(landfall == 1) 
+
+ch2 <- unique(l$id)  
+  
+end.swim <- all.v2 %>%
+  dplyr::filter(end.swim == 1)
+
+end <- unique(end.swim$id)
+
+dplyr::setdiff(ch2, end) # look at 20525.2014 and 
+
+b11 <- all.v2 %>%
+  dplyr::filter(id == "pb_21237.2011") 
+
+b14l <- l %>%
+
+
 s <- summary %>%
   separate(date.begin, into = c("date.begin", "time.begin"), sep = ' ', remove = TRUE) %>% # remove = FALSE will keep original column
   separate(date.end, into = c('date.end', 'time.end'), sep = ' ', remove = TRUE) 
   
-s <- s %>%
+end.swim <- all.v2 %>%
+  dplyr::filter(end.swim == 1)s <- s %>%
   mutate(ordinal.begin = yday(date.begin)) %>%
   mutate(ordinal.end = yday(date.end))
 

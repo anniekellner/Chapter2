@@ -31,7 +31,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r bonepile-vs-not}
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
 
 pb2 <- pb %>%
   mutate(bear_type = case_when(
@@ -172,14 +172,6 @@ h <- harvest %>%
 h <- h %>%
   filter(!(Bonepile == "Barrow"))
 
-bpt2 <- bpt2 %>% # df with start and end dates
-  mutate(bonepile = if_else(
-    id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
-      id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
-    "Kaktovik", "Cross"
-  )) %>%
-  glimpse()
-
 bpt <- bpt %>%
     mutate(bonepile = if_else(
     id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
@@ -189,28 +181,7 @@ bpt <- bpt %>%
 
 ```
 
-```{r time-intervals}
 
-# Do the bears' time intervals at the bonepile overlap the harvest dates?
-# interval() works for ymd and ymd_hms
-
-bpt.t <- bpt %>% 
-  mutate(interval = interval(start, end))
-
-h$interval <- 
-
-t <- bpt.t %>%
-  pivot_wider(names_from = interval, values_from = )
-
-h2 <- h %>%
-  dplyr::mutate(h, twoDays = interval(Dates + days(2)))
-
-test <- ymd("2008-05-13")
-
-i <- interval(test, test + days(2)) # sweet - this works
-
-test %within% i # good
-```
 
 
 

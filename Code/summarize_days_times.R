@@ -2,11 +2,6 @@
 ##    Summarize Days Tracked       ######################
 #####################################################
 
-
-
-# See ice_depart_arrive.csv for swim/landfall data
-
-
 library(dplyr)
 library(tidyr)
 library(lubridate)

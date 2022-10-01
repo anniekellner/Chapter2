@@ -36,30 +36,33 @@ h <- harvest %>%
   filter(!(Bonepile == "Barrow")) %>%
   mutate(Bonepile = recode(Bonepile, "Cross " = "Cross")) # Because there was a space in csv file and wouldn't join correctly
 
+tz(h$Dates) <- 'US/Alaska'
+
 # ------------------   JOIN -------------------------------------------------- #
 
 bpt2 <- bpt %>%
   full_join(h, by = "Bonepile") %>% 
-  dplyr::rename(c(BP_date = Dates, BP_year = Year.y, Bear_year = Year.x)) 
+  dplyr::rename(c(harvest_date = Dates, harvest_year = Year.y, Bear_year = Year.x)) %>%
+  mutate(t_interval = interval(start, end)) 
+
+
+sameDay <- bpt2 %>%
+  mutate(within_t = harvest_date %within% t_interval)
+
+
+
+
 
 # Scratch code:
 
-bpt.t <- bpt %>% 
-  mutate(interval = interval(start, end))
-
-h$interval <- 
-  
-  t <- bpt.t %>%
-  pivot_wider(names_from = interval, values_from = )
 
 h2 <- h %>%
   dplyr::mutate(h, twoDays = interval(Dates + days(2)))
 
-test <- ymd("2008-05-13")
 
 i <- interval(test, test + days(2)) # sweet - this works
 
-test %within% i # good
+
 
 
 

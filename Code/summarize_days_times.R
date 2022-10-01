@@ -12,7 +12,7 @@ rm(list = ls())
 
 # ------------- LOAD AND PREP DATA  ------------------ #
 
-bears <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds')
+bears <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
 pb <- st_as_sf(bears, crs = 3338)
 
 pb <- cbind(pb, st_coordinates(pb)) # separate coords from geometry columns into X and Y columns
@@ -55,23 +55,7 @@ end.swim <- all.v2 %>%
 
 mean(s$ordinal.begin)
 
-# WHETHER OR NOT BEARS ARE AT BONEPILE DURING HARVEST - help from writing group
 
-x <- data.frame(Location = c("Chicago", "Colorado", "Colorado", "Chicago"), 
-                Date = ymd(c("2008-09-06", "2008-09-07", "2008-09-13", "2008-09-05")))
-
-x$Year <- 2008
-
-y <- data.frame(id = c("Sam", "Kasey", "Matt", "Wendi"), 
-                Location = c("Chicago", "Colorado", "Colorado", "Chicago"),
-                start = ymd_hms(c("2008-09-16 18:00:37 MDT", "2008-10-03 08:00:37 MDT", "2008-08-27 05:00:00 MDT", "2012-08-27 17:00:00 MDT")),
-                end = ymd_hms(c("2008-10-11 23:00:36 MDT", "2008-10-25 16:01:06 MDT", "2008-10-16 23:00:00 MDT", "2012-10-19 08:00:00 MDT")),
-                Year = c(2008, 2008, 2008, 2012))
-
-x
-y
-y %>% full_join(x, by = "Location") %>% rename(bone_date = Date, bone_year = Year.y) %>%
-  mutate(in_int = (bone_date >= start & bone_date <= end))
 
 
 # Fix rates

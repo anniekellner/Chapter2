@@ -100,8 +100,6 @@ fisher.test(r$young, r$bear_type)
 
 There is not an association between having dependent young and the bonepile. Cannot test for having a COY in particular because the sample size is too small. 
 
-# Is there an association between age and the bonepile
-
 
 # How much time do bears spend at the bonepile vs. along the coastal corridor?
 

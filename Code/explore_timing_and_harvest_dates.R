@@ -4,6 +4,7 @@
 
 library(lubridate)
 library(dplyr)
+library(tidyr)
 library(sf)
 
 rm(list = ls())
@@ -60,10 +61,12 @@ bpt2 <- bpt %>%
 
 
 sameDay <- bpt2 %>%
-  mutate(within_t = harvest_date %within% t_interval) %>%
+  mutate(within_t = harvest_date %within% t_interval) %>% glimpse()
   group_by(id) %>%
   slice_head() %>%
   left_join(r)
+
+sameDay <- sameDay[-9,] # remove second entry for 20735.2009. within_t was the same (FALSE for both) 
 
 overlap <- sameDay %>%
   filter(within_t == TRUE) %>% 
@@ -72,7 +75,28 @@ overlap <- sameDay %>%
   left_join(r) %>%
   glimpse()
 
+## Every bear that was at the bonepile on the day of the harvest had dependent young, with the exception of one bear that is a subadult
+## Run a statistical test on this result
+# NA = subadult
 
+table(sameDay$within_t)
+
+sameDay$dependent <- ifelse(sameDay$repro == "coy" | sameDay$repro == "yearling", 1, 0)
+
+adults <- sameDay %>%
+  drop_na(repro)
+
+fisher.test(adults$within_t, adults$dependent)
+
+table(r$repro, useNA = "always") # repro = all bears in study (both bonepile and non)
+table(sameDay$repro, useNA = "always") # sameDay = bonepile bears only
+table(overlap$repro, useNA = "always") # overlap = bears are present at bonepile on at least one harvest 
+
+r$dependent <- ifelse(r$repro == "coy" | r$repro == "yearling", 1, 0)
+table(r$dependent)
+
+overlap$dependent <- ifelse(overlap$repro == "coy" | overlap$repro == "yearling", 1, 0)
+table(overlap$dependent)
 
 # Scratch code:
 

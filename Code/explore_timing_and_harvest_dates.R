@@ -39,15 +39,27 @@ h <- harvest %>%
 # ------------------   JOIN -------------------------------------------------- #
 
 bpt2 <- bpt %>%
-  full_join(h, by = "Bonepile") %>%
-  dplyr::rename(c(BP_date = Dates, BP_year = Year.y, Bear_year = Year.x)) %>%
-  arrange(id, start) %>%
-  as_tibble() %>%
-  print(width = Inf)
+  full_join(h, by = "Bonepile") %>% 
+  dplyr::rename(c(BP_date = Dates, BP_year = Year.y, Bear_year = Year.x)) 
+
+# Scratch code:
+
+bpt.t <- bpt %>% 
+  mutate(interval = interval(start, end))
+
+h$interval <- 
   
+  t <- bpt.t %>%
+  pivot_wider(names_from = interval, values_from = )
 
+h2 <- h %>%
+  dplyr::mutate(h, twoDays = interval(Dates + days(2)))
 
-head(bpt)
+test <- ymd("2008-05-13")
+
+i <- interval(test, test + days(2)) # sweet - this works
+
+test %within% i # good
 
 
 

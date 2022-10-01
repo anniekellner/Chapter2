@@ -4,14 +4,27 @@
 
 library(lubridate)
 library(dplyr)
+library(sf)
 
 rm(list = ls())
 
 # --------------------  LOAD AND PREP DATA ------------------------------------------------ #
 
+## Repro and age data
+
+r <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds') # for repro and age data
+
+r <- st_drop_geometry(r)
+
+r <- r %>%
+  group_by(id) %>%
+  select(id, age, repro) %>%
+  slice_head()
+
 ## Bonepile
 
 bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
+
 
 bpt$Year <- year(bpt$start)
 years <- unique(bpt$Year)
@@ -49,7 +62,14 @@ bpt2 <- bpt %>%
 sameDay <- bpt2 %>%
   mutate(within_t = harvest_date %within% t_interval)
 
+overlap <- sameDay %>%
+  filter(within_t == TRUE) %>%
+  group_by(id) %>%
+  slice_head() %>%
+  left_join(r) %>%
+  glimpse()
 
+table(overlap$repro)
 
 
 

@@ -89,30 +89,11 @@ r2 <- r %>%
   replace_na(list(overlap = "TRUE")) %>%
   print(n = 21)
 
-fisher.test(r2$age_class, r2$overlap)  # result is not significant
+fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
 
   
 
-sameDayF <- dplyr::filter(sameDay, within_t == FALSE) %>%
-  group_by(id) %>%
-  slice_head() %>%
-  left_join(r)
 
-table(sameDayF$repro) # Doesn't appear to be a pattern
-table(sameDayF$age_class) # Doesn't appear to be a pattern
-
-
-fisher.test(sameDay$within_t, sameDay
-
-table(r$repro, useNA = "always") # repro = all bears in study (both bonepile and non)
-table(sameDayT$repro, useNA = "always") # sameDay = bonepile bears only
-
-
-r$dependent <- ifelse(r$repro == "coy" | r$repro == "yearling", 1, 0)
-table(r$dependent)
-
-overlap$dependent <- ifelse(overlap$repro == "coy" | overlap$repro == "yearling", 1, 0)
-table(overlap$dependent)
 
 # Scratch code:
 

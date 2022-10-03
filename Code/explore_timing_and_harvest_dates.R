@@ -20,7 +20,12 @@ r <- st_drop_geometry(r)
 r <- r %>%
   group_by(id) %>%
   select(id, age, repro) %>%
-  slice_head()
+  slice_head() %>%
+  mutate(age_class = 
+         case_when(
+           age < 5 ~ "Subadult",
+           TRUE ~ "Adult"
+         ))
 
 ## Bonepile
 
@@ -57,40 +62,51 @@ tz(h$Dates) <- 'US/Alaska'
 bpt2 <- bpt %>%
   full_join(h, by = "Bonepile") %>% 
   dplyr::rename(c(harvest_date = Dates, harvest_year = Year.y, Bear_year = Year.x)) %>%
-  mutate(t_interval = interval(start, end)) 
+  mutate(t_interval = interval(start, end)) %>%
+  glimpse()
 
+
+mutate(age_class = 
+         case_when(
+           age < 5 ~ "Subadult",
+           TRUE ~ "Adult"
+         ))
 
 sameDay <- bpt2 %>%
-  mutate(within_t = harvest_date %within% t_interval) %>% glimpse()
+  mutate(within_t = harvest_date %within% t_interval) 
+
+# Which bears were not present on any harvest date
+
+none <- r %>%
+  anti_join(sameDayT, by = "id") %>%
+ mutate(overlap = "FALSE")
+
+table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile (how long did they wait?)
+
+
+r2 <- r %>%
+  left_join(none) %>%
+  replace_na(list(overlap = "TRUE")) %>%
+  print(n = 21)
+
+fisher.test(r2$age_class, r2$overlap)  # result is not significant
+
+  
+
+sameDayF <- dplyr::filter(sameDay, within_t == FALSE) %>%
   group_by(id) %>%
   slice_head() %>%
   left_join(r)
 
-sameDay <- sameDay[-9,] # remove second entry for 20735.2009. within_t was the same (FALSE for both) 
+table(sameDayF$repro) # Doesn't appear to be a pattern
+table(sameDayF$age_class) # Doesn't appear to be a pattern
 
-overlap <- sameDay %>%
-  filter(within_t == TRUE) %>% 
-  group_by(id) %>%
-  slice_head() %>%
-  left_join(r) %>%
-  glimpse()
 
-## Every bear that was at the bonepile on the day of the harvest had dependent young, with the exception of one bear that is a subadult
-## Run a statistical test on this result
-# NA = subadult
-
-table(sameDay$within_t)
-
-sameDay$dependent <- ifelse(sameDay$repro == "coy" | sameDay$repro == "yearling", 1, 0)
-
-adults <- sameDay %>%
-  drop_na(repro)
-
-fisher.test(adults$within_t, adults$dependent)
+fisher.test(sameDay$within_t, sameDay
 
 table(r$repro, useNA = "always") # repro = all bears in study (both bonepile and non)
-table(sameDay$repro, useNA = "always") # sameDay = bonepile bears only
-table(overlap$repro, useNA = "always") # overlap = bears are present at bonepile on at least one harvest 
+table(sameDayT$repro, useNA = "always") # sameDay = bonepile bears only
+
 
 r$dependent <- ifelse(r$repro == "coy" | r$repro == "yearling", 1, 0)
 table(r$dependent)

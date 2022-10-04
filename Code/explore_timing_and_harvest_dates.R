@@ -91,7 +91,7 @@ none <- none %>%
 
 ## Does age class influence arrival date?
 
-table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile (Q: could the third subadult been with a parent?)
+table(none$age_class) # 1/3 subadults waited to visit, 1/3 never went to the BP. (Q: could the third subadult been with a parent?)
 
 r2 <- r %>%
   left_join(none) %>%

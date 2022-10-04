@@ -76,20 +76,74 @@ overlap <- sameDay %>%
 overlap[6,1] <- "pb_20735.2009"
 
 
-# Which bears were not present on any harvest date
+# ------------- ANALYSES  --------------------- #
+
+## Which bears were not present on any harvest date?
 
 none <- r %>%
   anti_join(overlap, by = "id") %>%
   mutate(overlap = "FALSE")
 
-table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile (how long did they wait?)
+# 8/18 were not at the bonepile on the date of any harvest
+
+## Does age class influence arrival date?
+
+table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile 
 
 r2 <- r %>%
   left_join(none) %>%
   replace_na(list(overlap = "TRUE")) %>%
   print(n = 21)
 
+sub <- subset(r2, age_class == "Subadult")
+fisher.test(sub$overlap == TRUE, sub$overlap == FALSE) # not signif
+
+## How long did the subadults wait before visiting?
+
+# First harvest
+
+first <- h %>%
+  group_by(Year, Bonepile) %>%
+  arrange(Year, Bonepile, Dates) %>%
+  slice_head()
+
+# Last harvest
+
+last <-h %>%
+  group_by(Year, Bonepile) %>%
+  arrange(Year, Bonepile, Dates) %>%
+  slice_tail()
+
+# Bears
+
+b <- bpt %>% # start = date bear arrived at bonepile
+  select(id, start, end, Year, Bonepile) %>%
+  rename(bear_arrival = start) %>%
+  rename(bear_departure = end)
+
+none.ids <- unique(none$id)
+
+b[18,4] <- "Kaktovik" # Listed as Cross because of way I categorized. 
+
+b2 <- b %>%
+  left_join(first, by = c('Year', 'Bonepile')) %>%
+  rename(first_harvest = Dates)
+
+b3 <- b2 %>%
+  left_join(last, by = c('Year', 'Bonepile')) %>%
+  rename(last_harvest = Dates)
+
+b3$time_to_first_harvest <- difftime(b3$first_harvest, b3$bear_arrival)
+b3$time_to_last_harvest <- difftime(b3$last_harvest, b3$bear_arrival)
+
+
+
 # Assoc w/ repro status?
+
+# How long did 20735 wait at the bonepile with her COY (prior to the harvest) before leaving?
+
+ex <- b3 %>% filter(id == "pb_20735.2009")
+difftime(ex$bear_arrival, ex$bear_departure) # 20.0 days
 
 table(r2$repro, r2$overlap) # adults with coys looks to be interesting - 5 overlap bonepile while 1 does not
 
@@ -99,19 +153,10 @@ fisher.test(coy$overlap == TRUE, coy$overlap == FALSE) # not significant but p =
 
 fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
 
-# ---------------   HOW LONG DID BEARS WAIT BEFORE GOING TO THE BONEPILES -------------------------- #
-
-# Get final harvest dates for each year
   
-fin <-h %>%
-  group_by(Year, Bonepile) %>%
-  arrange(Year, Bonepile, Dates) %>%
-  slice_tail()
 
-b <- bpt %>% # start = date bear arrived at bonepile
-  select(id, start, Year, Bonepile)
 
-b[18,4] <- "Kaktovik" # Listed as Cross because of way I categorized. Is fine to just change like this. 
+
 
 
 

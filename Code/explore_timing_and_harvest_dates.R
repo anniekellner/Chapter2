@@ -93,13 +93,6 @@ r2 <- r %>%
 
 table(r2$repro, r2$overlap) # adults with coys looks to be interesting - 5 overlap bonepile while 1 does not
 
-r2$w_coy <- ifelse(r2$repro == "coy", 1, 0)
-
-r2 <- r2 %>%
-  replace_na(list(w_coy = 0)) # subadults categorized with 0 instead of NA for w_coy
-
-fisher.test(r2$repro, r2$overlap) # not significant
-
 coy <- subset(r2, repro == "coy")
 
 fisher.test(coy$overlap == TRUE, coy$overlap == FALSE) # not significant but p = 0.16

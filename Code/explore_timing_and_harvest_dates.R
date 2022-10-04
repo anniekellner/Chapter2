@@ -68,7 +68,7 @@ bpt2 <- bpt %>%
 sameDay <- bpt2 %>%
   mutate(within_t = harvest_date %within% t_interval) 
 
-overlap <- sameDay %>%
+overlap <- sameDay %>% # 13 bears overlap; 5 do not
   filter(within_t == TRUE) %>%
   group_by(id) %>%
   slice_head()
@@ -80,15 +80,18 @@ overlap[6,1] <- "pb_20735.2009"
 
 ## Which bears were not present on any harvest date?
 
-none <- r %>%
+none <- bpt %>%
   anti_join(overlap, by = "id") %>%
   mutate(overlap = "FALSE")
 
-# 8/18 were not at the bonepile on the date of any harvest
+none <- none %>%
+  left_join(r)
+
+# 5/18 were not at the bonepile on the date of any harvest - include non-bonepile bears in this??
 
 ## Does age class influence arrival date?
 
-table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile 
+table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile (Q: could the third subadult been with a parent?)
 
 r2 <- r %>%
   left_join(none) %>%
@@ -136,7 +139,8 @@ b3 <- b2 %>%
 b3$time_to_first_harvest <- difftime(b3$first_harvest, b3$bear_arrival)
 b3$time_to_last_harvest <- difftime(b3$last_harvest, b3$bear_arrival)
 
-
+b0 <- b3[b3$id %in% none.ids,]
+b3.ids <- unique(b3$id)
 
 # Assoc w/ repro status?
 

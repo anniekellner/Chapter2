@@ -38,7 +38,7 @@ years <- unique(bpt$Year)
 bpt <- bpt %>%
   select(id, start, end, Year) %>%
   mutate(Bonepile = if_else(
-    id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | 
+    id == "pb_20492.2008" | id == "pb_20520.2012" | id == "pb_20735.2009" | id == "pb_20966.2008" | id == "pb_20735.2009.2" |
       id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
     "Kaktovik", "Cross")) %>%
   mutate(t_interval = interval(start = start, end = end, tzone = 'US/Alaska'))
@@ -65,24 +65,24 @@ bpt2 <- bpt %>%
   mutate(t_interval = interval(start, end)) %>%
   glimpse()
 
-
-mutate(age_class = 
-         case_when(
-           age < 5 ~ "Subadult",
-           TRUE ~ "Adult"
-         ))
-
 sameDay <- bpt2 %>%
   mutate(within_t = harvest_date %within% t_interval) 
+
+overlap <- sameDay %>%
+  filter(within_t == TRUE) %>%
+  group_by(id) %>%
+  slice_head()
+
+overlap[6,1] <- "pb_20735.2009"
+
 
 # Which bears were not present on any harvest date
 
 none <- r %>%
-  anti_join(sameDayT, by = "id") %>%
- mutate(overlap = "FALSE")
+  anti_join(overlap, by = "id") %>%
+  mutate(overlap = "FALSE")
 
 table(none$age_class) # 2 of the 3 subadults waited to visit the bonepile (how long did they wait?)
-
 
 r2 <- r %>%
   left_join(none) %>%
@@ -91,7 +91,21 @@ r2 <- r %>%
 
 fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
 
+# ---------------   HOW LONG DID BEARS WAIT BEFORE GOING TO THE BONEPILES -------------------------- #
+
+# Get final harvest dates for each year
   
+fin <-h %>%
+  group_by(Year, Bonepile) %>%
+  arrange(Year, Bonepile, Dates) %>%
+  slice_tail()
+
+b <- bpt %>% # start = date bear arrived at bonepile
+  select(id, start, Year, Bonepile)
+
+b[18,4] <- "Kaktovik" # Listed as Cross because of way I categorized. Is fine to just change like this. 
+
+
 
 
 

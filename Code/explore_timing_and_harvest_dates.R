@@ -231,7 +231,14 @@ br %>%
 # with coys: -5 days with outlier; -0.2 days without outlier. All other groups positive. yearling = 1 day; entering den = 4 days later
 # Subadults (status unknown) arrive last at 4.6 days
 
+br2 <- br %>%
+  mutate(coy = if_else(
+    repro == "coy", "coy", "no coy"
+  ))
 
+br2$coy <- as.factor(br2$coy)
+
+br2 %>% {t.test(.$time_to_first_harvest ~ .$coy, var.equal = TRUE)} # still not significant when divided into coy and not-coy
 
 ########## SCRATCH  ##############################################################
 

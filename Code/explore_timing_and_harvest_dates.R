@@ -2,6 +2,9 @@
 #####     IS THERE SOCIAL STRATIFICAION SURROUNDING THE HARVEST   #####################
 #######################################################################################
 
+# About Fisher's Exact test: need 2 x 2 contingency tables. 
+
+
 library(lubridate)
 library(dplyr)
 library(tidyr)
@@ -73,35 +76,58 @@ overlap <- sameDay %>% # 13 bears overlap; 5 do not
   group_by(id) %>%
   slice_head()
 
-overlap[6,1] <- "pb_20735.2009"
+overlap[6,1] <- "pb_20735.2009" # 20735.2009 goes to the bonepile twice. Second time overlaps the harvest.
 
+dayOf <- unique(overlap$id)
 
 # ------------- ANALYSES  --------------------- #
 
-## Which bears were not present on any harvest date?
-
-none <- bpt %>%
-  anti_join(overlap, by = "id") %>%
-  mutate(overlap = "FALSE")
-
-none <- none %>%
-  left_join(r)
-
-# 5/18 were not at the bonepile on the date of any harvest - include non-bonepile bears in this??
-
-## Does age class influence arrival date?
-
-table(none$age_class) # 1/3 subadults waited to visit, 1/3 never went to the BP. (Q: could the third subadult been with a parent?)
+###### Which bears were not present on any harvest date? (including non-bp bears)
 
 r2 <- r %>%
-  left_join(none) %>%
-  replace_na(list(overlap = "TRUE")) %>%
-  print(n = 21)
+  mutate(dayOf = if_else(id %in% dayOf, "TRUE", "FALSE")) # bring back non-bp bears
+
+# 13/18 present at harvest; 5/18 bp bears not present at harvest; 
+# 8/21 land bears not present; 13/21 present at harvest
+
+
+###### Does age class influence arrival date?
+
+table(r2$dayOf, r2$age_class)
+ 
+# 2/3 subadults not present at harvest. 1 waited but later visited, 1 never went to the BP. 1 present same day. 
 
 sub <- subset(r2, age_class == "Subadult")
-fisher.test(sub$overlap == TRUE, sub$overlap == FALSE) # not signif
+fisher.test(sub$dayOf == TRUE, sub$dayOf == FALSE) # not signif
 
-## How long did the subadults wait before visiting?
+######  Does repro status influence arrival date?
+
+table(r2$repro, r2$dayOf) # only interesting result is 5/6 bears with coys visit the bonepile the day of harvest
+
+# add bp status to r2 df
+
+bpid <- unique(b$id)
+r2$bpBear <- ifelse(r2$id %in% bpid, "TRUE", "FALSE")
+
+table(r2$coy, r2$bpBear)
+
+fisher.test(r2$coy, r2$bpBear) # not significant. Subadults = FALSE (no coy) - but I don't understand how 5/6 arrived on same day p = 0.16
+
+
+# How long did 20735 wait at the bonepile with her COY (prior to the harvest) before leaving?
+
+ex <- b3 %>% filter(id == "pb_20735.2009")
+difftime(ex$bear_arrival, ex$bear_departure) # 20.0 days
+
+table(r2$repro, r2$overlap) # adults with coys looks to be interesting - 6/6 visit bonepile and 5/6 arrive the day of
+
+r2 <- r2 %>% replace_na(list(coy = "FALSE"))
+
+
+fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
+
+
+###### Last investigation: how long bears waited to visit when they did not overlap a harvest
 
 # First harvest
 
@@ -124,9 +150,10 @@ b <- bpt %>% # start = date bear arrived at bonepile
   rename(bear_arrival = start) %>%
   rename(bear_departure = end)
 
-none.ids <- unique(none$id)
+x <- r2 %>% # getting ids for bears that were not present at harvest
+  filter(dayOf == "FALSE")
 
-b[18,4] <- "Kaktovik" # Listed as Cross because of way I categorized. 
+no.ids <- x$id
 
 b2 <- b %>%
   left_join(first, by = c('Year', 'Bonepile')) %>%
@@ -139,23 +166,10 @@ b3 <- b2 %>%
 b3$time_to_first_harvest <- difftime(b3$first_harvest, b3$bear_arrival)
 b3$time_to_last_harvest <- difftime(b3$last_harvest, b3$bear_arrival)
 
-b0 <- b3[b3$id %in% none.ids,]
+b0 <- b3[b3$id %in% no.ids,]
 b3.ids <- unique(b3$id)
 
-# Assoc w/ repro status?
 
-# How long did 20735 wait at the bonepile with her COY (prior to the harvest) before leaving?
-
-ex <- b3 %>% filter(id == "pb_20735.2009")
-difftime(ex$bear_arrival, ex$bear_departure) # 20.0 days
-
-table(r2$repro, r2$overlap) # adults with coys looks to be interesting - 5 overlap bonepile while 1 does not
-
-coy <- subset(r2, repro == "coy")
-
-fisher.test(coy$overlap == TRUE, coy$overlap == FALSE) # not significant but p = 0.16
-
-fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
 
   
 

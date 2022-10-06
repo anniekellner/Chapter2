@@ -9,6 +9,7 @@ library(lubridate)
 library(dplyr)
 library(tidyr)
 library(sf)
+library(rstatix)
 
 rm(list = ls())
 
@@ -60,7 +61,7 @@ h <- harvest %>%
 
 tz(h$Dates) <- 'US/Alaska'
 
-# Harvest summary stats: 2008-2015
+# Harvest summary stats: 2008-2015 (ALL whales landed)
 
 h$ordinal <- yday(h$Dates)
 
@@ -144,7 +145,7 @@ r2 <- r2 %>% replace_na(list(coy = "FALSE"))
 fisher.test(r2$age_class, r2$overlap)  # result is not significant but worth mentioning
 
 
-###### Last investigation: how long bears waited to visit when they did not overlap a harvest
+###### Last investigation: how many days bears arrived after first harvest
 
 # First harvest
 
@@ -167,42 +168,76 @@ b <- bpt %>% # start = date bear arrived at bonepile
   rename(bear_arrival = start) %>%
   rename(bear_departure = end)
 
-x <- r2 %>% # getting ids for bears that were not present at harvest
-  filter(dayOf == "FALSE")
+#x <- r2 %>% # getting ids for bears that were not present at harvest
+  #filter(dayOf == "FALSE")
 
-no.ids <- x$id
+#no.ids <- x$id
 
-b2 <- b %>%
+b2 <- b %>% # join with first harvest date
   left_join(first, by = c('Year', 'Bonepile')) %>%
-  rename(first_harvest = Dates)
+  rename(first_harvest = Dates) %>%
+  select(-c("ordinal", "month"))
 
-b3 <- b2 %>%
-  left_join(last, by = c('Year', 'Bonepile')) %>%
-  rename(last_harvest = Dates)
+#b3 <- b2 %>% # join with last harvest
+  #left_join(last, by = c('Year', 'Bonepile')) %>%
+  #rename(last_harvest = Dates)
 
-b3$time_to_first_harvest <- difftime(b3$first_harvest, b3$bear_arrival)
-b3$time_to_last_harvest <- difftime(b3$last_harvest, b3$bear_arrival)
+b2$time_to_first_harvest <- difftime(b2$bear_arrival, b2$first_harvest)
+#b3$time_to_last_harvest <- difftime(b3$last_harvest, b3$bear_arrival)
 
-b0 <- b3[b3$id %in% no.ids,]
-b3.ids <- unique(b3$id)
+mean(b2$time_to_first_harvest) # -0.44 days: mean arrival preceded the landing by a half day. DISCUSSION: bears maybe smelled the kill. Idea: movement rate 1-2 days prior to first landing?
+
+# Join with age/repro data and see if means are different between groups
+
+br <- b2 %>%
+  left_join(r) 
+
+# Add in age/repro info for 20735.2009.2. Remember to deal with this when calculating
+
+br[18,8] <- 7
+br[18,9] <- "coy"
+br[18,10] <- "Adult"
+
+br$time_to_first_harvest <- as.numeric(br$time_to_first_harvest)
+br <- br %>% replace_na(list(repro = "unknown"))
+br$repro <- as.factor(br$repro)
+
+## Summaries
+# pb_20735.2009 is an outlier, having arrived 35 days prior to harvest
+
+# T-test for difference between subadult and adult
+
+br %>% 
+  #filter(!(id == "pb_20735.2009")) %>% # decide whether or not to include outlier
+  group_by(age_class) %>%
+  summarize(mean = mean(time_to_first_harvest)) 
+# see table for results. Subadult mean ~ 4.6 while Adult mean -1.07. But not significant because n = 2 subadults. 
+  # worth mentioning that 1 subadult never visited the bonepile
+
+br %>%
+  #filter(!(id == "pb_20735.2009")) %>%
+  {t.test(.$time_to_first_harvest ~ .$age_class, var.equal = TRUE)} # not significant with or without extreme value
+
+# 1-way ANOVA for difference among repro status - not significant
+
+m <- aov(formula = time_to_first_harvest ~ repro, data = br)
+summary(m)
+
+br %>%
+  filter(!(id == "pb_20735.2009")) %>% 
+  group_by(repro) %>%
+  summarize(mean = mean(time_to_first_harvest)) 
+
+# with coys: -5 days with outlier; -0.2 days without outlier. All other groups positive. yearling = 1 day; entering den = 4 days later
+# Subadults (status unknown) arrive last at 4.6 days
 
 
 
-  
-
-
-
-
-
-
-
-
-# Scratch code:
+########## SCRATCH  ##############################################################
 
 
 h2 <- h %>%
   dplyr::mutate(h, twoDays = interval(Dates + days(2)))
-
 
 i <- interval(test, test + days(2)) # sweet - this works
 

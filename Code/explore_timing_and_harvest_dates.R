@@ -60,6 +60,23 @@ h <- harvest %>%
 
 tz(h$Dates) <- 'US/Alaska'
 
+# Harvest summary stats: 2008-2015
+
+h$ordinal <- yday(h$Dates)
+
+summary(h$ordinal)
+
+origin <- ymd("2011-01-01") # not a leap year
+
+as.Date(242, origin) # min - Aug 31
+as.Date(272, origin) # max - September 30
+as.Date(252, origin) # mean - Sept. 10
+
+h.cross <- subset(h, Bonepile == "Cross")
+h.kak <- subset(h, Bonepile == "Kaktovik")
+
+t.test(h.cross$ordinal, h.kak$ordinal) # kaktovik mean ordinal date is 4 days later (p = 0.08) but probably easier to say no difference
+
 # ------------------   JOIN -------------------------------------------------- #
 
 bpt2 <- bpt %>%

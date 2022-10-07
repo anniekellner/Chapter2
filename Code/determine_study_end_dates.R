@@ -27,7 +27,20 @@ last <- pb %>%
 
 ids <- unique(pb$id)
 
+# Is it because the data drops off on those dates?
+# No
+
 all2 <- all %>%
+  filter(id %in% ids) %>%
+  filter(month > 8) %>%
+  group_by(id) %>%
+  slice_tail()
+
+# Look at first saved Rds file and see what final points are
+
+old <- readRDS('./Data/Derived-data/DFs/Old/bears_072321.Rds')
+
+old %>%   
   filter(id %in% ids) %>%
   filter(month > 8) %>%
   group_by(id) %>%

@@ -17,7 +17,7 @@ source('./Code/MyFunctions.R')
 
 # -------   DATA  ----------------------------------------------------------------- #
 
-pb <- readRDS('./Data/bears_091521.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
 
 # Spatial data
 

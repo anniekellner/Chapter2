@@ -32,5 +32,17 @@ geom_into_columns <- function(x){
 #' @param x,y sf objects  
 st_erase = function(x, y) st_difference(x, st_union(st_combine(y)))
 
+#' Get citation in bibtex format
+#' 
+#' @param pkg package name to get citation for (in quotes) (e.g., "survival")
+
+get_bib_citation <- function(pkg){
+  cit = citation(pkg)
+  toBibtex(cit)
+}
+  
+
+
+
 
 

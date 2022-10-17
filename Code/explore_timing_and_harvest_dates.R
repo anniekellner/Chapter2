@@ -65,13 +65,18 @@ tz(h$Dates) <- 'US/Alaska'
 
 h$ordinal <- yday(h$Dates)
 
+h %>% # mean
+  group_by(Bonepile) %>%
+  summarise(mean = mean(ordinal))
+
+h %>% # check for leap years when translating to calendar dates
+  group_by(Bonepile) %>%
+  arrange(ordinal) %>%
+  print(n = 41)
+
+
 summary(h$ordinal)
 
-origin <- ymd("2011-01-01") # not a leap year
-
-as.Date(242, origin) # min - Aug 31
-as.Date(272, origin) # max - September 30
-as.Date(252, origin) # mean - Sept. 10
 
 h.cross <- subset(h, Bonepile == "Cross")
 h.kak <- subset(h, Bonepile == "Kaktovik")

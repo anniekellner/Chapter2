@@ -2,7 +2,7 @@
 ########    STUDY END DATES   #########################
 #######################################################
 
-# Sent an email to the group on 9/21/22 about study start and end dates
+# Sent an email to the group on 9/21/21 about study start and end dates
 # Only SB responded
 # Seems reasonable to start at 'landfall' - see clean_data.R
 # When I created the first dataframe (Rds) for this study, I cut the dates off at November 1. 

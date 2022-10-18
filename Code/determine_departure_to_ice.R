@@ -7,6 +7,7 @@
 library(dplyr)
 library(tidyr)
 library(zoo)
+library(lubridate)
 
 rm(list = ls())
 
@@ -21,7 +22,7 @@ lbs <- unique(lb$id)
 land <- all %>%
   filter(id %in% lbs & month > 8)
 
-# ----  APPLY CRITERIA  ------------- #
+# ----  DEPARTURE TO ICE  ------------- #
 
 land <- land %>%
   group_by(id, ymd) %>%
@@ -33,7 +34,16 @@ land <- land %>%
 ice <- land %>% # 8 observations
   group_by(id, consec_seven) %>%
   filter(consec_seven == TRUE & land == 0) %>%
-  slice_head() 
+  slice_head() %>%
+  select(1:13)
+
+ice$ymd <- ymd(ice$ymd)
+ice$ordinal <- yday(ice$ymd)
+
+summary(ice$ordinal)
+
+ice %>% # Results
+  arrange(ordinal)
 
 # How many bears are denning?
 

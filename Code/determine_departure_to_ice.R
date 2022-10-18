@@ -8,6 +8,7 @@ library(dplyr)
 library(tidyr)
 library(zoo)
 library(lubridate)
+library(ggplot2)
 
 rm(list = ls())
 
@@ -44,6 +45,38 @@ summary(ice$ordinal)
 
 ice %>% # Results
   arrange(ordinal)
+
+# linear model - g
+m <- lm(ordinal ~ year, data = ice)
+summary(m) # 8 days later per year (p = 0.06)
+
+
+# ------------  PLOT DEPARTURE DATE OVER TIME  ------------------- #
+
+# Contrary to climate predictions, trend is later departure dates over time
+
+shapiro.test(ice$ordinal) # data does not deviate from a normal distribution
+
+ice2 <- ice %>%
+  dplyr::select(animal, year, ordinal) %>%
+  mutate(diff = year - 2008)
+
+ice2$year<- as.factor(ice2$year)
+
+# df to predict over for regression line
+
+new <- data.frame(year =  c(2008, 2009, 2010, 2011, 2012, 2013, 2014))
+new$ordinal <- predict(m, newdata = new)
+new$year <- as.factor(new$year)
+
+ggplot(data = ice2, aes(x = year, y = ordinal)) + 
+  geom_point(size = 2) + 
+  xlab("\nYear") +
+  ylab("Ordinal Date of Departure\n") + 
+  geom_line(data = new, aes(year, ordinal), group = 1, color = "black", linetype = "dashed") +
+  theme_classic()
+
+# --------------------------------- #
 
 # How many bears are denning?
 

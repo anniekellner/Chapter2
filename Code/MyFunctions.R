@@ -41,8 +41,14 @@ get_bib_citation <- function(pkg){
   toBibtex(cit)
 }
   
+#' Get mode
+#' 
+#' @param x vector (can be df column)
 
-
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
 
 
 

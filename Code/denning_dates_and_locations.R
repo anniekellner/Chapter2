@@ -21,7 +21,9 @@ source('./Code/MyFunctions.R') # for splitting geom into columns and getting mod
 
 den <- read.csv('./Data/Denning_locs_dates.csv') # denning data from TA
 
-b <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
+b <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds') # cut off at Nov 1
+
+all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # all data (df)
 
 # ---  PREP DATA ------------ #
 
@@ -44,17 +46,26 @@ den2 <- den %>% # add column for id
   unite("id", X, year, sep = '.') %>%
   filter(id %in% bearIDs)
 
+# all data (with dates beyond Nov 1)
+
+x <- all %>% # get bear for which I have denning location from TA
+  filter(id == "pb_21237.2011" & month > 8) %>%
+  mutate(gps_lat = round(gps_lat, digits = 3)) %>%
+  mutate(gps_lon = round(gps_lon, digits = 3))
+  
+# --- DETECT DENNING LOCATION BY USING MODE LOC VALUES  ---------- #
+
 # See if I can detect denning signature in 2011 bear (-155.103, 71.13)
 
-x <- b %>%
-  st_as_sf(crs = 3338) %>%
-  st_transform(4326) %>%
-  filter(id == "pb_21237.2011") %>%
-  geom_into_columns()
+Mode(x$gps_lat) # 71.12931 - check
+Mode(x$gps_lon) # -155.1067 - check (very slightly off but fine)
 
-Mode(x$X)
+sum(x$gps_lat == 71.129) # 23
+sum(x$gps_lon == -155.107) # 23
 
-Mode <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
-}
+# See about other bears - 20333.2008, 21015.2013, 21368.2014
+
+unique(dbears$id)
+
+
+

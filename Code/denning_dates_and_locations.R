@@ -48,14 +48,17 @@ den2 <- den %>% # add column for id
 
 # all data (with dates beyond Nov 1)
 
-x <- all %>% # get bear for which I have denning location from TA
-  filter(id == "pb_21237.2011" & month > 8) %>%
+all <- all %>%
   mutate(gps_lat = round(gps_lat, digits = 3)) %>%
   mutate(gps_lon = round(gps_lon, digits = 3))
+
   
 # --- DETECT DENNING LOCATION BY USING MODE LOC VALUES  ---------- #
 
 # See if I can detect denning signature in 2011 bear (-155.103, 71.13)
+
+x <- all %>% # get bear for which I have denning location from TA
+  filter(id == "pb_21237.2011" & month > 8) %>%
 
 Mode(x$gps_lat) # 71.12931 - check
 Mode(x$gps_lon) # -155.1067 - check (very slightly off but fine)
@@ -66,6 +69,8 @@ sum(x$gps_lon == -155.107) # 23
 # See about other bears - 20333.2008, 21015.2013, 21368.2014
 
 unique(dbears$id)
+
+x2 <- 
 
 
 

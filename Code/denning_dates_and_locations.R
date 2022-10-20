@@ -3,6 +3,7 @@
 ##########################################################
 
 # TA data only goes up to 2011
+# 1 bear in common: pb_21237.2011
 # 2 bears recorded as denning after 2011 (pb_21015.2013 and pb_21368.2014)
 # 1 bear not included from 2008 (pb_20333.2008)
 
@@ -14,6 +15,7 @@ library(sf)
 
 rm(list = ls())
 
+source('./Code/MyFunctions.R') # for splitting geom into columns and getting mode values
 
 # --- LOAD DATA ------------- #
 
@@ -42,9 +44,17 @@ den2 <- den %>% # add column for id
   unite("id", X, year, sep = '.') %>%
   filter(id %in% bearIDs)
 
-## ONLY ONE BEAR IN COMMON (pb_21237.2011)
+# See if I can detect denning signature in 2011 bear (-155.103, 71.13)
 
-den %>%
-  arrange(year) %>%
-  slice_tail()
+x <- b %>%
+  st_as_sf(crs = 3338) %>%
+  st_transform(4326) %>%
+  filter(id == "pb_21237.2011") %>%
+  geom_into_columns()
 
+Mode(x$X)
+
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}

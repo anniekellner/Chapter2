@@ -35,7 +35,6 @@ r <- r %>%
 
 bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
 
-
 bpt$Year <- year(bpt$start)
 years <- unique(bpt$Year)
 
@@ -46,6 +45,8 @@ bpt <- bpt %>%
       id == "pb_20982.2008" | id == "pb_32282.2008" | id == "pb_32366.2011" | id == "pb_32608.2008",
     "Kaktovik", "Cross")) %>%
   mutate(t_interval = interval(start = start, end = end, tzone = 'US/Alaska'))
+
+saveRDS(bpt, './Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
 
 ## Harvest
 

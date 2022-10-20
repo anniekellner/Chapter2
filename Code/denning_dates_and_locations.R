@@ -14,6 +14,8 @@ library(lubridate)
 library(sf)
 library(adehabitatLT)
 library(plotly) # loads ggplot2
+library(tmap)
+library(tmaptools)
 
 rm(list = ls())
 
@@ -30,6 +32,8 @@ all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # all data (df)
 harvest <- read.csv('./Data/Bonepile_Dates.csv')
 
 bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
+
+bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp')
 
 # ---  PREP DATA ------------ #
 
@@ -93,13 +97,13 @@ unique(dbears$id) # 20333.2008, 21015.2013, 21368.2014
 
 # when is landfall
 
-b %>%
-  filter(landfall == 1) %>%
-  glimpse()
+b %>% # can also get age info from this df
+  filter(landfall == 1) 
 
 # ------------------- CREATE NSD PLOTS  ---------------------------- #
 
-## 20333.2008 - definitely a denning bear; can see on NSD plot
+## 20333.2008 
+# definitely a denning bear; can see on NSD plot
 # Landfall is on the later end: 09/09/2008
 
 x2 <- all %>% # get bear for which I have denning location from TA
@@ -117,7 +121,9 @@ x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) %>% 
 
 denPeriod <- x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) 
 
-## 21015.2013 - bonepile_denning_info.xlsx says bear is present during all harvests. Also visits Sag delta for a long stint, probably denning location?
+## 21015.2013 
+# Definitely denning bear
+# bonepile_denning_info.xlsx says bear is present during all harvests. Also visits Sag delta for a long stint, probably denning location?
 
 x2 <- all %>% # get bear for which I have denning location from TA
   filter(id == "pb_21015.2013" & month > 7)
@@ -128,3 +134,16 @@ traj.pb<-as.ltraj(xy=x2[,c("X","Y")], date=x2$datetime, id=as.character(x2$id))
 traj.df <- ld(traj.pb)
 
 plot_ly(data = traj.df, x = ~date, y = ~R2n, type = "scatter")
+
+# Plot
+
+x2 <- st_as_sf(x2, coords = c('X', 'Y'), crs = 3338)
+
+tmap_mode('view')
+
+tm_shape(x2) + 
+  tm_symbols(col = 'month', popup.vars = 'ymd') + 
+  tm_shape(bones) + 
+  tm_dots(col = "purple", size = 0.25)
+
+

@@ -12,6 +12,8 @@ library(tidyr)
 library(stringr)
 library(lubridate)
 library(sf)
+library(adehabitatLT)
+library(plotly) # loads ggplot2
 
 rm(list = ls())
 
@@ -24,6 +26,10 @@ den <- read.csv('./Data/Denning_locs_dates.csv') # denning data from TA
 b <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds') # cut off at Nov 1
 
 all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # all data (df)
+
+harvest <- read.csv('./Data/Bonepile_Dates.csv')
+
+bpt <- readRDS('./Data/Derived-data/DFs/Space_Use_Summaries/time_at_bonepile.Rds')
 
 # ---  PREP DATA ------------ #
 
@@ -52,13 +58,27 @@ all <- all %>%
   mutate(gps_lat = round(gps_lat, digits = 3)) %>%
   mutate(gps_lon = round(gps_lon, digits = 3))
 
+# harvest data
+
+harvest$Dates <- mdy(harvest$Dates)
+harvest$Year <- year(harvest$Dates)
+
+years <- unique(b$year)
+
+h <- harvest %>%
+  filter(Year %in% years) %>%
+  filter(!(Bonepile == "Barrow")) %>%
+  mutate(Bonepile = recode(Bonepile, "Cross " = "Cross")) # Because there was a space in csv file and wouldn't join correctly
+
+tz(h$Dates) <- 'US/Alaska'
+
   
 # --- DETECT DENNING LOCATION BY USING MODE LOC VALUES  ---------- #
 
 # See if I can detect denning signature in 2011 bear (-155.103, 71.13)
 
 x <- all %>% # get bear for which I have denning location from TA
-  filter(id == "pb_21237.2011" & month > 8) %>%
+  filter(id == "pb_21237.2011" & month > 8) 
 
 Mode(x$gps_lat) # 71.12931 - check
 Mode(x$gps_lon) # -155.1067 - check (very slightly off but fine)
@@ -66,11 +86,29 @@ Mode(x$gps_lon) # -155.1067 - check (very slightly off but fine)
 sum(x$gps_lat == 71.129) # 23
 sum(x$gps_lon == -155.107) # 23
 
-# See about other bears - 20333.2008, 21015.2013, 21368.2014
 
-unique(dbears$id)
+# ---------   CHECK OTHER DENNING BEARS -------------------------------- #
 
-x2 <- 
+unique(dbears$id) # 20333.2008, 21015.2013, 21368.2014
+
+# when is landfall
+
+b %>%
+  filter(landfall == 1)
 
 
+# ------------------- CREATE NSD PLOTS  ---------------------------- #
 
+# 20333.2008 - definitely a denning bear; can see on NSD plot
+# Landfall is on the later end: 09/09/2008
+
+x2 <- all %>% # get bear for which I have denning location from TA
+  filter(id == "pb_20333.2008" & month > 8)
+
+traj.pb<-as.ltraj(xy=x2[,c("X","Y")], date=x2$datetime, id=as.character(x2$id))
+traj.df <- ld(traj.pb)
+
+plot_ly(data = traj.df, x = ~date, y = ~R2n, type = "scatter")
+
+Mode(x2$gps_lat) # this works - correct denning location
+Mode(x2$gps_lon)

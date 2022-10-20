@@ -94,12 +94,12 @@ unique(dbears$id) # 20333.2008, 21015.2013, 21368.2014
 # when is landfall
 
 b %>%
-  filter(landfall == 1)
-
+  filter(landfall == 1) %>%
+  glimpse()
 
 # ------------------- CREATE NSD PLOTS  ---------------------------- #
 
-# 20333.2008 - definitely a denning bear; can see on NSD plot
+## 20333.2008 - definitely a denning bear; can see on NSD plot
 # Landfall is on the later end: 09/09/2008
 
 x2 <- all %>% # get bear for which I have denning location from TA
@@ -116,3 +116,15 @@ denLong <- Mode(x2$gps_lon)
 x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) %>% slice_head() # first day at den location - NOT START OF DEN PERIOD!
 
 denPeriod <- x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) 
+
+## 21015.2013 - bonepile_denning_info.xlsx says bear is present during all harvests. Also visits Sag delta for a long stint, probably denning location?
+
+x2 <- all %>% # get bear for which I have denning location from TA
+  filter(id == "pb_21015.2013" & month > 7)
+
+# NSD
+
+traj.pb<-as.ltraj(xy=x2[,c("X","Y")], date=x2$datetime, id=as.character(x2$id))
+traj.df <- ld(traj.pb)
+
+plot_ly(data = traj.df, x = ~date, y = ~R2n, type = "scatter")

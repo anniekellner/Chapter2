@@ -110,5 +110,9 @@ traj.df <- ld(traj.pb)
 
 plot_ly(data = traj.df, x = ~date, y = ~R2n, type = "scatter")
 
-Mode(x2$gps_lat) # this works - correct denning location
-Mode(x2$gps_lon)
+denLat <- Mode(x2$gps_lat) # this works - correct denning location
+denLong <- Mode(x2$gps_lon)
+
+x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) %>% slice_head() # first day at den location - NOT START OF DEN PERIOD!
+
+denPeriod <- x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(datetime) 

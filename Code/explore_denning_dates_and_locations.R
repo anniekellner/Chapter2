@@ -171,4 +171,11 @@ tm_shape(x2) +
   tm_shape(bones) + 
   tm_dots(col = "purple", size = 0.25)
 
+# Denning location: on the mainland near Cross Island
 
+denLoc <- st_sfc(st_point(x = c(denLong, denLat)), crs = 4326)
+
+tm_shape(denLoc) + 
+  tm_dots(col = "red") +
+  tm_shape(bones) + 
+  tm_dots(col = "yellow")

@@ -125,7 +125,7 @@ denPeriod <- x2 %>% filter(gps_lat == denLat & gps_lon == denLong) %>% arrange(d
 # Definitely denning bear
 # bonepile_denning_info.xlsx says bear is present during all harvests. 
 
-x2 <- all %>% # get bear for which I have denning location from TA
+x2 <- all %>% 
   filter(id == "pb_21015.2013" & month > 7)
 
 # NSD
@@ -139,8 +139,22 @@ denLat <- Mode(x2$gps_lat) # this works - correct denning location
 denLong <- Mode(x2$gps_lon)
 
 
+## 21368.2014
+# Denning bear - checked 10/31/22
+# BEar arrived 4 days after first harvest; stays through the rest
 
+x2 <- all %>% 
+  filter(id == "pb_21368.2014" & month > 7)
 
+# NSD
+
+traj.pb<-as.ltraj(xy=x2[,c("X","Y")], date=x2$datetime, id=as.character(x2$id))
+traj.df <- ld(traj.pb)
+
+plot_ly(data = traj.df, x = ~date, y = ~R2n, type = "scatter")
+
+denLat <- Mode(x2$gps_lat) # this works - correct denning location
+denLong <- Mode(x2$gps_lon)
 
 #############################################################################
 ##  EXTRA   #################################################################

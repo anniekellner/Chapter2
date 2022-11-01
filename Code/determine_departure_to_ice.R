@@ -21,7 +21,7 @@ lb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
 lbs <- unique(lb$id)
 
 land <- all %>%
-  filter(id %in% lbs & month > 7)
+  filter(id %in% lbs & month > 8)
 
 # ----  DEPARTURE TO ICE  ------------- #
 
@@ -32,30 +32,50 @@ land2 <- land %>%
   ungroup() %>%
   left_join(land) # status for on_ice is by day. DO NOT USE AS INDICATOR FOR WHETHER BEAR IS ON ICE. Use 'land' column instead.
 
-ice <- land %>% # 8 observations
+ice <- land2 %>% # 8 observations
   group_by(id, consec_seven) %>%
   filter(consec_seven == TRUE & land == 0) %>%
   slice_head() %>%
-  select(1:13)
+  select(1:13) %>%
+  ungroup()
 
 ice$ymd <- ymd(ice$ymd)
 ice$ordinal <- yday(ice$ymd)
 
+# --------------- RESULTS --------------------- #
+
+## Add study end dates to dataframe
+
+ice$departure_to_ice <- 1
+
+ice2 <- select(ice, id, year, month, day, hour, minute, second, departure_to_ice)
+
+all2 <- all %>%
+  left_join(ice2) %>%
+  replace_na(list(departure_to_ice = 0))
+
+all2 %>% # check
+  filter(departure_to_ice == 1)
+
+#saveRDS(all2, file = './Data/Derived-data/DFs/all.Rds')
+
+
+## Descriptive stats
+
 summary(ice$ordinal)
 
-ice %>% # Results
+ice %>% 
   arrange(ordinal)
 
-# linear model - g
+# Trend over time (linear model)
+
+shapiro.test(ice$ordinal) # assumptions of normality
+
 m <- lm(ordinal ~ year, data = ice)
-summary(m) # 8 days later per year (p = 0.06)
+summary(m) # 8 days later per year (p = 0.06) - disregarding this result because small sample size; not significant; irrelevant
+            # Contrary to climate predictions, trend is later departure dates over time
 
-
-# ------------  PLOT DEPARTURE DATE OVER TIME  ------------------- #
-
-# Contrary to climate predictions, trend is later departure dates over time
-
-shapiro.test(ice$ordinal) # data does not deviate from a normal distribution
+# Plot
 
 ice2 <- ice %>%
   dplyr::select(animal, year, ordinal) %>%
@@ -63,7 +83,7 @@ ice2 <- ice %>%
 
 ice2$year<- as.factor(ice2$year)
 
-# df to predict over for regression line
+# Regression line
 
 new <- data.frame(year =  c(2008, 2009, 2010, 2011, 2012, 2013, 2014))
 new$ordinal <- predict(m, newdata = new)

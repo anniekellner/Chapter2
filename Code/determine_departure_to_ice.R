@@ -21,16 +21,16 @@ lb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
 lbs <- unique(lb$id)
 
 land <- all %>%
-  filter(id %in% lbs & month > 8)
+  filter(id %in% lbs & month > 7)
 
 # ----  DEPARTURE TO ICE  ------------- #
 
-land <- land %>%
+land2 <- land %>%
   group_by(id, ymd) %>%
-  summarise(on_ice = any(land == 0)) %>%
+  summarise(on_ice = any(land == 0)) %>% 
   mutate(consec_seven = rollapply(on_ice, 7, all, align = 'left', fill = NA)) %>%
   ungroup() %>%
-  left_join(land)
+  left_join(land) # status for on_ice is by day. DO NOT USE AS INDICATOR FOR WHETHER BEAR IS ON ICE. Use 'land' column instead.
 
 ice <- land %>% # 8 observations
   group_by(id, consec_seven) %>%

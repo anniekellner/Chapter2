@@ -4,10 +4,15 @@
 
 # Sent an email to the group on 9/21/21 about study start and end dates
 # Only SB responded
-# Seems reasonable to start at 'landfall' - see clean_data.R
 # When I created the first dataframe (Rds) for this study, I cut the dates off at November 1. 
 
-# Consider changing to departure for ice OR another date for denning bears
+# Seems reasonable to start at 'landfall' - see clean_data.R
+# End dates:
+  # Denning bears: when they enter dens
+  # Departing Bears: when they leave for ice
+  # Other:
+    # When collars stop transmitting data
+  
 
 library(dplyr)
 library(sf)
@@ -16,7 +21,7 @@ rm(list = ls())
 
 # ---- LOAD DATA  ----------------- #
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds') # study data
+#pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # all data
 
 

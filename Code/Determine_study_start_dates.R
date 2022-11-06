@@ -85,15 +85,23 @@ ch2 <- ch2 %>%
   replace_na(list(study.start = 0))
 
 ch2 %>% filter(study.start == 1) # looks good 
+
+# ----  REMOVE POINTS PRIOR TO STUDY START DATES  -------------- #
+
+ch2$geometry <- NULL # remove geometry and convert to dataframe
+
+x <- ch2 %>%
+  group_by(id) %>%
+  mutate(row = row_number()) %>%
+  ungroup()
+
+x2 <- x %>%
+  group_by(id) %>%
+  mutate(across(everything(),
+                ~replace(., row < match(1, study.start), NA))) %>%
+  drop_na(animal) %>%
+  ungroup()
+
+x2 %>% filter(study.start == 1) %>% print(n = 21) # successfully removed dates prior to study.start
   
 
-# -------- Combine into 1 start date df for summary stats ----------------- #
-
-lf2 <- select(lf, id, start_date, ordinal)
-c2 <- select(c, id, start_date, ordinal)
-
-sd <- rbind(lf2, c2)
-
-summary(sd)
-
-sd %>% arrange(ordinal)

@@ -9,31 +9,39 @@ library(sf)
 
 rm(list = ls())
 
-source('./Code/MyFunctions.R')
+source('./Code/MyFunctions.R') # for Mode fxn
 
 # --- LOAD DATA ------------- #
 
-all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') # all data (df)
+all <- readRDS('./Data/Derived-data/DFs/all.Rds') # all data (df)
+ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
+
+dbears <- ch2 %>%
+  group_by(id) %>%
+  filter(repro == "enter_den") %>%
+  slice_head()
+
+ids <- unique(dbears$id)
 
 # --- PREP DATA ------------------- #
 
-x <- all %>% 
-  filter(id == 'pb_21237.2011' & month > 9) %>%
-  st_as_sf(coords = c('gps_lat', 'gps_lon'), crs = 4326, remove = FALSE) # do not remove gps_lat and lon from df
+dbears <- data.frame(id = character(), 
+                     denLat = double(), 
+                     denLon = double())
 
-denLat <- Mode(x$gps_lat) 
-denLon <- Mode(x$gps_lon) 
+for(i in 1:length(ids)){
+  bear = subset(all, id == ids[[i]] & month > 9)
+  dbears[i,1] = ids[[i]]
+  dbears[i,2] = Mode(bear$gps_lat)
+  dbears[i,3] = Mode(bear$gps_lon)
+}
+
+
+
 
 # Make sf
 
 denLoc <- st_point(x = c(denLat, denLon))
 geom <- st_geometry(denLoc)
 
-# ----  JOIN TO DATAFRAME ---------------- #
 
-x$den_location <- ifelse(x$geometry == geom, 1, 0)
-
-x2 <- select(x, id, den_location)
-
-all2 <- all %>%
-  left_join(x2)  

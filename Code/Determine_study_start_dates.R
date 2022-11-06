@@ -104,4 +104,10 @@ x2 <- x %>%
 
 x2 %>% filter(study.start == 1) %>% print(n = 21) # successfully removed dates prior to study.start
   
+# Put geometry back
 
+x3 <- x2 %>%
+  left_join(b) %>%
+  select(-row)
+
+#saveRDS(x3, './Data/Derived-data/DFs/bears_ch2_110622.Rds')

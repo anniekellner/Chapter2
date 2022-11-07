@@ -41,23 +41,24 @@ for(i in 1:length(ids)){
 }
 
 dbears <- dbears %>%
-  mutate(across(where(is.numeric), round, 1))
+  mutate(across(where(is.numeric), round, 1)) # need to round to 1 digit because otherwise GPS error will throw off denning start date
 
 t <- all %>%
   left_join(dbears) %>%
   filter(id %in% ids & month > 9) %>%
   mutate(across(where(is.numeric), round, 1))
 
+# Add den location to df
+
 t <- t %>%
   group_by(id) %>%
   mutate(den_location = 
            if_else(gps_lat == denLat & gps_lon == denLon, 1, 0)) %>%
-  #select(-c('denLat', 'denLon')) %>%
-  #right_join(all)
+  select(-c('denLat', 'denLon')) %>%
+  right_join(all)
 
-all2 %>% filter(den_location == 1)
 
-db <- all2 %>%
+db <- t %>%
   filter(id %in% ids & month > 9) %>%
   group_by(id) %>%
   arrange(id, datetime) %>%

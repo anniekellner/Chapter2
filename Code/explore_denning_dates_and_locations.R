@@ -54,7 +54,7 @@ den$year <- year(den$entrance)
 den2 <- den %>% # add column for id
   mutate(X = str_trim(X, side = "right")) %>% # remove whitespace
   unite("id", X, year, sep = '.') %>%
-  filter(id %in% bearIDs)
+  filter(id %in% ids)
 
 # all data (with dates beyond Nov 1)
 

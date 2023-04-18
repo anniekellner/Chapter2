@@ -70,7 +70,7 @@ addback <- all2 %>%
 ch2Cols <- colnames(ch2)
 addbackCols <- colnames(addback)
 
-setdiff(ch2Cols, addbackCols)
+setdiff(addbackCols, ch2Cols) # finds all rows in x that are not in y
 
 ## Prep df to join back into ch2 df
 
@@ -82,11 +82,13 @@ addback <- addback %>%
 ch2 <- ch2 %>%
   full_join(addback)
 
-studyEnd <- test %>% group_by(id) %>% slice_tail()  # looks good
+#studyEnd <- ch2 %>% group_by(id) %>% arrange(datetime) %>% slice_tail()  # looks good
 
-## ----------  Which bears end dates do not coincide with entering den or departing for ice ------------------- #
+## ----------  Collar drops/malfunctions ------------------- ##
 
-other <- studyEnd %>%
+# 7 bears whose collars appeared to drop off or malfunction
+
+other <- ch2 %>%
   filter(!(id %in% icedenIDS))
 
 # Check back to all to see if more data is available
@@ -96,13 +98,12 @@ otherIDS <- unique(other$id)
 otherAll <- all2 %>%
   filter(id %in% otherIDS & month > 8)
 
-otherAll <-  otherAll %>% # Add study_end = 1 for bears whose collars dropped
+otherAll <-  otherAll %>% # Add study_end = 1 for bears whose collars dropped (data ends in September or October)
   group_by(id) %>% 
+  arrange(id, datetime) %>%
   slice_tail() %>%
   mutate(study_end = 
            if_else(month == 10 | month == 9, 1, study_end)) 
-
-# Stats summary
 
 drop <- otherAll %>%
   filter(study_end == 1) %>%
@@ -122,20 +123,25 @@ all3 <- all2 %>% left_join(drop)
 
 dropIDS <- unique(drop$id)
 
+# Add data to bears whose collars dropped
+
 dropAdd <- all3 %>%
   filter(id %in% dropIDS & month > 8)
-
-
+  
 dropAll <- all3 %>%
   filter(id %in% dropIDS & month > 8) %>%
   group_by(id) %>%
-  slice_tail() %>%
+  arrange(id, datetime) %>%
+  slice_tail() %>% 
   mutate(study_end = replace(study_end, 0, 1))
 
+collarDrop <- dropAdd %>%
+  full_join(dropAll)
 
-## Prep df to join back into ch2 df
+collarDrop <- collarDrop %>%
+  
 
-dropAdd$ymd <- ymd(dropAdd$ymd)
+
 
 dropAdd <- dropAdd %>%
   select(-c('swim', 'SIC', 'ows', 'land_bear_ows', "land_bear", 'id.ymd', 'row', 'start.swim', 'end.swim', 'ordinal'))

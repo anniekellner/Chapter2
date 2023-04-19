@@ -17,7 +17,7 @@ rm(list = ls())
 
 # -------------  DATA PREP  ------------------  #
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # loads as df
+pb <- readRDS('./Data/Derived-data/DFs/Old/bears_ch2_092122.Rds') # loads as df
 pb <- st_as_sf(pb)
 
 # Create traj df

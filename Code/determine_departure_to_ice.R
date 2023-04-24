@@ -2,37 +2,55 @@
 #####   Determine Departure to Ice  ###########
 #################################################
 
+# 04/23/23: Revisiting script with chapter 2 bears only
 # 10/17/22: Departure to ice = first point after which bear is at sea at least 1x for 7 days (DEM only; no buffer)
+
 
 library(dplyr)
 library(tidyr)
 library(zoo)
 library(lubridate)
 library(ggplot2)
+library(sf)
 
 rm(list = ls())
 
-# ---- LOAD AND FILTER DATA  ----------------- #
+# ---- LOAD AND JOIN DATA  ----------------- #
 
-all <- readRDS('./Data/Derived-data/DFs/all_v2.Rds') 
-which(is.na(all$land)) # no NA values for land
+ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
+all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
-lb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
-lbs <- unique(lb$id)
+all$ymd <- ymd(all$ymd)
 
-land <- all %>%
-  filter(id %in% lbs & month > 8)
+ch2all <- ch2 %>%
+  left_join(all)
 
 # ----  DEPARTURE TO ICE  ------------- #
 
-land2 <- land %>%
+# First day after which bear does not use land for 7 consecutive days
+
+ice <- ch2all %>%
   group_by(id, ymd) %>%
   summarise(on_ice = any(land == 0)) %>% 
   mutate(consec_seven = rollapply(on_ice, 7, all, align = 'left', fill = NA)) %>%
-  ungroup() %>%
-  left_join(land) # status for on_ice is by day. DO NOT USE AS INDICATOR FOR WHETHER BEAR IS ON ICE. Use 'land' column instead.
+  ungroup() #%>%
+  #arrange(desc(on_ice)) 
+  #left_join(ch2all) # status for on_ice is by day. DO NOT USE AS INDICATOR FOR WHETHER BEAR IS ON ICE. Use 'land' column instead.
 
-ice <- land2 %>% # 8 observations
+#land <- ch2all %>%
+  #group_by(id, ymd) %>%
+  #summarise(on_land = any(land == 1)) %>%
+  #ungroup()
+
+#depart <- full_join(ice, land)
+
+depart <- ice %>% 
+  group_by(id, consec_seven) %>% 
+  arrange(desc(on_ice)) %>%
+  slice_head()
+  
+  
+ice <- land %>% # 8 observations
   group_by(id, consec_seven) %>%
   filter(consec_seven == TRUE & land == 0) %>%
   slice_head() %>%

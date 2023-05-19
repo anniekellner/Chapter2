@@ -25,11 +25,17 @@ rm(list = ls())
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
+# check that 'all df does not end Nov 1 - it does not
+
+end <- all %>%
+  group_by(id) %>%
+  slice_tail()
+
 all <- as_tibble(all)
 all$ymd <- ymd(all$ymd)
 
 ch2all <- ch2 %>%
-  left_join(all)
+  full_join(all)
 
 ## Dates when bears enter dens
 

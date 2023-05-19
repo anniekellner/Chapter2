@@ -31,31 +31,22 @@ ch2all <- ch2 %>%
 
 ice <- ch2all %>%
   group_by(id, ymd) %>%
-  summarise(on_ice = any(land == 0)) %>% 
+  summarise(on_ice = all(land == 0)) %>% 
   mutate(consec_seven = rollapply(on_ice, 7, all, align = 'left', fill = NA)) %>%
-  ungroup() #%>%
-  #arrange(desc(on_ice)) 
-  #left_join(ch2all) # status for on_ice is by day. DO NOT USE AS INDICATOR FOR WHETHER BEAR IS ON ICE. Use 'land' column instead.
-
-#land <- ch2all %>%
-  #group_by(id, ymd) %>%
-  #summarise(on_land = any(land == 1)) %>%
-  #ungroup()
-
-#depart <- full_join(ice, land)
+  ungroup() 
 
 depart <- ice %>% 
   group_by(id, consec_seven) %>% 
   arrange(desc(on_ice)) %>%
   slice_head()
-  
-  
-ice <- land %>% # 8 observations
-  group_by(id, consec_seven) %>%
-  filter(consec_seven == TRUE & land == 0) %>%
-  slice_head() %>%
-  select(1:13) %>%
-  ungroup()
+
+depart
+
+depart <- depart %>%
+  group_by(id, ymd) %>%
+  filter(consec_seven == "TRUE") %>%
+  mutate(depart_date = ymd - 1) %>% # because this was the last day the bear was on land
+  slice_head()
 
 ice$ymd <- ymd(ice$ymd)
 ice$ordinal <- yday(ice$ymd)

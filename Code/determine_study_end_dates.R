@@ -23,10 +23,8 @@ rm(list = ls())
 # ---- LOAD DATA  ----------------- #
 
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052323.Rds') # study data
-all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
+all <- readRDS('./Data/Derived-data/DFs/all_052323.Rds') # all data - has denning start dates
 
-all$ymd <- ymd(all$ymd)
-saveRDS(all, './Data/Derived-data/DFs/all_052323.Rds')
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
 allDen <- all %>%
@@ -39,24 +37,30 @@ allDen <- allDen %>%
 # Look at last dates in ch2 df
 
 ch2 <- ch2 %>%
-  inner_join(allDen) %>%
+  left_join(allDen) %>%
   rename(study_start = study.start)
 
-ch2 %>% filter(study_end == 1)
+ch2 %>% filter(study_end == 1) # looks good- 4 obs
 
 
-# ----    ICE BEARS ------------------- #
+# ----  ADD STUDY END DATES FOR ICE BEARS ------------------- #
 
 ## Dates when bears leave for ice
 
+ch2ice <- filter(ch2, departure_to_ice == 1) %>% select(id, ymd, departure_to_ice)
+allIce <- filter(all, departure_to_ice == 1) %>% select(id, ymd, departure_to_ice)
+
+setdiff(allIce, ch2ice) # missing 20735.2009
+
 ice <- all %>% 
   filter(departure_to_ice == 1) %>% # 8 observations
-  select(id, ymd,)
+  select(id, ymd, departure_to_ice) 
 
-ice$ordinal <- yday(ice$ymd)
-summary(ice$ordinal)
+ch2.2 <- ch2 %>%
+  left_join(ice, join_by(id, ymd, ))
 
-
+mutate(across(everything(),
+              ~replace(., row > match(1, study_end), NA))) 
 # ---- ADD STUDY_END COLUMN TO DATAFRAME AND REMOVE POINTS AFTERWARD  ------------------ #
 
 # not sure where study_end dates came from, so deleting and re-doing. Many dates in November/December 

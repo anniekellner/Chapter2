@@ -1,0 +1,41 @@
+---
+title: "Data for USGS"
+author: "Annie Kellner"
+date: "2023-05-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r packages}
+
+library(dplyr)
+library(sf)
+library(knitr)
+library(tmap)
+library(tmaptools)
+
+```
+
+
+This study includes a subset of GPS-collared bears that spent ≥ 7 consecutive days on land between June 1 and September 30 of any given year. Bears with insufficient data (< 100 total points) were excluded. In total, our analysis includes tracking data from 21 bear-summers (19 individuals including two bears with data from two separate years) over eight calendar years (2005, 2008-9, 2011 – 2015). Bears were tracked for an average of 52 days (range: 26 – 78, σ = 14).  
+
+```{r study-dataset}
+
+b <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds')
+
+b1 <- b %>% 
+  select(animal, year) %>%
+  distinct(animal, year) %>%
+  arrange(year)
+
+kable(b1)
+
+## include start date, end date, days tracked
+
+```
+
+
+

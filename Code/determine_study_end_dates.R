@@ -25,7 +25,9 @@ rm(list = ls())
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052323.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
-# Denning bears
+all$ymd <- ymd(all$ymd)
+saveRDS(all, './Data/Derived-data/DFs/all_052323.Rds')
+# -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
 allDen <- all %>%
   filter(enter_den == 1)
@@ -34,49 +36,22 @@ allDen <- allDen %>%
   rename(study_end = enter_den) %>%
   select(id, datetime, study_end)
 
-# Are all the denning bears from the 'all' database represented in the Ch2 database
-allDen_ids <- unique(allDen$id)
-
-ch2Den_ids <- ch2 %>%
-  filter(repro == "enter_den") 
-
-ch2Den_ids <- unique(ch2Den_ids$id)
-
-## YES - they are all there. 
-## The problem is I need to add the extra dates because I cut off the study too early
+# Look at last dates in ch2 df
 
 ch2 <- ch2 %>%
-  left_join(allDen) %>%
+  inner_join(allDen) %>%
   rename(study_start = study.start)
 
 ch2 %>% filter(study_end == 1)
 
-#all <- as_tibble(all)
-#all$ymd <- ymd(all$ymd)
 
-
-# Get IDs for bears that enter dens in all vs. ch2 df
-
-
-
-denAll <- dplyr::select(all, enter_den = 1)
-
-denCh2IDs <- distinct(denCh2, id)
-## Dates when bears enter dens
-
-ch2all$Ordinal <- yday(ch2all$ymd)
-
-denDate <- ch2all %>% # n = 4
-  filter(enter_den == 1) %>%
-  select(Ordinal)
-
-mean(denDate$Ordinal) # 307.25
-min(denDate$Ordinal) # 277
-max(denDate$Ordinal) #332
+# ----    ICE BEARS ------------------- #
 
 ## Dates when bears leave for ice
 
-ice <- ch2all %>% filter(departure_to_ice == 1) # 7 observations
+ice <- all %>% 
+  filter(departure_to_ice == 1) %>% # 8 observations
+  select(id, ymd,)
 
 ice$ordinal <- yday(ice$ymd)
 summary(ice$ordinal)

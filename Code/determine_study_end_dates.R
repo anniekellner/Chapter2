@@ -7,7 +7,7 @@
 # When I created the first dataframe (Rds) for this study, I cut the dates off at November 1. 
 
 # End dates:
-  # Denning bears: when they enter dens - FIGURE OUT WHY DISCREPANCY
+  # Denning bears: when they enter dens 
   # Departing Bears: when they leave for ice
   # Other:
     # When collars stop transmitting data
@@ -22,7 +22,7 @@ rm(list = ls())
 
 # ---- LOAD DATA  ----------------- #
 
-ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
+ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052323.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
 # Denning bears
@@ -31,7 +31,7 @@ allDen <- all %>%
   filter(enter_den == 1)
 
 allDen <- allDen %>%
-  rename(study_end = study.end) %>%
+  rename(study_end = enter_den) %>%
   select(id, datetime, study_end)
 
 # Are all the denning bears from the 'all' database represented in the Ch2 database

@@ -17,21 +17,16 @@ source('./Code/MyFunctions.R') # for Mode fxn
 
 # --- LOAD DATA ------------- #
 
-all <- readRDS('./Data/Derived-data/DFs/all.Rds') # all data (df)
+all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data (df)
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
-den <- read.csv('./Data/Denning_locs_dates.csv') # denning data from TA
+denTA <- read.csv('./Data/Denning_locs_dates.csv') # denning data from TA
 
 # --- PREP DATA ------------------- #
 
 # TA
 
-den$entrance <- mdy(den$entrance)
-den$year <- year(den$entrance)
-
-den2 <- den %>% # add column for id
-  mutate(X = str_trim(X, side = "right")) %>% # remove whitespace
-  unite("id", X, year, sep = '.') %>%
-  filter(id %in% ids)
+denTA$entrance <- mdy(denTA$entrance)
+denTA$year <- year(denTA$entrance)
 
 # Ch2 data
 
@@ -42,7 +37,12 @@ dbears <- ch2 %>%
 
 ids <- unique(dbears$id)
 
-dbears <- data.frame(id = character(), 
+denTA <- denTA %>% # add column for id
+  mutate(X = str_trim(X, side = "right")) %>% # remove whitespace
+  unite("id", X, year, sep = '.') %>%
+  filter(denTA, id %in% ids)
+
+denLocs <- data.frame(id = character(), 
                      denLat = double(), 
                      denLon = double())
 
@@ -52,27 +52,35 @@ dbears <- data.frame(id = character(),
 
 for(i in 1:length(ids)){
   bear = subset(all, id == ids[[i]] & month > 9)
-  dbears[i,1] = ids[[i]]
-  dbears[i,2] = Mode(bear$gps_lat)
-  dbears[i,3] = Mode(bear$gps_lon)
+  denLocs[i,1] = ids[[i]]
+  denLocs[i,2] = Mode(bear$gps_lat)
+  denLocs[i,3] = Mode(bear$gps_lon)
 }
 
-dbears <- dbears %>%
+denLocs <- denLocs %>%
   mutate(across(where(is.numeric), round, 1)) # need to round to 1 digit because otherwise GPS error will throw off denning start date
 
-t <- all %>%
-  left_join(dbears) %>%
-  filter(id %in% ids & month > 9) %>%
-  mutate(across(where(is.numeric), round, 1))
+## Location for my bears matches TA location for 21237.2011
 
-# Add den location to df
+# Join denLocs to dbears
 
-t <- t %>%
-  group_by(id) %>%
-  mutate(den_location = 
-           if_else(gps_lat == denLat & gps_lon == denLon, 1, 0)) #%>%
+#dbears <- denLocs %>%
+  #right_join(dbears) %>%
+  #filter(id %in% ids & month > 9) %>%
+  #mutate(across(where(is.numeric), round, 1))
+
+
+#t <- t %>%
+  #group_by(id) %>%
+  #mutate(den_location = 
+           #if_else(gps_lat == denLat & gps_lon == denLon, 1, 0)) #%>%
   #select(-c('denLat', 'denLon')) %>%
 
+# Get all locations for denning bears
+
+allDen <- all %>%
+  filter(id %in% ids) %>%
+  filter(den_location == 1)
 
 time <- t %>%
   group_by(id) %>%

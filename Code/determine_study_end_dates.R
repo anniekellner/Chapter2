@@ -7,7 +7,7 @@
 # When I created the first dataframe (Rds) for this study, I cut the dates off at November 1. 
 
 # End dates:
-  # Denning bears: when they enter dens
+  # Denning bears: when they enter dens - FIGURE OUT WHY DISCREPANCY
   # Departing Bears: when they leave for ice
   # Other:
     # When collars stop transmitting data
@@ -25,23 +25,27 @@ rm(list = ls())
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
-# check that 'all df does not end Nov 1 - it does not
 
-end <- all %>%
-  group_by(id) %>%
-  slice_tail()
-
-all <- as_tibble(all)
-all$ymd <- ymd(all$ymd)
+#all <- as_tibble(all)
+#all$ymd <- ymd(all$ymd)
 
 ch2all <- ch2 %>%
-  full_join(all)
+  inner_join(all)
 
+# Get IDs for bears that enter dens in all vs. ch2 df
+
+denCh2 <- ch2all %>%
+  select(enter_den = 1) %>%
+  distinct()
+
+denAll <- dplyr::select(all, enter_den = 1)
+
+denCh2IDs <- distinct(denCh2, id)
 ## Dates when bears enter dens
 
 ch2all$Ordinal <- yday(ch2all$ymd)
 
-denDate <- ch2all %>%
+denDate <- ch2all %>% # n = 4
   filter(enter_den == 1) %>%
   select(Ordinal)
 
@@ -69,11 +73,11 @@ ch2all <- ch2all %>%
   mutate(study_end = ifelse(departure_to_ice == 1 | enter_den == 1, 1, 0)) 
 
 # Check
-table(ch2all$study_end) # 11
+table(ch2all$study_end) # 12 2023-05-22
 
 ## ----------  Collar drops/malfunctions ------------------- ##
 
-iceden <- ch2all %>%
+iceden <- ch2all %>% # bears that either den or depart for ice
   filter(study_end == 1) 
 
 icedenIDS <- unique(iceden$id)

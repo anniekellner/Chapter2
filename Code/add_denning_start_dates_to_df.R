@@ -115,3 +115,16 @@ all3 <- all2 %>%
 
 #saveRDS(all3, './Data/Derived-data/DFs/all_11_06_2022.Rds')
 
+##. THIS CODE COPIED FROM A DIFFERENT SCRIPT SO OBJECT NAMES WILL NEED TO CHANGE TO CALCULATE
+## Dates when bears enter dens
+
+ch2all$Ordinal <- yday(ch2all$ymd)
+
+denDate <- ch2all %>% # n = 4
+  filter(enter_den == 1) %>%
+  select(Ordinal)
+
+mean(denDate$Ordinal) # 307.25
+min(denDate$Ordinal) # 277
+max(denDate$Ordinal) #332
+

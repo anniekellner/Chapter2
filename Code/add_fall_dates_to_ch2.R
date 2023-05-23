@@ -23,6 +23,8 @@ allCh2 <- all %>%
 allCh2$ymd <- ymd(allCh2$ymd) # Because ymd is chr in all df
 
 ch2.2 <- ch2 %>%
-  left_join(allCh2)
+  full_join(allCh2)
 
-saveRDS(ch2.2, file = './Data/Derived-data/DFs/bears_ch2_052323.Rds')
+ch2.2 %>% group_by(id) %>% slice_tail()
+
+#saveRDS(ch2.2, file = './Data/Derived-data/DFs/bears_ch2_052323.Rds')

@@ -25,18 +25,39 @@ rm(list = ls())
 ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # study data
 all <- readRDS('./Data/Derived-data/DFs/all_11_06_2022.Rds') # all data - has denning start dates
 
+# Denning bears
+
+allDen <- all %>%
+  filter(enter_den == 1)
+
+allDen <- allDen %>%
+  rename(study_end = study.end) %>%
+  select(id, datetime, study_end)
+
+# Are all the denning bears from the 'all' database represented in the Ch2 database
+allDen_ids <- unique(allDen$id)
+
+ch2Den_ids <- ch2 %>%
+  filter(repro == "enter_den") 
+
+ch2Den_ids <- unique(ch2Den_ids$id)
+
+## YES - they are all there. 
+## The problem is I need to add the extra dates because I cut off the study too early
+
+ch2 <- ch2 %>%
+  left_join(allDen) %>%
+  rename(study_start = study.start)
+
+ch2 %>% filter(study_end == 1)
 
 #all <- as_tibble(all)
 #all$ymd <- ymd(all$ymd)
 
-ch2all <- ch2 %>%
-  inner_join(all)
 
 # Get IDs for bears that enter dens in all vs. ch2 df
 
-denCh2 <- ch2all %>%
-  select(enter_den = 1) %>%
-  distinct()
+
 
 denAll <- dplyr::select(all, enter_den = 1)
 

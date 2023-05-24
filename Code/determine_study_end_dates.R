@@ -42,17 +42,16 @@ ch2 <- ch2 %>%
 
 ch2 %>% filter(study_end == 1) # looks good- 4 obs
 
-
 # ----  ADD STUDY END DATES FOR ICE BEARS ------------------- #
 
 ## Dates when bears leave for ice
 
-ch2ice <- filter(ch2, departure_to_ice == 1) %>% select(id, datetime, departure_to_ice) 
-allIce <- filter(all, departure_to_ice == 1) %>% select(id, datetime, departure_to_ice)
+#ch2ice <- filter(ch2, departure_to_ice == 1) %>% select(id, datetime, departure_to_ice) 
+#allIce <- filter(all, departure_to_ice == 1) %>% select(id, datetime, departure_to_ice)
 
-setdiff(allIce, ch2ice) # missing 20735.2009
+#setdiff(allIce, ch2ice) # missing 20735.2009
 
-which(ch2$id == "pb_20735.2009" & ch2$datetime == "2009-09-02 18:00:00")
+#which(ch2$id == "pb_20735.2009" & ch2$datetime == "2009-09-02 18:00:00")
 
 ch2[6463,35] <- 1 # change missing departure to 1
 
@@ -83,23 +82,12 @@ collarDrops <-  others %>% # Add study_end = 1 for bears whose collars dropped (
   slice_tail() %>%
   mutate(study_end = replace(study_end, month == 9 | month == 10, 1))
 
-collarDropIDS <- collarDrops %>% group_by(id) %>% filter(study_end == 1) # 7 bears whose collars stopped transmitting data in Oct or Nov
-unique(collarDropIDS$id)
+# Join collarDrops to ch2 df
 
-ch2 <- ch2 %>%
-  group_by(id) %>%
-  mutate(collar_drop = 
-           if_else(id %in% collarDropIDS, 1, 0))
+ch2.2 <- ch2 %>%
+  full_join(collarDrops)
 
-## Add collar_drop to study_end column
-  
-ch2 <- ch2 %>%
-  group_by(id) %>%
-  slice_tail() %>%
-  mutate(study_end = 
-           if_else(collar_drop == 1, 1, study_end))
-
-table(ch2$study_end) 
+table(ch2.2$study_end == 1) # 19 - but need to remove duplicates where study_end = NA for ch2
   
 ## 
 all2 <- all %>%

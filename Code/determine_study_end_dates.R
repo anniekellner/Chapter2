@@ -80,15 +80,36 @@ collarDrops <-  others %>% # Add study_end = 1 for bears whose collars dropped (
   group_by(id) %>% 
   arrange(id, datetime) %>%
   slice_tail() %>%
-  mutate(study_end = replace(study_end, month == 9 | month == 10, 1))
+  mutate(study_end = replace(study_end, month == 9 | month == 10, 1)) %>%
+  mutate(collar_drop = if_else(month == 9 | month == 10, 1, 0)) %>%
+  select(id, datetime, collar_drop)
 
-# Join collarDrops to ch2 df
+collarDrops <- collarDrops %>%
+  filter(collar_drop == 1) 
 
-ch2.2 <- ch2 %>%
-  full_join(collarDrops)
+# Join to ch2 df
 
-table(ch2.2$study_end == 1) # 19 - but need to remove duplicates where study_end = NA for ch2
+ch2 <- ch2 %>%
+  full_join(collarDrops) %>%
+  select(-study_end)
+
+ch2 <- ch2 %>%
+  group_by(id) %>%
+  mutate(study_end = if_else(departure_to_ice == 1 | enter_den == 1 | collar_drop , 1, 0))
   
+table(ch2$study_end) # 19 - looks good
+
+# ----  DETERMINE END DATE FOR REMAINING TWO BEARS  ----------- #
+
+# Take average ordinal study_end date for denning, departing, and collar-drop bears
+
+ch2 <- ch2 %>%
+  mutate(ordinal_date = yday(datetime)) 
+
+se <- ch2 %>% filter(study_end == 1)
+mean(se$ordinal_date) # 296
+
+
 ## 
 all2 <- all %>%
   group_by(id) %>%

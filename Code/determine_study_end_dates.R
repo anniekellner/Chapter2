@@ -127,6 +127,16 @@ ch2[24581,39] <- 1 # change study_end to 1 (pb_32366.2014)
 
 table(ch2$study_end) # 21 study end dates!
 
+# ---   REMOVE DATES AFTER STUDY END DATES  ---------- #
+
+ch2 <- ch2 %>%
+  group_by(id) %>%
+  mutate(row = row_number()) %>%
+  mutate(across(everything(),
+                ~replace(., row > match(1, study_end), NA))) %>%
+  drop_na(animal) %>%
+  ungroup()
+
 #saveRDS(ch2, file = './Data/Derived-data/DFs/bears_ch2_052823.Rds')
 
 

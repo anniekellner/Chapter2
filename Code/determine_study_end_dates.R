@@ -101,77 +101,34 @@ table(ch2$study_end) # 19 - looks good
 
 # ----  DETERMINE END DATE FOR REMAINING TWO BEARS  ----------- #
 
+# Remaining bears: "pb_20418.2005" "pb_32366.2014"
+
 # Take average ordinal study_end date for denning, departing, and collar-drop bears
 
 ch2 <- ch2 %>%
   mutate(ordinal_date = yday(datetime)) 
 
 se <- ch2 %>% filter(study_end == 1)
-mean(se$ordinal_date) # 296
+mean(se$ordinal_date) # 296 - October 21 in non-leap year
+mean(se$month)
+mean(se$day)
+# Get remaining bears
+seIDs <- unique(se$id)
+setdiff(unique(ch2$id), seIDs)
 
+# Set study end date as Oct 31 for remaining bears (306)
 
-## 
-all2 <- all %>%
-  group_by(id) %>%
-  mutate(study_end = if_else(departure_to_ice == 1 | enter_den == 1, 1, 0)) %>%
-  mutate(row = row_number()) %>%
-  mutate(across(everything(),
-                ~replace(., row > match(1, study_end), NA))) %>% # remove points for bears after which study_end = 1
-  drop_na(animal) %>% # arbitrary column that does not usually have an NA for any reason - this removes rows after study_end rather than fill with NA
-  ungroup()
+which(ch2$id == "pb_20418.2005" & ch2$ordinal_date > 306)
+ch2[16112,39] <- 1 # change study_end to 1 (pb_20418.2005)
 
+which(ch2$id == "pb_32366.2014" & ch2$ordinal_date == 305)
 
+ch2[24581,39] <- 1 # change study_end to 1 (pb_32366.2014)
 
+table(ch2$study_end) # 21 study end dates!
 
-# 7 bears whose collars appeared to drop off or malfunction
-
-
-
-## Add back to all df
-
-drop <- rename(drop, collar_drop = study_end) # because all df doesn't have a 'study_end' because it represents all data
-
-all3 <- all2 %>% left_join(drop)
-
-dropIDS <- unique(drop$id)
-
-# Add data to bears whose collars dropped
-
-dropAdd <- all3 %>%
-  filter(id %in% dropIDS & month > 8)
-  
-dropAll <- all3 %>%
-  filter(id %in% dropIDS & month > 8) %>%
-  group_by(id) %>%
-  arrange(id, datetime) %>%
-  slice_tail() %>% 
-  mutate(study_end = replace(study_end, 0, 1))
-
-collarDrop <- dropAdd %>%
-  full_join(dropAll)
-
-collarDrop <- collarDrop %>%
-  
+#saveRDS(ch2, file = './Data/Derived-data/DFs/bears_ch2_052823.Rds')
 
 
 
-dropAdd <- dropAdd %>%
-  select(-c('swim', 'SIC', 'ows', 'land_bear_ows', "land_bear", 'id.ymd', 'row', 'start.swim', 'end.swim', 'ordinal'))
 
-ch2 <- ch2 %>%
-  full_join(dropAdd) 
-
-ch2df <- ch2 %>%
-  select(-'study_end')
-
-ch2df <- ch2df %>%
-  mutate(study_end = 
-           case_when(enter_den == 1 ~ 1,
-                     departure_to_ice == 1 ~ 1,
-                     collar_drop == 1 ~ 1,
-                     TRUE ~ 0))
-  
-ch2df %>%
-  group_by(id) %>%
-  slice_tail() %>%
-  print(width = Inf)

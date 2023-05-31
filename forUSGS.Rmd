@@ -20,7 +20,7 @@ library(tmaptools)
 ```
 
 
-This study includes a subset of GPS-collared bears that spent ≥ 7 consecutive days on land between June 1 and September 30 of any given year. Bears with insufficient data (< 100 total points) were excluded. In total, our analysis includes tracking data from 21 bear-summers (19 individuals including two bears with data from two separate years) over eight calendar years (2005, 2008-9, 2011 – 2015). Bears were tracked for an average of 52 days (range: 26 – 78, σ = 14).  
+This study includes a subset of GPS-collared bears that spent ≥ 7 consecutive days on land between June 1 and September 30 of any given year. Bears with insufficient data (< 100 total points) were excluded. In total, our analysis includes tracking data from 21 bear-summers (19 individuals including two bears with data from two separate years) over eight calendar years (2005, 2008-9, 2011 – 2015). ADD DAYS TRACKED  
 
 ```{r study-dataset}
 

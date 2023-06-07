@@ -2,6 +2,9 @@
 ###     JOIN ALL DF TO CH2 DF   ###########
 ###########################################
 
+rm(list = ls())
+
+
 b <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
 all <- readRDS("Data/raw_csv.Rds")
 

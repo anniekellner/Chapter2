@@ -18,35 +18,22 @@ library(adehabitatLT)
 library(tmap)
 library(tmaptools)
 library(lubridate)
-library(readr)
 
 source('./Code/MyFunctions.R')
 
 ```
 
+```{r, include=FALSE}
+
+rm(list = ls())
+
+```
 
 This study includes a subset of GPS-collared bears that spent ≥ 7 consecutive days on land between June 1 and September 30 of any given year. Bears with insufficient data (< 100 total points) were excluded. In total, our analysis includes tracking data from 21 bear-summers (19 individuals including two bears with data from two separate years) over eight calendar years (2005, 2008-9, 2011 – 2015). ADD DAYS TRACKED  
 
 ```{r load-data, include=FALSE}
 
 b <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
-all <- read_csv("Data/usgs_pbear_gps_ccde16_v20170131.csv")
-
-#saveRDS(all, './Data/raw_csv.Rds')
-
-pb <- b %>%
-  left_join(all)
-
-
-b1 <- b %>% 
-  select(animal, year) %>%
-  distinct(animal, year) %>%
-  arrange(year) %>%
-  ungroup()
-
-kable(b1)
-
-## include start date, end date, days tracked
 
 ```
 
@@ -61,9 +48,14 @@ bsf <- bsf %>%
   geom_into_columns() 
   
 bdf <- as.data.frame(bsf)
-bdf$id.datetime <- paste(bdf$id, bdf$datetime, sep = '.')
 
-ltraj <- as.ltraj(xy=bdf[,c("X","Y")], date=bdf$datetime, id=as.character(bdf$id))
+bdf$ymd <- as.POSIXct(bdf$ymd) # adehabitat gives an error using datetime or if ymd is not POSIXct
+
+bdf <- bdf %>% # so only one point per day
+  group_by(id, ymd) %>%
+  slice_head()
+
+ltraj <- as.ltraj(xy=bdf[,c("X","Y")], date=bdf$ymd, id=as.character(bdf$id))
 summary <- summary(ltraj)
 
 summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)

@@ -18,6 +18,7 @@ library(adehabitatLT)
 library(tmap)
 library(tmaptools)
 library(lubridate)
+library(tidyr)
 
 source('./Code/MyFunctions.R')
 
@@ -42,12 +43,24 @@ b <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
 # Create track in adehabitatLT
 
 bsf <- st_as_sf(b, crs = st_crs(3338))
+bsf <- dplyr::select(bsf, -c('X','Y'))
 
-bsf <- bsf %>%
-  dplyr::select(!c(X,Y)) %>%
-  geom_into_columns() 
+bsf <- cbind(bsf, st_coordinates(bsf))
+
+bdf <- bsf %>%
+  st_drop_geometry() %>%
+  as.data.frame() %>%
+  dplyr::select(id, datetime, X, Y) 
+
+bdf$datetime <- as.character(bdf$datetime)
+
+bdf <- separate(bdf, datetime, into = c("Date", "Time"), sep = " ")
   
-bdf <- as.data.frame(bsf)
+datetimes <- as.POSIXct(strptime(paste(bdf$Date, bdf$Time), "%d/%m/%Y %H:%M:%S"))
+
+which(duplicated(bdf$datetime))
+
+ltraj <- as.ltraj(bdf[,c("X","Y")], date=datetimes, id=bdf$id, typeII = TRUE)
 
 bdf$ymd <- as.POSIXct(bdf$ymd) # adehabitat gives an error using datetime or if ymd is not POSIXct
 

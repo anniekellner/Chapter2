@@ -27,7 +27,7 @@ library(adehabitatLT)
 
 # Bears
 
-used <- readRDS('./Data/all_bonepile_points.Rds') # load all bonepile points
+used <- readRDS('./Data/Derived-data/DFs/all_bonepile_points.Rds') # load all bonepile points
 
 # Alaska
 

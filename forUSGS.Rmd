@@ -50,25 +50,11 @@ bsf <- cbind(bsf, st_coordinates(bsf))
 bdf <- bsf %>%
   st_drop_geometry() %>%
   as.data.frame() %>%
-  dplyr::select(id, datetime, X, Y) 
+  dplyr::select(id, datetime, X, Y) %>%
+  na.omit()
 
-bdf$datetime <- as.character(bdf$datetime)
+ltraj <- as.ltraj(bdf[,c("X","Y")], date=bdf$datetime, id=bdf$id, typeII = TRUE)
 
-bdf <- separate(bdf, datetime, into = c("Date", "Time"), sep = " ")
-  
-datetimes <- as.POSIXct(strptime(paste(bdf$Date, bdf$Time), "%d/%m/%Y %H:%M:%S"))
-
-which(duplicated(bdf$datetime))
-
-ltraj <- as.ltraj(bdf[,c("X","Y")], date=datetimes, id=bdf$id, typeII = TRUE)
-
-bdf$ymd <- as.POSIXct(bdf$ymd) # adehabitat gives an error using datetime or if ymd is not POSIXct
-
-bdf <- bdf %>% # so only one point per day
-  group_by(id, ymd) %>%
-  slice_head()
-
-ltraj <- as.ltraj(xy=bdf[,c("X","Y")], date=bdf$ymd, id=as.character(bdf$id))
 summary <- summary(ltraj)
 
 summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)

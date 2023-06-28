@@ -23,8 +23,6 @@ rm(list = ls())
 
 # ----- LOAD DATA --------------------- #
 
-
-
 b <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
 
 
@@ -50,17 +48,24 @@ summary <- summary(ltraj)
 summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)
 
 summary <- summary %>%
-  mutate(date.begin = as.character("date.begin")) %>%
-  mutate(date.end = as.character("date.end")) %>%
-  separate(date.begin, c("start_date", "start_time")) %>%
-  separate(date.end, c("end_date", "end_time"))
+  mutate(year = year(date.begin)) %>%
+  mutate(date.begin = as.character(date.begin)) %>%
+  mutate(date.end = as.character(date.end)) %>% 
+  separate_wider_delim(date.begin, " ", names = c("start_date", NA)) %>%
+  separate_wider_delim(date.end, " ", names = c("end_date", NA))
 
 summary <- summary %>%
-  select(id, date.begin, date.end, DaysTrack) %>%
-  mutate(year = year(date.begin)) %>%
-  mutate(DaysTrack = as.numeric(DaysTrack)) %>%
-  mutate(start_date = ymd(date.begin)) %>%
-  mutate(end_date = ymd(date.end)) %>%
-  arrange(year) 
+  select(year, id, start_date, end_date, DaysTrack,) %>%
+  rename(days_tracked = DaysTrack) %>%
+  arrange(year) %>% print(n = 21)
 
-kable(summary)
+summary %>%
+  gt() %>%
+  tab_header(title = "Bears Included in Study") %>%
+  tab_style(style = cell_text(size = "small"), 
+            locations = cells_body(columns = everything(), rows = everything())) %>%
+  tab_style(style = cell_fill(color = "yellow"), 
+                              locations = cells_body(columns = everything(), rows = c(14,16,18,20))) 
+  
+
+

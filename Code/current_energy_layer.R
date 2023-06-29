@@ -13,6 +13,7 @@ theme_set(theme_bw())
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggrepel)
+library(conflicted)
 
 rm(list = ls())
 

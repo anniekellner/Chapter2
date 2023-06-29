@@ -7,6 +7,12 @@ output: html_document
 
 ```{r setup, include=FALSE, message=FALSE}
 
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+```{r}
+
 library(knitr)
 library(kableExtra)
 library(plyr)
@@ -15,14 +21,21 @@ library(tidyr)
 library(sf)
 library(ggplot2)
 library(lubridate)
+library(conflicted)
 #library(tmap)
 #library(tmaptools)
 
+conflicts_prefer(
+  dplyr::select(),
+  dplyr::filter(),
+  dplyr::mutate()
+)
+
 rm(list = ls())
 
-knitr::opts_chunk$set(echo = FALSE)
-
 ```
+
+
 
 # Basic summary tables for bears that visit the bonepile and those that do not
 
@@ -31,11 +44,11 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ```{r bonepile-vs-not}
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_093022.Rds')
+pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
 
 pb2 <- pb %>%
   mutate(bear_type = case_when(
-    id == "pb_32255.2008" | id == "pb_21237.2011" | id == "pb_20418.2005" | 
+    id == "pb_32255.2008" | id == "pb_20418.2005" | 
       id == "pb_20414.2009" ~ "Do Not Visit Bonepile",
     TRUE ~ "Visit Bonepile"
   ))

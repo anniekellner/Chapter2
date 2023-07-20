@@ -10,6 +10,7 @@ library(tidyverse)
 library(sf)
 library(terra)
 library(leaflet)
+library(zoo)
 library(conflicted)
 
 conflicts_prefer(
@@ -144,5 +145,15 @@ test <- b2sf %>%
   mutate(Land = if_else(st_intersects(., buff5k) == TRUE, 1, 0))
 
 b2sf$Land <- st_intersects(b2sf, buff5k) %>% lengths > 0 # https://stackoverflow.com/questions/49294933/r-convert-output-from-sfst-within-to-vector
+
+## 7-day criteria
+
+lb <- b2sf %>% 
+  group_by(ID, ymd) %>%
+  mutate(on_land = any(Land == TRUE)) %>%
+  mutate(consec_seven = rollapply(on_land, 7, all, align = 'left', fill = NA)) %>%
+  filter(consec_seven == TRUE)
+
+#### CONCLUSION: LOOKS GOOD, JUST ADD ANTHONY'S BEARS ####
 
 

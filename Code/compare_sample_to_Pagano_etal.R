@@ -13,7 +13,8 @@ library(leaflet)
 library(conflicted)
 
 conflicts_prefer(
-  dplyr::filter()
+  dplyr::filter(),
+  terra::extract()
 )
 
 rm(list = ls())
@@ -98,7 +99,7 @@ b7days <- b7days %>%
 b2sf <- st_as_sf(b2, coords = c('gps_lon','gps_lat'), crs = 4326)
 b2vec <- vect(b2sf)
 
-# DEM
+### DEM
   
 dem <- rast('./Data/Spatial/ans_dem_8bit.tif') # AK Albers Equal Area Conic
 
@@ -126,6 +127,22 @@ bears <- demVals %>%
   mutate(land = if_else(demVal == 27, 0, 1)) %>%
   replace_na(list(land = 0)) # NA means it was outside the DEM, so in water/on ice
 
+# Use 5K polygon to overlay points
+
+demPoly_5k <- st_read('./Data/Spatial/DEM/AK_CA_5kbuff/AK_CA_5kbuff.shp')
+
+rec <- st_transform(rec, st_crs(demPoly_5k))
+
+demPoly_5k_crop <- st_crop(demPoly_5k, rec)
+
+buff5k <- demPoly_5k_crop %>%
+  filter(OBJECTID == 14) # excludes Canada
+
+b2sf <- st_transform(b2sf, st_crs(buff5k))
+
+test <- b2sf %>%
+  mutate(Land = if_else(st_intersects(., buff5k) == TRUE, 1, 0))
+
+b2sf$Land <- st_intersects(b2sf, buff5k) %>% lengths > 0 # https://stackoverflow.com/questions/49294933/r-convert-output-from-sfst-within-to-vector
 
 
-which(is.na(bears$land))

@@ -108,17 +108,24 @@ rec <- project(rec, dem)
 
 dem <- crop(dem, rec)
 
+#writeRaster(dem, filename = 'C:/Users/akell/ArcGIS/Chapter2/DEM/fromR_check_water_071923.tif') # Check in ArcGIS what the code for water is
+
 # Project points into DEM projection
 
 pts <- project(b2vec, dem)
 
+test <- terra::extract(dem, pts)
+
+demVals <- test %>%
+  select(ans_dem_8bit) %>%
+  rename(demVal = ans_dem_8bit) %>%
+  bind_cols(b2sf) %>%
+  select(ID, YEAR, datetime, X, Y, ymd, geometry, demVal)
+
+bears <- demVals %>%
+  mutate(land = if_else(demVal == 27, 0, 1)) %>%
+  replace_na(list(land = 0)) # NA means it was outside the DEM, so in water/on ice
 
 
-writeRaster(dem, filename = 'C:/Users/akell/ArcGIS/Chapter2/DEM/fromR_check_water_071923.tif') # Check in ArcGIS what the code for water is
 
-
-
-b2vec <- project(b2vec, polar.stereo)
-
-plot(dem)
-points(b2vec, col = "black")
+which(is.na(bears$land))

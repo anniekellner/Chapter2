@@ -10,18 +10,19 @@
 library(tidyverse)
 library(conflicted)
 
+conflicts_prefer(
+  dplyr::filter()
+)
+
+rm(list = ls())
+
 # --------    LOAD DATA   --------------------  #
 
 pag <- read_csv("Data/Pagano_bears.csv")
 
 all <- readRDS("Data/Derived-data/DFs/all_052323.Rds")
 
-ch2_nov22 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # 21 bears
-ch2_may23 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
-
-novIDs <- unique(ch2_nov22$id)
-mayIDs <- unique(ch2_may23$id) # May and Nov df's are identical for ID's
-
+ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
 
 
 # Figure out which bears are different btw Pag and me
@@ -35,4 +36,17 @@ ch2_id_yr <- ch2 %>%
   mutate(ID = as.double(ID)) %>%
   ungroup()
 
-dif <- setdiff(pag$ID, mayIDs)
+ch2_id_yr <- select(ch2_id_yr, ID, YEAR)
+
+dif <- setdiff(pag, ch2_id_yr) 
+
+# --------- ADD MISSING BEARS ----------------------- #
+
+missing <- all %>%
+  filter(id == "pb_20446.2009" | # ice bear
+           id == "pb_20529.2004" | # ice bear
+           id == "pb_20529.2005" | # ice bear
+           id == "pb_20965.2008" | # probably collared on land
+           id == "pb_20975.2008" | # probably collared on land
+           id == "pb_21264.2011" | # ice bear
+           id == "pb_21358.2013") # ice bear

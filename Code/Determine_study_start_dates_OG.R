@@ -8,45 +8,68 @@
 
 
 library(tidyverse)
+library(sf)
+library(terra)
+#library(leaflet)
+library(zoo)
 library(conflicted)
 
 conflicts_prefer(
-  dplyr::filter()
+  dplyr::filter(),
+  terra::extract()
 )
 
 rm(list = ls())
 
-# --------    LOAD DATA   --------------------  #
+# --------    LOAD AND PREP DATA   --------------------  #
 
-pag <- read_csv("Data/Pagano_bears.csv")
+# Bears
 
-all <- readRDS("Data/Derived-data/DFs/all_052323.Rds")
+missing <- readRDS("Data/Derived-data/DFs/missing_bears.Rds")
 
-ch2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_052823.Rds')
+missing %>%
+  filter(end.swim == 1) # 20446.2009, 20529.2005, 21264.2011, 21358.2013, 20529.2004
+
+ice <- missing %>%
+  filter(id == "pb_20446.2009" | 
+           id == "pb_20529.2005" | 
+           id == "pb_21264.2011" | 
+           id == "pb_21358.2013" | 
+           id == "20529.2004")
+
+# Spatial
+
+demPoly_5k <- st_read('./Data/Spatial/DEM/AK_CA_5kbuff/AK_CA_5kbuff.shp')
+
+rec <- st_read('./Data/Spatial/Rectangle/rectangle.shp')
+rec <- st_transform(rec, st_crs(demPoly_5k))
+
+demPoly_5k_crop <- st_crop(demPoly_5k, rec)
+
+buff5k <- demPoly_5k_crop %>%
+  filter(OBJECTID == 14) # excludes Canada
+
+# -------   BEARS THAT ARRIVED FROM ICE ---------------- #
 
 
-# Figure out which bears are different btw Pag and me
 
-ch2_id_yr <- ch2 %>% 
-  select(animal, year) %>%
-  separate_wider_delim(animal, delim = "_", names = c(NA, "ID"), cols_remove = TRUE) %>%
-  select(ID, year) %>%
-  rename(YEAR = year) %>%
-  distinct() %>%
-  mutate(ID = as.double(ID)) %>%
-  ungroup()
 
-ch2_id_yr <- select(ch2_id_yr, ID, YEAR)
 
-dif <- setdiff(pag, ch2_id_yr) 
+# Spatial data
 
-# --------- ADD MISSING BEARS ----------------------- #
+b2sf <- st_transform(b2sf, st_crs(buff5k))
 
-missing <- all %>%
-  filter(id == "pb_20446.2009" | # ice bear
-           id == "pb_20529.2004" | # ice bear
-           id == "pb_20529.2005" | # ice bear
-           id == "pb_20965.2008" | # probably collared on land
-           id == "pb_20975.2008" | # probably collared on land
-           id == "pb_21264.2011" | # ice bear
-           id == "pb_21358.2013") # ice bear
+test <- b2sf %>%
+  mutate(Land = if_else(st_intersects(., buff5k) == TRUE, 1, 0))
+
+b2sf$Land <- st_intersects(b2sf, buff5k) %>% lengths > 0 # https://stackoverflow.com/questions/49294933/r-convert-output-from-sfst-within-to-vector
+
+## 7-day criteria
+
+lb <- b2sf %>% 
+  group_by(ID, ymd) %>%
+  mutate(on_land = any(Land == TRUE)) %>%
+  mutate(consec_seven = rollapply(on_land, 7, all, align = 'left', fill = NA)) %>%
+  filter(consec_seven == TRUE)
+
+

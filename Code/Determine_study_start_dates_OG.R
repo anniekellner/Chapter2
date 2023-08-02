@@ -79,21 +79,27 @@ lb <- lb %>%
 
 lb <- lb %>%
   group_by(id) %>%
-  mutate(cum_land = cumsum(on_land)) 
+  mutate(cum_land = cumsum(on_land)) %>%
+  mutate(rowNum = row_number()) %>% glimpse()
 
-day7 <- lb %>% filter(cum_land == 7) %>% select(id, ymd)
+day7 <- lb %>% 
+  filter(cum_land == 7) %>% 
+  select(id, ymd, rowNum) 
 
 day1 <- day7 %>%
-  mutate(Day1 = ymd - ddays(7)) %>%
-  select(id, geometry, Day1) %>%
-  rename(ymd = Day1) %>%
+  mutate(Day1row = rowNum - 6) 
+
+lb <- lb %>%
   st_drop_geometry()
+
+day1 <- day1 %>%
+  left_join(lb, by = c("id"))
 
 ice2 <- iceSF %>%
   st_drop_geometry()
 
 landfall <- day1 %>%
-  left_join(ice2, by = c("id", "ymd"))
+  left_join(ice2, by = c("id", "ymd")) 
 
 landfall <- landfall %>%
   group_by(id) %>%

@@ -25,6 +25,8 @@ rm(list = ls())
 
 # Bears
 
+all <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/all_052323.Rds")
+
 missing <- readRDS("Data/Derived-data/DFs/missing_bears.Rds")
 
 missing %>%
@@ -63,16 +65,16 @@ iceSF <- iceSF %>% # remove previous column for land
 
 ## 7-day criteria
 
-lb <- iceSF %>% 
+lb <- iceSF %>% # Create column for Land = TRUE or FALSE
   group_by(id, ymd) %>%
   mutate(on_land = any(Land == TRUE)) %>%
   ungroup()
 
-lb <- lb %>%
+lb <- lb %>% # switch to binary 0/1
   mutate(on_land = if_else(
     on_land == TRUE, 1, 0)) 
 
-lb <- lb %>%
+lb <- lb %>% # Take the first daily observation in order to see whether bear used land that day
   group_by(id, ymd) %>%
   slice_head() %>%
   ungroup()
@@ -84,28 +86,35 @@ lb <- lb %>%
 
 day7 <- lb %>% 
   filter(cum_land == 7) %>% 
-  select(id, ymd, rowNum) 
+  select(id, ymd, rowNum) %>% glimpse()
 
-day1 <- day7 %>%
+row_number_day1 <- day7 %>% # get row number from day 7 that's affiliated with the dates 
   mutate(Day1row = rowNum - 6) 
 
-lb <- lb %>%
-  st_drop_geometry()
+day1 <- lb %>%
+  filter(id == "pb_20446.2009" & rowNum == 31 |
+    id == "pb_20529.2004" & rowNum == 31 |
+    id == "pb_20529.2005" & rowNum == 10 | 
+    id == "pb_21264.2011" & rowNum == 30 | 
+    id == "pb_21358.2013" & rowNum == 48) %>%
+  select(id, ymd)
 
-day1 <- day1 %>%
-  left_join(lb, by = c("id"))
+iceSF <- iceSF %>%
+  st_drop_geometry() %>%
+  select(id, ymd, datetime, end.swim, Land)
 
-ice2 <- iceSF %>%
-  st_drop_geometry()
-
-landfall <- day1 %>%
-  left_join(ice2, by = c("id", "ymd")) 
-
-landfall <- landfall %>%
+landfall <- iceSF %>%
+  left_join(day1, by = c("id", "ymd")) %>% 
   group_by(id) %>%
   arrange(id, datetime) %>%
   filter(Land == TRUE) %>%
-  slice_head()
+  slice_head() 
+
+landfall$landfall <- 1
+
+# ----- RE-RUN CH2 BEARS WITH NEW LANDFALL SCRIPT --------------------------- #
+
+
   
  
 

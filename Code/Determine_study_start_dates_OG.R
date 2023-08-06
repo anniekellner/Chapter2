@@ -38,7 +38,7 @@ ice <- missing %>%
            id == "pb_21264.2011" | # included
            id == "pb_21358.2013" | # included
            id == "pb_20529.2004") %>%
-  filter(month > 6 & month < 11)
+  filter(month > 6 & month < 12)
 
 # Spatial
 
@@ -112,11 +112,27 @@ landfall <- iceSF %>%
 
 landfall$landfall <- 1
 
-# ----- RE-RUN CH2 BEARS WITH NEW LANDFALL SCRIPT --------------------------- #
+landfall <- landfall %>%
+  select(id:datetime, Land, landfall) %>%
+  rename(land = Land)
 
+# ----- MERGE INTO LARGER DATAFRAME -------------- #
+
+missing <- missing %>%
+  select(id, animal:datetime, X, Y, ymd) %>%
+  full_join(landfall, by = c('id', 'ymd', 'datetime')) %>% glimpse()
 
   
- 
+# Merge with chapter 2 bears
 
+# New dataframe after redetermining start dates
 
+ch2 <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/bears_ch2_080523.Rds")
+
+ch2 <- ch2 %>%
+  full_join(missing) %>% glimpse()
+
+test <- ch2 %>% filter(landfall == 1) %>% glimpse() # looks good
+
+saveRDS(ch2, file = './Data/Derived-data/DFs/ch2_bears_with_Pag_all_days.Rds')
 

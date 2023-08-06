@@ -102,7 +102,7 @@ day1 <- lb %>%
 
 ch2sf <- ch2sf %>%
   st_drop_geometry() %>%
-  select(id, ymd, datetime, end.swim, land)
+  select(id, ymd, datetime, land)
 
 landfall <- ch2sf %>%
   left_join(day1, by = c("id", "ymd")) %>% 
@@ -116,7 +116,7 @@ landfall$landfall <- 1
 # ----- MERGE INTO LARGER DATAFRAME -------------- #
 
 allCh2 <- allCh2 %>%
-  full_join(landfall, by = c('id', 'ymd', 'datetime')) %>%
+  full_join(landfall, by = c('id', 'ymd', 'datetime')) 
 
 saveRDS(allCh2, file = './Data/Derived-data/DFs/bears_ch2_080523.Rds')
   

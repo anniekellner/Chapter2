@@ -27,8 +27,8 @@ iceIDs <- ch2 %>% # exclude bears collared on land
 
 allCh2 <- all %>%
   filter(id %in% iceIDs) %>%
-  filter(month > 6 & month < 11) 
-
+  filter(month > 6 & month < 11) %>%
+  select(-land)
 
 # Spatial
 
@@ -116,8 +116,7 @@ landfall$landfall <- 1
 # ----- MERGE INTO LARGER DATAFRAME -------------- #
 
 allCh2 <- allCh2 %>%
-  select(-land) %>%
-  full_join(landfall, by = c('id', 'ymd', 'datetime')) 
+  full_join(landfall, by = c('id', 'ymd', 'datetime')) %>%
 
 saveRDS(allCh2, file = './Data/Derived-data/DFs/bears_ch2_080523.Rds')
   

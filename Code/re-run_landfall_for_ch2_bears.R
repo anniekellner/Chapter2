@@ -25,6 +25,8 @@ ch2 <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapte
 iceIDs <- ch2 %>% # exclude bears collared on land
   filter(landfall == 1) 
 
+iceIDs <- unique(iceIDs$id)
+
 allCh2 <- all %>%
   filter(id %in% iceIDs) %>%
   filter(month > 6 & month < 11) %>%
@@ -116,7 +118,10 @@ landfall$landfall <- 1
 # ----- MERGE INTO LARGER DATAFRAME -------------- #
 
 allCh2 <- allCh2 %>%
-  full_join(landfall, by = c('id', 'ymd', 'datetime')) 
+  select(id, animal:datetime, X, Y, ymd, departure_to_ice, den_location, enter_den) %>%
+  full_join(landfall) %>% glimpse()
+
+test <- allCh2 %>% filter(landfall == 1)
 
 saveRDS(allCh2, file = './Data/Derived-data/DFs/bears_ch2_080523.Rds')
   

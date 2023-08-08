@@ -57,13 +57,22 @@ ice3 <- ice2 %>% # Put ID back in dataframe
 
 ch2 <- full_join(ice3, landCollar)
 
-unique(ch2$id) # 28 bears
 
 # -------   CHECK IDS AGAINST PAGANO BEARS  --------------- #
 
 pag <- read_csv('./Data/Pagano_bears.csv')
 
-pagIDs <- pag$ID
+pagIDs <- pag$ID # 25 bears
 
+# alter ways IDs are written to accommodate Pagano csv style
 
+ch2_bears <- ch2 %>% # 28 bears
+  group_by(animal, year) %>%
+  slice_head() %>%
+  separate_wider_delim(animal, delim = "_", names = c(NA, "ID"), cols_remove = TRUE) %>%
+  select(ID, year) %>%
+  mutate(ID = as.double(ID)) %>%
+  rename(YEAR = year) 
+
+setdiff(pag, ch2_bears) # 3 bears more in my dataset; all bears included from Pagano et al. 
   

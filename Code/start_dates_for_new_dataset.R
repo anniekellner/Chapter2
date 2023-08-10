@@ -57,6 +57,7 @@ ice3 <- ice2 %>% # Put ID back in dataframe
 
 ch2 <- full_join(ice3, landCollar)
 
+saveRDS(ch2, file = 'Data/Derich2_no_end_cutoff_080823.Rds')
 
 # -------   CHECK IDS AGAINST PAGANO BEARS  --------------- #
 

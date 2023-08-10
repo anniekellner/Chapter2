@@ -23,7 +23,7 @@ orig_Ch2 <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/C
 
 iceIDs <- unique(ch2ice$id)
 
-landCollar <- allCh2 %>%
+landCollar <- orig_Ch2 %>%
   filter(!id %in% iceIDs)
 
 landIDs <- unique(landCollar$id)
@@ -57,7 +57,7 @@ ice3 <- ice2 %>% # Put ID back in dataframe
 
 ch2 <- full_join(ice3, landCollar)
 
-saveRDS(ch2, file = 'Data/Derich2_no_end_cutoff_080823.Rds')
+saveRDS(ch2, file = 'Data/Derived-data/DFs/ch2_no_end_cutoff_080823.Rds')
 
 # -------   CHECK IDS AGAINST PAGANO BEARS  --------------- #
 

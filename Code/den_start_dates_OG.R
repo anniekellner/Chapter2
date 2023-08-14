@@ -14,6 +14,8 @@ library(sf)
 
 rm(list = ls())
 
+source('./Code/MyFunctions.R') # for Mode fxn
+
 # ---- LOAD AND PREP DATA  ----------------- #
 
 b <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/ch2_no_end_cutoff_080823.Rds")
@@ -21,6 +23,8 @@ b <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2
 ch2IDs <- unique(b$id)
 
 all <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/all_052323.Rds") # has denning start dates
+
+allUSGS <- read_csv("Data/usgs_pbear_gps_ccde16_v20170131.csv") # to get all data for denning bears
 
 den <- read_csv('./Data/Denning_locs_dates.csv') %>%
   rename(animal = ...1) 
@@ -58,23 +62,50 @@ newBear <- den %>%
   filter(id == "pb_21264.2011") # Entrance date = 11/5/2011 ( see OneNote for location and COY)
 
 # Get data for all denning bears
+  # oldCh2 has 'start date' but not enter_den
+  # allDen has enter_den but doesn't seem right
 
 newBear <- b %>%
   filter(id == "pb_21264.2011")
 
 allDen <- allDen %>%
-  full_join(newBear) 
+  full_join(newBear) # 5 bears: good
 
-denCh2 <- den %>%
-  select(id:Den_long, Produced_coy) %>%
-  filter(id %in% allDenIDs)
+allDenIDs <- unique(allDen$id)
+
+
+#   --------- GET DENNING LOCATIONS ----------------------------------  #
+  
+denLocs <- data.frame(id = character(), 
+                      gps_lat = double(), 
+                      gps_lon = double())
+
+# Get denning locations using Mode method
+
+for(i in 1:length(allDenIDs)){
+  bear = subset(allDen, id == allDenIDs[[i]] & month > 9)
+  denLocs[i,1] = allDenIDs[[i]]
+  denLocs[i,2] = Mode(bear$gps_lat)
+  denLocs[i,3] = Mode(bear$gps_lon)
+}
+
+denLocs$gps_lat <- round(denLocs$gps_lat, 2)
+denLocs$gps_lon <- round(denLocs$gps_lon, 2)
+
+# Merge to get datetimes
+
+all_fall <- allUSGS %>%
+  select(animal:rate) %>%
+  filter(month > 9) %>%
+  unite("id", c("animal", "year"), sep = '.', remove = FALSE) 
+
+all_fall$gps_lat <- round(all_fall$gps_lat, 2)
+all_fall$gps_lon <- round(all_fall$gps_lon, 2)
+
+inDen <- denLocs %>%
+  full_join(all_fall) 
+
+
   
 
-  
-
-
-  
-
-
-
-
+pb20333 <- filter(all_fall, id == "pb_20333.2008")

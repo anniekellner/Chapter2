@@ -11,22 +11,24 @@
 
 library(tidyverse)
 library(sf)
+library(here)
+
 
 rm(list = ls())
 
-source('./Code/MyFunctions.R') # for Mode fxn
+source(here('Code', 'MyFunctions.R')) # for Mode fxn
 
 # ---- LOAD AND PREP DATA  ----------------- #
 
-b <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/ch2_no_end_cutoff_080823.Rds")
+b <- readRDS(here("Data", "Derived-data", "DFs", "ch2_no_end_cutoff_080823.Rds")) 
 
 ch2IDs <- unique(b$id)
 
-all <- readRDS("C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears/Repos/Chapter2/Data/Derived-data/DFs/all_052323.Rds") # has denning start dates
+all <- readRDS(here("Data", "Derived-data", "DFs", "all_052323.Rds")) # has denning start dates
 
-allUSGS <- read_csv("Data/usgs_pbear_gps_ccde16_v20170131.csv") # to get all data for denning bears
+allUSGS <- read_csv(here("Data", "usgs_pbear_gps_ccde16_v20170131.csv")) # to get all data for denning bears
 
-den <- read_csv('./Data/Denning_locs_dates.csv') %>%
+den <- read_csv(here('Data', 'Denning_locs_dates.csv')) %>%
   rename(animal = ...1) 
 
 den$entrance_ymd <- mdy(den$entrance)
@@ -37,7 +39,7 @@ den <- den %>%
 
 denIDs <- unique(den$id)
 
-oldCh2 <- readRDS('./Data/Derived-data/DFs/bears_ch2_110622.Rds') # to see if there are bears in new pag data that are denning bears
+oldCh2 <- readRDS(here('Data', 'Derived-data', 'DFs', 'bears_ch2_110622.Rds')) # to see if there are bears in new pag data that are denning bears
 
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #

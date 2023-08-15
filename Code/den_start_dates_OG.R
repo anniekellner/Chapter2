@@ -75,8 +75,16 @@ allDen <- allDen %>%
 
 allDenIDs <- unique(allDen$id)
 
+# Get all dates from 'all' df for all denning bears
+
+allDen <- all %>%
+  filter(id %in% allDenIDs & month > 9) 
+
 
 #   --------- GET DENNING LOCATIONS ----------------------------------  #
+
+allDen$gps_lat <- round(allDen$gps_lat, 2) # round to two digits for lat/long otherwise GPS error messes up dates
+allDen$gps_lon <- round(allDen$gps_lon, 2)
   
 denLocs <- data.frame(id = character(), 
                       gps_lat = double(), 
@@ -85,13 +93,13 @@ denLocs <- data.frame(id = character(),
 # Get denning locations using Mode method
 
 for(i in 1:length(allDenIDs)){
-  bear = subset(allDen, id == allDenIDs[[i]] & month > 9)
+  bear = subset(allDen, id == allDenIDs[[i]])
   denLocs[i,1] = allDenIDs[[i]]
   denLocs[i,2] = Mode(bear$gps_lat)
   denLocs[i,3] = Mode(bear$gps_lon)
 }
 
-denLocs$gps_lat <- round(denLocs$gps_lat, 2) # round to two digits for lat/long otherwise GPS error messes up dates
+denLocs$gps_lat <- round(denLocs$gps_lat, 2) 
 denLocs$gps_lon <- round(denLocs$gps_lon, 2)
 
 # Merge to get datetimes
@@ -115,10 +123,38 @@ all_fall <- all_fall %>%
   left_join(inDen) %>%
   replace_na(list(at_densite = 0))
 
-# Criteria that bear needs to stay in den for > 30 days 
+# Criteria that bear needs to stay in den for > 5 days 
+
+all_fall <- all_fall %>%
+  unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
+  unite("time", hour:second, sep = ':', remove = FALSE) 
+  
+all_fall$date <- ymd(all_fall$date, tz = "US/Alaska")
+all_fall$time <- hms(all_fall$time)
+
+all_fall_ymd <- all_fall %>%
+  group_by(id, date) %>%
+  mutate(in_den = any(at_densite == 1)) %>%
+  ungroup()
+
+all_fall_daily <- all_fall_ymd %>%
+  group_by(id, date) %>%
+  slice_head() %>%
+  ungroup()
+
+all_fall_daily <- all_fall_daily %>%
+  group_by(id) %>%
+  mutate(cum_den= cumsum(in_den)) %>%
+  mutate(rowNum = row_number()) %>% glimpse()
+
+day5 <- all_fall_daily  %>% # 21015 is not represented
+  filter(cum_den == 5) %>% 
+  select(id, date, rowNum) %>% glimpse()
+  
 
 
-
+pb21015 <- all_fall_daily %>%
+  filter(id == "pb_21015.2013")
 
 
 

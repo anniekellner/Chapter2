@@ -99,9 +99,6 @@ for(i in 1:length(allDenIDs)){
   denLocs[i,3] = Mode(bear$gps_lon)
 }
 
-denLocs$gps_lat <- round(denLocs$gps_lat, 2) 
-denLocs$gps_lon <- round(denLocs$gps_lon, 2)
-
 # Merge to get datetimes
 
 all_fall <- allUSGS %>%
@@ -125,14 +122,23 @@ all_fall <- all_fall %>%
 
 # Criteria that bear needs to stay in den for > 5 days 
 
-all_fall <- all_fall %>%
+all_fall2 <- all_fall %>%
   unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
   unite("time", hour:second, sep = ':', remove = FALSE) 
+
+all_fall2 <- all_fall2 %>%
+  unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
   
-all_fall$date <- ymd(all_fall$date, tz = "US/Alaska")
-all_fall$time <- hms(all_fall$time)
+all_fall2$datetime <- ymd_hms(all_fall2$datetime, tz = "US/Alaska")
+
+
+all_fall2 <- all_fall %>%
+  unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
+  
+all_fall2 <- all_fall2 %>% ymd_hms(datetime, tz = "US/Alaska") %>% glimpse()
 
 all_fall_ymd <- all_fall %>%
+  ymd_hms()
   group_by(id, date) %>%
   mutate(in_den = any(at_densite == 1)) %>%
   ungroup()

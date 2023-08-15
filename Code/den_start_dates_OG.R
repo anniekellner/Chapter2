@@ -137,24 +137,36 @@ all_fall2<- all_fall2 %>%
   mutate(in_den = any(at_densite == 1)) %>%
   ungroup()
 
+all_fall2 <- all_fall2 %>%
+  group_by(id) %>%
+  mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% glimpse()
+
 # Select only first entry of the day
 
-all_fall_daily <- all_fall2 %>%
+denDaily <- all_fall2 %>%
+  filter(denning_bear == 1) %>%
   group_by(id, date) %>%
   slice_head() %>%
   ungroup()
 
-all_fall_daily <- all_fall_daily %>%
+denDaily<- denDaily %>%
   group_by(id) %>%
   mutate(cum_den= cumsum(in_den)) %>%
-  mutate(rowNum = row_number()) %>% glimpse()
+  mutate(rowNum = row_number()) %>% 
+  ungroup()
 
-day5 <- all_fall_daily  %>% 
-  filter(cum_den == 5) %>% 
+day10 <- denDaily  %>% 
+  filter(cum_den == 10) %>% 
   select(id, date, rowNum) %>% glimpse()
   
 
+# See if slice_head gets the same dates. It does not. So criteria is probably good. 
 
+test <- denDaily %>%
+  group_by(id) %>%
+  filter(in_den == 1) %>%
+  arrange(id, date) %>%
+  slice_head()
 
 
 

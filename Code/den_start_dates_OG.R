@@ -83,8 +83,8 @@ allDen <- all %>%
 
 #   --------- GET DENNING LOCATIONS ----------------------------------  #
 
-allDen$gps_lat <- round(allDen$gps_lat, 2) # round to two digits for lat/long otherwise GPS error messes up dates
-allDen$gps_lon <- round(allDen$gps_lon, 2)
+allDen$gps_lat <- round(allDen$gps_lat, 1) # round to two digits for lat/long otherwise GPS error messes up dates
+allDen$gps_lon <- round(allDen$gps_lon, 1)
   
 denLocs <- data.frame(id = character(), 
                       gps_lat = double(), 
@@ -106,8 +106,8 @@ all_fall <- allUSGS %>%
   filter(month > 9) %>%
   unite("id", c("animal", "year"), sep = '.', remove = FALSE) 
 
-all_fall$gps_lat <- round(all_fall$gps_lat, 2)
-all_fall$gps_lon <- round(all_fall$gps_lon, 2)
+all_fall$gps_lat <- round(all_fall$gps_lat, 1)
+all_fall$gps_lon <- round(all_fall$gps_lon, 1)
 
 inDen <- denLocs %>%
   inner_join(all_fall)
@@ -130,20 +130,16 @@ all_fall2 <- all_fall2 %>%
   unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
   
 all_fall2$datetime <- ymd_hms(all_fall2$datetime, tz = "US/Alaska")
+all_fall2$date <- ymd(all_fall2$date)
 
-
-all_fall2 <- all_fall %>%
-  unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
-  
-all_fall2 <- all_fall2 %>% ymd_hms(datetime, tz = "US/Alaska") %>% glimpse()
-
-all_fall_ymd <- all_fall %>%
-  ymd_hms()
+all_fall2<- all_fall2 %>%
   group_by(id, date) %>%
   mutate(in_den = any(at_densite == 1)) %>%
   ungroup()
 
-all_fall_daily <- all_fall_ymd %>%
+# Select only first entry of the day
+
+all_fall_daily <- all_fall2 %>%
   group_by(id, date) %>%
   slice_head() %>%
   ungroup()
@@ -153,14 +149,12 @@ all_fall_daily <- all_fall_daily %>%
   mutate(cum_den= cumsum(in_den)) %>%
   mutate(rowNum = row_number()) %>% glimpse()
 
-day5 <- all_fall_daily  %>% # 21015 is not represented
+day5 <- all_fall_daily  %>% 
   filter(cum_den == 5) %>% 
   select(id, date, rowNum) %>% glimpse()
   
 
 
-pb21015 <- all_fall_daily %>%
-  filter(id == "pb_21015.2013")
 
 
 

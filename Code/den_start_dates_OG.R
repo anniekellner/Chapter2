@@ -91,7 +91,7 @@ for(i in 1:length(allDenIDs)){
   denLocs[i,3] = Mode(bear$gps_lon)
 }
 
-denLocs$gps_lat <- round(denLocs$gps_lat, 2)
+denLocs$gps_lat <- round(denLocs$gps_lat, 2) # round to two digits for lat/long otherwise GPS error messes up dates
 denLocs$gps_lon <- round(denLocs$gps_lon, 2)
 
 # Merge to get datetimes
@@ -105,9 +105,20 @@ all_fall$gps_lat <- round(all_fall$gps_lat, 2)
 all_fall$gps_lon <- round(all_fall$gps_lon, 2)
 
 inDen <- denLocs %>%
-  full_join(all_fall) 
+  inner_join(all_fall)
+
+inDen$at_densite <- 1
+
+# Merge in_den back into all_fall to get all dates
+
+all_fall <- all_fall %>%
+  left_join(inDen) %>%
+  replace_na(list(at_densite = 0))
 
 
-  
 
-pb20333 <- filter(all_fall, id == "pb_20333.2008")
+
+
+
+
+

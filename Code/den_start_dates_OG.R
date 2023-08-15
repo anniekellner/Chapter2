@@ -115,6 +115,8 @@ all_fall <- all_fall %>%
   left_join(inDen) %>%
   replace_na(list(at_densite = 0))
 
+# Criteria that bear needs to stay in den for > 30 days 
+
 
 
 

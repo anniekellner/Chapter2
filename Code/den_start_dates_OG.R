@@ -150,14 +150,36 @@ denDaily <- all_fall2 %>%
   ungroup()
 
 denDaily<- denDaily %>%
+  mutate(in_den = if_else(in_den == TRUE, 1, 0)) %>%
   group_by(id) %>%
-  mutate(cum_den= cumsum(in_den)) %>%
+  mutate(days_in_den = cumsum(in_den)) %>%
   mutate(rowNum = row_number()) %>% 
+  select(id, date, in_den:rowNum) %>%
   ungroup()
 
+library(data.table)
+setDT(df)
+
+denDaily[, cumdist := south*cumsum(distance), .(animal, rleid(south))]
+
+
+test <- denDaily %>%
+  mutate(cumDen = days_in_den * in_den) %>% 
+  group_by(id, grp = cumsum(in_den == 0)) %>% 
+  mutate(cumDen = cumsum(days_in_den)) %>% 
+  ungroup %>%
+  select(-grp) %>% glimpse()
+
+  mutate(cumdist = south * distance) %>%
+    group_by(animal, grp = cumsum(south == 0)) %>%
+    mutate(cumdist = cumsum(cumdist)) %>%
+    ungroup %>%
+    select(-grp) %>% glimpse()
+
 day10 <- denDaily  %>% 
-  filter(cum_den == 10) %>% 
-  select(id, date, rowNum) %>% glimpse()
+  filter(cum_den < 11) %>% 
+  arrange(id, date) %>%
+  select(id, date, cum_den, rowNum) %>% glimpse()
   
 
 # See if slice_head gets the same dates. It does not. So criteria is needed.

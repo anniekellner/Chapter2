@@ -167,17 +167,13 @@ enterDen <- day1date %>%
 
 enterDen$enter_den <- 1
 
-# Join back into ch2 df with enter_den column (will also be start_date)
+# Join back into all_fall df with additional enter_den column (will also be start_date)
+# Ch2 does not have enough dates - did not add dates after 11-1 when creating df
 
-enterDen <- enterDen %>%
-  rename(ymd = date)
+all_fall2 <- all_fall %>%
+  left_join(enterDen)
 
-test <- all %>%
-  full_join(enterDen)
-
-
-b %>% group_by(id) %>% slice_tail()
-
+filter(all_fall2, enter_den == 1)
 
 
 

@@ -72,6 +72,8 @@ denLocs <- allDen %>%
   select(id, gps_lat, gps_lon) %>%
   slice_tail()
 
+#saveRDS(denLocs, file = here("Data", "Derived-data", "DFs", "Den_Locations.Rds"))
+
 # Merge with all USGS data
 
 all_fall <- allUSGS %>%
@@ -139,39 +141,43 @@ setDT(denDaily)
 
 denDaily[, cumDen := in_den*cumsum(in_den), .(id, rleid(in_den))] ## LOOKS GOOD!!!!!!
 
+# --- GET ACTUAL DATETIME OF DEN ENTRANCE ----------- #
 
+# Create dataframe of day 1's by starting with Day 3 and going back 2 rows. 
+# No bears visited den for more than 3 days prior to entrance (upon inspection of data)
 
+rowNum_day1 <- denDaily %>%
+  filter(cumDen == 3) %>%
+  mutate(day1row = rowNum - 2) %>%
+  select(id, day1row) 
 
-
-
-
-
-test <- denDaily %>%
-  mutate(cumDen = days_in_den * in_den) %>% 
-  group_by(id, grp = cumsum(in_den == 0)) %>% 
-  mutate(cumDen = cumsum(days_in_den)) %>% 
-  ungroup %>%
-  select(-grp) %>% glimpse()
-
-  mutate(cumdist = south * distance) %>%
-    group_by(animal, grp = cumsum(south == 0)) %>%
-    mutate(cumdist = cumsum(cumdist)) %>%
-    ungroup %>%
-    select(-grp) %>% glimpse()
-
-day10 <- denDaily  %>% 
-  filter(cum_den < 11) %>% 
-  arrange(id, date) %>%
-  select(id, date, cum_den, rowNum) %>% glimpse()
+rowNum_day1 <- rowNum_day1 %>%
+  rename(rowNum = day1row)
   
+day1date <- semi_join(denDaily, rowNum_day1)
+day1date <- select(day1date, id, date)
 
-# See if slice_head gets the same dates. It does not. So criteria is needed.
+# Pull all points from specified date and add a column for enter_den
 
-test <- denDaily %>%
+enterDen <- day1date %>%
+  left_join(all_fall) %>%
   group_by(id) %>%
-  filter(in_den == 1) %>%
-  arrange(id, date) %>%
+  filter(at_densite == 1) %>%
   slice_head()
+
+enterDen$enter_den <- 1
+
+# Join back into ch2 df with enter_den column (will also be start_date)
+
+enterDen <- enterDen %>%
+  rename(ymd = date)
+
+test <- all %>%
+  full_join(enterDen)
+
+
+b %>% group_by(id) %>% slice_tail()
+
 
 
 

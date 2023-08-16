@@ -79,7 +79,7 @@ all_fall <- allUSGS %>%
   filter(month > 9) %>%
   unite("id", c("animal", "year"), sep = '.', remove = FALSE) 
 
-all_fall$gps_lat <- round(all_fall$gps_lat, 1)
+all_fall$gps_lat <- round(all_fall$gps_lat, 1) # round to match denLocs and avoid GPS error
 all_fall$gps_lon <- round(all_fall$gps_lon, 1)
 
 inDen <- denLocs %>%
@@ -95,32 +95,32 @@ all_fall <- all_fall %>%
 
 # Criteria that bear needs to stay in den for > 5 days 
 
-# Prep USGS data by adding datetime
+# Prep USGS data (now all_fall) by adding datetime
 
-all_fall2 <- all_fall %>%
+all_fall <- all_fall %>%
   unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
   unite("time", hour:second, sep = ':', remove = FALSE) 
 
-all_fall2 <- all_fall2 %>%
+all_fall <- all_fall %>%
   unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
   
-all_fall2$datetime <- ymd_hms(all_fall2$datetime, tz = "US/Alaska")
-all_fall2$date <- ymd(all_fall2$date)
+all_fall$datetime <- ymd_hms(all_fall$datetime, tz = "US/Alaska")
+all_fall$date <- ymd(all_fall$date)
 
 # ------  DAILY DATA  ---------------- #
 
-all_fall2<- all_fall2 %>% # if bear is in den at all that day, in_den = 1
+all_fall<- all_fall %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
   mutate(in_den = any(at_densite == 1)) %>%
   ungroup()
 
-all_fall2 <- all_fall2 %>% # add column for denning_bear so is easily retrievable
+all_fall <- all_fall %>% # add column for denning_bear so is easily retrievable
   group_by(id) %>%
   mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% glimpse()
 
-# Select only first entry of the day - denDaily DF
+# Select only first entry of the day - denDaily DF (this avoids differences between GPS fix intervals)
 
-denDaily <- all_fall2 %>%
+denDaily <- all_fall %>%
   filter(denning_bear == 1) %>%
   group_by(id, date) %>%
   slice_head() %>%
@@ -137,9 +137,9 @@ denDaily<- denDaily %>%
 
 setDT(denDaily)
 
-denDaily[, cumDen := in_den*cumsum(in_den), .(id, rleid(in_den))]
+denDaily[, cumDen := in_den*cumsum(in_den), .(id, rleid(in_den))] ## LOOKS GOOD!!!!!!
 
-denIDs
+
 
 
 

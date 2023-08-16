@@ -12,7 +12,11 @@
 library(tidyverse)
 library(sf)
 library(here)
+library(conflicted)
 
+conflicts_prefer(
+  dplyr::filter()
+)
 
 rm(list = ls())
 
@@ -44,34 +48,10 @@ oldCh2 <- readRDS(here('Data', 'Derived-data', 'DFs', 'bears_ch2_110622.Rds')) #
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
-allDen <- all %>%
+allDen <- all %>% # Just to get IDs - later will get all data
   filter(enter_den == 1 | 
            id %in% denIDs & 
            id %in% ch2IDs) 
-
-allDenIDs <- unique(allDen$id)
-
-# Old Ch2 denning bears
-
-dbears <- oldCh2 %>%
-  group_by(id) %>%
-  filter(repro == "enter_den") %>%
-  slice_head() # 4 bears: so one needs to be added
-
-setdiff(allDenIDs, unique(dbears$id)) # 21264.2011
-
-newBear <- den %>%
-  filter(id == "pb_21264.2011") # Entrance date = 11/5/2011 ( see OneNote for location and COY)
-
-# Get data for all denning bears
-  # oldCh2 has 'start date' but not enter_den
-  # allDen has enter_den but doesn't seem right
-
-newBear <- b %>%
-  filter(id == "pb_21264.2011")
-
-allDen <- allDen %>%
-  full_join(newBear) # 5 bears: good
 
 allDenIDs <- unique(allDen$id)
 

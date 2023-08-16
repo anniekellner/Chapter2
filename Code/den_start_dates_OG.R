@@ -12,10 +12,12 @@
 library(tidyverse)
 library(sf)
 library(here)
+library(data.table)
 library(conflicted)
 
 conflicts_prefer(
-  dplyr::filter()
+  dplyr::filter(),
+  lubridate::year()
 )
 
 rm(list = ls())
@@ -63,23 +65,14 @@ allDen <- all %>%
 
 #   --------- GET DENNING LOCATIONS ----------------------------------  #
 
-allDen$gps_lat <- round(allDen$gps_lat, 1) # round to two digits for lat/long otherwise GPS error messes up dates
-allDen$gps_lon <- round(allDen$gps_lon, 1)
-  
-denLocs <- data.frame(id = character(), 
-                      gps_lat = double(), 
-                      gps_lon = double())
+# Mode method does not work for all bears. Use last location of the year. 
 
-# Get denning locations using Mode method
+denLocs <- allDen %>%
+  group_by(id) %>%
+  select(id, gps_lat, gps_lon) %>%
+  slice_tail()
 
-for(i in 1:length(allDenIDs)){
-  bear = subset(allDen, id == allDenIDs[[i]])
-  denLocs[i,1] = allDenIDs[[i]]
-  denLocs[i,2] = Mode(bear$gps_lat)
-  denLocs[i,3] = Mode(bear$gps_lon)
-}
-
-# Merge to get datetimes
+# Merge with all USGS data
 
 all_fall <- allUSGS %>%
   select(animal:rate) %>%
@@ -102,6 +95,8 @@ all_fall <- all_fall %>%
 
 # Criteria that bear needs to stay in den for > 5 days 
 
+# Prep USGS data by adding datetime
+
 all_fall2 <- all_fall %>%
   unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
   unite("time", hour:second, sep = ':', remove = FALSE) 
@@ -112,16 +107,18 @@ all_fall2 <- all_fall2 %>%
 all_fall2$datetime <- ymd_hms(all_fall2$datetime, tz = "US/Alaska")
 all_fall2$date <- ymd(all_fall2$date)
 
-all_fall2<- all_fall2 %>%
+# ------  DAILY DATA  ---------------- #
+
+all_fall2<- all_fall2 %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
   mutate(in_den = any(at_densite == 1)) %>%
   ungroup()
 
-all_fall2 <- all_fall2 %>%
+all_fall2 <- all_fall2 %>% # add column for denning_bear so is easily retrievable
   group_by(id) %>%
   mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% glimpse()
 
-# Select only first entry of the day
+# Select only first entry of the day - denDaily DF
 
 denDaily <- all_fall2 %>%
   filter(denning_bear == 1) %>%
@@ -132,15 +129,21 @@ denDaily <- all_fall2 %>%
 denDaily<- denDaily %>%
   mutate(in_den = if_else(in_den == TRUE, 1, 0)) %>%
   group_by(id) %>%
-  mutate(days_in_den = cumsum(in_den)) %>%
   mutate(rowNum = row_number()) %>% 
-  select(id, date, in_den:rowNum) %>%
+  select(id, date, gps_lat, gps_lon, in_den:rowNum) %>%
   ungroup()
 
-library(data.table)
-setDT(df)
+# Use data.table to get cumulative den time with reset
 
-denDaily[, cumdist := south*cumsum(distance), .(animal, rleid(south))]
+setDT(denDaily)
+
+denDaily[, cumDen := in_den*cumsum(in_den), .(id, rleid(in_den))]
+
+denIDs
+
+
+
+
 
 
 test <- denDaily %>%

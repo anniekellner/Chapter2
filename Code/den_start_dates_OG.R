@@ -160,7 +160,7 @@ day10 <- denDaily  %>%
   select(id, date, rowNum) %>% glimpse()
   
 
-# See if slice_head gets the same dates. It does not. So criteria is probably good. 
+# See if slice_head gets the same dates. It does not. So criteria is needed.
 
 test <- denDaily %>%
   group_by(id) %>%

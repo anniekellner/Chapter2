@@ -22,7 +22,6 @@ conflicts_prefer(
 
 rm(list = ls())
 
-source(here('Code', 'MyFunctions.R')) # for Mode fxn
 
 # ---- LOAD AND PREP DATA  ----------------- #
 
@@ -72,7 +71,10 @@ denLocs <- allDen %>%
   select(id, gps_lat, gps_lon) %>%
   slice_tail()
 
-#saveRDS(denLocs, file = here("Data", "Derived-data", "DFs", "Den_Locations.Rds"))
+denLocs$gps_lat <- round(denLocs$gps_lat, 1)
+denLocs$gps_lon <- round(denLocs$gps_lon, 1)
+
+#saveRDS(denLocs, file = here("Data", "Derived-data", "DFs", "Den_Locations.Rds")) # saved with full gps locs, not rounded
 
 # Merge with all USGS data
 
@@ -113,12 +115,13 @@ all_fall$date <- ymd(all_fall$date)
 
 all_fall<- all_fall %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
-  mutate(in_den = any(at_densite == 1)) %>%
+  mutate(den_day = any(at_densite == 1)) %>%
   ungroup()
 
 all_fall <- all_fall %>% # add column for denning_bear so is easily retrievable
   group_by(id) %>%
-  mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% glimpse()
+  mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% 
+  ungroup()
 
 # Select only first entry of the day - denDaily DF (this avoids differences between GPS fix intervals)
 
@@ -129,17 +132,17 @@ denDaily <- all_fall %>%
   ungroup()
 
 denDaily<- denDaily %>%
-  mutate(in_den = if_else(in_den == TRUE, 1, 0)) %>%
+  mutate(den_day = if_else(den_day == TRUE, 1, 0)) %>%
   group_by(id) %>%
   mutate(rowNum = row_number()) %>% 
-  select(id, date, gps_lat, gps_lon, in_den:rowNum) %>%
+  select(id, date, gps_lat, gps_lon, den_day:rowNum) %>%
   ungroup()
 
 # Use data.table to get cumulative den time with reset
 
 setDT(denDaily)
 
-denDaily[, cumDen := in_den*cumsum(in_den), .(id, rleid(in_den))] ## LOOKS GOOD!!!!!!
+denDaily[, cumDen := den_day*cumsum(den_day), .(id, rleid(den_day))] ## LOOKS GOOD!!!!!!
 
 # --- GET ACTUAL DATETIME OF DEN ENTRANCE ----------- #
 
@@ -167,15 +170,29 @@ enterDen <- day1date %>%
 
 enterDen$enter_den <- 1
 
+# -----   JOIN BACK INTO MAIN DATAFRAMFE  --------- #
+
 # Join back into all_fall df with additional enter_den column (will also be start_date)
 # Ch2 does not have enough dates - did not add dates after 11-1 when creating df
 
 all_fall2 <- all_fall %>%
   left_join(enterDen)
 
+filter(all_fall2, enter_den == 1) # looks good
+
+# Join all_fall with Ch2 df 
+
+all_fall2 <- all_fall2 %>%
+  rename(ymd = date) %>%
+  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, at_densite, in_den, denning_bear, enter_den)
+
+b <- b %>%
+  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
+
+b2 <- b %>% 
+  full_join(all_fall2) %>%
+  distinct()
+
 filter(all_fall2, enter_den == 1)
-
-
-
 
 

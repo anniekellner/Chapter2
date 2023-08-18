@@ -78,54 +78,54 @@ denLocs$gps_lon <- round(denLocs$gps_lon, 1)
 
 # Merge with all USGS data
 
-all_fall <- allUSGS %>%
+ch2Fall <- allUSGS %>%
   select(animal:rate) %>%
-  filter(month > 9) %>%
+  filter(id %in% Ch2IDs & month > 9) %>%
   unite("id", c("animal", "year"), sep = '.', remove = FALSE) 
 
-all_fall$gps_lat <- round(all_fall$gps_lat, 1) # round to match denLocs and avoid GPS error
-all_fall$gps_lon <- round(all_fall$gps_lon, 1)
+ch2Fall$gps_lat <- round(ch2Fall$gps_lat, 1) # round to match denLocs and avoid GPS error
+ch2Fall$gps_lon <- round(ch2Fall$gps_lon, 1)
 
 inDen <- denLocs %>%
-  inner_join(all_fall)
+  inner_join(ch2Fall)
 
 inDen$at_densite <- 1
 
-# Merge in_den back into all_fall to get all dates
+# Merge in_den back into ch2Fall to get all dates
 
-all_fall <- all_fall %>%
+ch2Fall <- ch2Fall %>%
   left_join(inDen) %>%
   replace_na(list(at_densite = 0))
 
 # Criteria that bear needs to stay in den for > 5 days 
 
-# Prep USGS data (now all_fall) by adding datetime
+# Prep USGS data (now ch2Fall) by adding datetime
 
-all_fall <- all_fall %>%
+ch2Fall <- ch2Fall %>%
   unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
   unite("time", hour:second, sep = ':', remove = FALSE) 
 
-all_fall <- all_fall %>%
+ch2Fall <- ch2Fall %>%
   unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
   
-all_fall$datetime <- ymd_hms(all_fall$datetime, tz = "US/Alaska")
-all_fall$date <- ymd(all_fall$date)
+ch2Fall$datetime <- ymd_hms(ch2Fall$datetime, tz = "US/Alaska")
+ch2Fall$date <- ymd(ch2Fall$date)
 
 # ------  DAILY DATA  ---------------- #
 
-all_fall<- all_fall %>% # if bear is in den at all that day, in_den = 1
+ch2Fall<- ch2Fall %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
   mutate(den_day = any(at_densite == 1)) %>%
   ungroup()
 
-all_fall <- all_fall %>% # add column for denning_bear so is easily retrievable
+ch2Fall <- ch2Fall %>% # add column for denning_bear so is easily retrievable
   group_by(id) %>%
   mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% 
   ungroup()
 
 # Select only first entry of the day - denDaily DF (this avoids differences between GPS fix intervals)
 
-denDaily <- all_fall %>%
+denDaily <- ch2Fall %>%
   filter(denning_bear == 1) %>%
   group_by(id, date) %>%
   slice_head() %>%
@@ -162,37 +162,38 @@ day1date <- select(day1date, id, date)
 
 # Pull all points from specified date and add a column for enter_den
 
-enterDen <- day1date %>%
-  left_join(all_fall) %>%
+entranceDate <- day1date %>%
+  left_join(ch2Fall) %>%
   group_by(id) %>%
   filter(at_densite == 1) %>%
   slice_head()
 
-enterDen$enter_den <- 1
+entranceDate$enter_den <- 1
 
 # -----   JOIN BACK INTO MAIN DATAFRAMFE  --------- #
 
-# Join back into all_fall df with additional enter_den column (will also be start_date)
+# Join back into ch2Fall df with additional enter_den column (will also be start_date)
 # Ch2 does not have enough dates - did not add dates after 11-1 when creating df
 
-all_fall2 <- all_fall %>%
-  left_join(enterDen)
+ch2Fall2 <- ch2Fall %>%
+  left_join(entranceDate)
 
-filter(all_fall2, enter_den == 1) # looks good
+filter(ch2Fall2, enter_den == 1) # looks good
 
-# Join all_fall with Ch2 df 
+# Join ch2Fall with Ch2 df 
 
-all_fall2 <- all_fall2 %>%
+ch2Fall2 <- ch2Fall2 %>%
   rename(ymd = date) %>%
-  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, at_densite, in_den, denning_bear, enter_den)
+  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, at_densite, denning_bear, enter_den)
 
 b <- b %>%
   select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
 
 b2 <- b %>% 
-  full_join(all_fall2) %>%
+  full_join(ch2Fall2) %>%
   distinct()
 
-filter(all_fall2, enter_den == 1)
+filter(b2, enter_den == 1)
 
+unique(b2$id)
 

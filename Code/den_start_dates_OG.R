@@ -25,7 +25,11 @@ rm(list = ls())
 
 # ---- LOAD AND PREP DATA  ----------------- #
 
+## Load
+
 b <- readRDS(here("Data", "Derived-data", "DFs", "ch2_no_end_cutoff_080823.Rds")) 
+
+oldCh2 <- readRDS(here('Data', 'Derived-data', 'DFs', 'bears_ch2_110622.Rds')) # to see if there are bears in new pag data that are denning bears
 
 ch2IDs <- unique(b$id)
 
@@ -36,6 +40,23 @@ allUSGS <- read_csv(here("Data", "usgs_pbear_gps_ccde16_v20170131.csv")) # to ge
 den <- read_csv(here('Data', 'Denning_locs_dates.csv')) %>%
   rename(animal = ...1) 
 
+## Prep 
+
+# USGS 
+
+allUSGS <- allUSGS %>% # add columns for id, date, time
+  unite("id", c("animal", "year"), sep = '.', remove = FALSE) %>% # add column for id
+  unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
+  unite("time", hour:second, sep = ':', remove = FALSE) 
+
+allUSGS <- allUSGS %>% # add datetime
+  unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
+
+allUSGS$datetime <- ymd_hms(allUSGS$datetime, tz = "US/Alaska")
+allUSGS$date <- ymd(allUSGS$date)
+
+# Denning data 
+
 den$entrance_ymd <- mdy(den$entrance)
 den$year <- year(as.character(den$entrance_ymd)) 
 
@@ -43,9 +64,6 @@ den <- den %>%
   unite("id", c("animal", "year"), sep = '.')
 
 denIDs <- unique(den$id)
-
-oldCh2 <- readRDS(here('Data', 'Derived-data', 'DFs', 'bears_ch2_110622.Rds')) # to see if there are bears in new pag data that are denning bears
-
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
@@ -80,9 +98,9 @@ denLocs$gps_lon <- round(denLocs$gps_lon, 1)
 
 ch2Fall <- allUSGS %>%
   select(animal:rate) %>%
-  filter(id %in% Ch2IDs & month > 9) %>%
-  unite("id", c("animal", "year"), sep = '.', remove = FALSE) 
-
+  filter(month > 9) %>%
+  
+ch2Fall <- filter(ch2Fall, id %in% ch2IDs) 
 ch2Fall$gps_lat <- round(ch2Fall$gps_lat, 1) # round to match denLocs and avoid GPS error
 ch2Fall$gps_lon <- round(ch2Fall$gps_lon, 1)
 
@@ -102,14 +120,9 @@ ch2Fall <- ch2Fall %>%
 # Prep USGS data (now ch2Fall) by adding datetime
 
 ch2Fall <- ch2Fall %>%
-  unite("date", year:day, sep = '-', remove = FALSE) %>% # do not remove original columns
-  unite("time", hour:second, sep = ':', remove = FALSE) 
 
-ch2Fall <- ch2Fall %>%
-  unite("datetime", c("date", "time"), sep = " ", remove = FALSE) %>% glimpse()
-  
-ch2Fall$datetime <- ymd_hms(ch2Fall$datetime, tz = "US/Alaska")
-ch2Fall$date <- ymd(ch2Fall$date)
+
+
 
 # ------  DAILY DATA  ---------------- #
 
@@ -180,20 +193,66 @@ ch2Fall2 <- ch2Fall %>%
 
 filter(ch2Fall2, enter_den == 1) # looks good
 
-# Join ch2Fall with Ch2 df 
+# ---- MERGE LAT/LON SO DF HAS ALL VALUES ----------- #
+
+# Add all summer dates back to ch2Fall2
+
+summerUSGS <- allUSGS %>%
+  
 
 ch2Fall2 <- ch2Fall2 %>%
   rename(ymd = date) %>%
   select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, at_densite, denning_bear, enter_den)
 
-b <- b %>%
-  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
+which(is.na(ch2Fall2$gps_lat)) # no missing lat/lon values
+
+b <- b %>% # remove lat/lon from b so only merges from Ch2Fall2
+  select(id, ymd, datetime, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
 
 b2 <- b %>% 
-  full_join(ch2Fall2) %>%
-  distinct()
+  full_join(ch2Fall2) 
 
-filter(b2, enter_den == 1)
+which(is.na(b2$gps_lat)) 
 
-unique(b2$id)
+# See if any rows after that are NOT NA
+
+na <- b2[18105:nrow(b2),]
+which(!is.na(na$gps_lat)) # row 653
+
+na[653,]
+  
+  na[!is.na(gps_lat)]
+
+
+
+# Need to add back gps_lat and gps_lon for b2
+
+i <- seq(nrow(b2))
+
+b2[i,] <- Map(function(x, y) ifelse(is.na(x), y, x),
+               df1[i,], df2)
+
+df1
+  
+
+# Checks 
+
+filter(b2, enter_den == 1) # check enter_den date
+unique(b2$id) # check ID's
+
+setDT(b2)
+anyDuplicated(b2) # check for duplicate rows
+
+b %>%
+  group_by(id) %>%
+  arrange(id, datetime) %>%
+  slice_head()
+
+b %>%
+  group_by(id) %>%
+  arrange(id, datetime) %>%
+  slice_tail() %>%
+  ungroup()
+
+
 

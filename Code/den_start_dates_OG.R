@@ -60,9 +60,6 @@ allUSGS$date <- ymd(allUSGS$date)
 den$entrance_ymd <- mdy(den$entrance)
 den$year <- year(as.character(den$entrance_ymd)) 
 
-den <- den %>% 
-  unite("id", c("animal", "year"), sep = '.')
-
 denIDs <- unique(den$id)
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
@@ -97,8 +94,8 @@ denLocs$gps_lon <- round(denLocs$gps_lon, 1)
 # Merge with all USGS data
 
 ch2Fall <- allUSGS %>%
-  select(animal:rate) %>%
-  filter(month > 9) %>%
+  select(id:rate) %>%
+  filter(month > 9)
   
 ch2Fall <- filter(ch2Fall, id %in% ch2IDs) 
 ch2Fall$gps_lat <- round(ch2Fall$gps_lat, 1) # round to match denLocs and avoid GPS error
@@ -115,16 +112,9 @@ ch2Fall <- ch2Fall %>%
   left_join(inDen) %>%
   replace_na(list(at_densite = 0))
 
-# Criteria that bear needs to stay in den for > 5 days 
+# ----------  3-DAY CRITERIA  -------------------- #
 
-# Prep USGS data (now ch2Fall) by adding datetime
-
-ch2Fall <- ch2Fall %>%
-
-
-
-
-# ------  DAILY DATA  ---------------- #
+# Daily data
 
 ch2Fall<- ch2Fall %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
@@ -179,6 +169,7 @@ entranceDate <- day1date %>%
   left_join(ch2Fall) %>%
   group_by(id) %>%
   filter(at_densite == 1) %>%
+  select(id:datetime, gps_lon, gps_lat, distance:denning_bear) %>%
   slice_head()
 
 entranceDate$enter_den <- 1
@@ -193,52 +184,39 @@ ch2Fall2 <- ch2Fall %>%
 
 filter(ch2Fall2, enter_den == 1) # looks good
 
-# ---- MERGE LAT/LON SO DF HAS ALL VALUES ----------- #
-
-# Add all summer dates back to ch2Fall2
-
-summerUSGS <- allUSGS %>%
-  
-
-ch2Fall2 <- ch2Fall2 %>%
-  rename(ymd = date) %>%
-  select(id, ymd, datetime, gps_lat, gps_lon, distance, rate, at_densite, denning_bear, enter_den)
-
 which(is.na(ch2Fall2$gps_lat)) # no missing lat/lon values
 
-b <- b %>% # remove lat/lon from b so only merges from Ch2Fall2
+# ---- MERGE LAT/LON SO DF HAS ALL VALUES ----------- #
+
+# Create owsUSGS for complete lat/lon list
+
+owsUSGS <- allUSGS %>%
+  filter(month > 6 & id %in% ch2IDs) %>%
+  select(id:rate)
+
+ch2Fall2 <- ch2Fall2 %>%
+  select(id, date, datetime, distance, rate, at_densite, denning_bear, enter_den)
+
+owsUSGS <- owsUSGS %>%
+  full_join(ch2Fall2) %>%
+  rename(ymd = date)
+
+filter(owsUSGS, enter_den == 1)
+
+# merge with previous ch2 data
+
+b <- b %>% # remove lat/lon from b so gps coords come from owsUSGS
   select(id, ymd, datetime, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
 
 b2 <- b %>% 
-  full_join(ch2Fall2) 
-
-which(is.na(b2$gps_lat)) 
-
-# See if any rows after that are NOT NA
-
-na <- b2[18105:nrow(b2),]
-which(!is.na(na$gps_lat)) # row 653
-
-na[653,]
+  full_join(owsUSGS) 
   
-  na[!is.na(gps_lat)]
-
-
-
-# Need to add back gps_lat and gps_lon for b2
-
-i <- seq(nrow(b2))
-
-b2[i,] <- Map(function(x, y) ifelse(is.na(x), y, x),
-               df1[i,], df2)
-
-df1
-  
-
 # Checks 
 
 filter(b2, enter_den == 1) # check enter_den date
 unique(b2$id) # check ID's
+
+## NEED TO CHECK PAGANO ID'S AND ELIMINATE ANY THAT DO NOT QUALIFY
 
 setDT(b2)
 anyDuplicated(b2) # check for duplicate rows

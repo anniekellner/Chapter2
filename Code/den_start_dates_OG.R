@@ -40,6 +40,9 @@ allUSGS <- read_csv(here("Data", "usgs_pbear_gps_ccde16_v20170131.csv")) # to ge
 den <- read_csv(here('Data', 'Denning_locs_dates.csv')) %>%
   rename(animal = ...1) 
 
+pag <- read_csv(here("Data", "Pagano_bears.csv"))
+
+
 ## Prep 
 
 # USGS 
@@ -61,6 +64,10 @@ den$entrance_ymd <- mdy(den$entrance)
 den$year <- year(as.character(den$entrance_ymd)) 
 
 denIDs <- unique(den$id)
+
+# Pagano bears
+
+
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
@@ -216,7 +223,24 @@ b2 <- b %>%
 filter(b2, enter_den == 1) # check enter_den date
 unique(b2$id) # check ID's
 
-## NEED TO CHECK PAGANO ID'S AND ELIMINATE ANY THAT DO NOT QUALIFY
+## --- CHECK AGAINST PAGANO BEARS AND ELIMINATE BEARS THAT ARE NOT INCLUDED IN HIS LIST --------- #
+
+# Criteria for pag bears: no gap in data > 108 hrs and fix rate <= 4 hrs
+
+pag <- pag %>%
+  select(`Bear ID`, Year) %>%
+  mutate(`Bear ID` = as.character(`Bear ID`)) %>%
+  unite("id", `Bear ID`:Year, sep = '.', remove = TRUE) %>%
+  mutate(id = paste0("pb_", id))
+
+pag[1,] <- "pb_06810.2008"
+
+# IDs
+
+pagIDs <- pag$id
+myIDs <- unique(b2$id)
+
+dif <- setdiff(myIDs, pagIDs) # "pb_20418.2005" "pb_21237.2011" "pb_32255.2008"
 
 setDT(b2)
 anyDuplicated(b2) # check for duplicate rows

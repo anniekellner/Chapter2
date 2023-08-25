@@ -72,6 +72,13 @@ denIDs <- unique(den$id)
 
 # Pagano bears
 
+pag <- pag %>%
+  select(`Bear ID`, Year) %>%
+  mutate(`Bear ID` = as.character(`Bear ID`)) %>%
+  unite("id", `Bear ID`:Year, sep = '.', remove = TRUE) %>%
+  mutate(id = paste0("pb_", id))
+
+pag[1,] <- "pb_06810.2008"
 
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
 
@@ -198,7 +205,7 @@ entranceDate <- day1date %>%
 
 entranceDate$enter_den <- 1
 
-# -----   JOIN BACK INTO MAIN DATAFRAMFE  --------- #
+# -----   JOIN BACK INTO USGS DATAFRAMFE  --------- #
 
 # Join back into ch2USGS_ows with additional denning-related columns
 
@@ -215,69 +222,48 @@ b %>% group_by(id) %>% slice_head() %>% print(n = 28) # none start prior to July
 filter(ch2USGS_ows, enter_den == 1) # looks good
 
 
-# merge with previous ch2 data
+# ----- MERGE WITH EXISTING CHAPTER 2 DATA  ----------------------- #
 
-b <- b %>% # remove lat/lon from b so gps coords come from owsUSGS
-  select(id, ymd, datetime, departure_to_ice, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
+# Make separate df for categorical variables
 
-b2 <- b %>% 
-  full_join(owsUSGS) 
+bCat <- b %>%
+  select(id, age, repro) %>%
+  group_by(id) %>%
+  slice_head() %>% print(n = length(unique(b$id)))
+
+addBack <- b %>% # add back with left_join
+  select(id:rate, departure_to_ice:collar_drop)
+
+b <- b %>% # remove columns that will need to be changed 
+  select(id:ymd)
+
+# b (previous chapter 2 data) and USGS data should not have duplicate rows (theoretically) since all common variables can be matched
+
+ch2 <-ch2USGS_ows %>% 
+  left_join(b) 
 
 # Checks 
 
-filter(b2, enter_den == 1) # check enter_den date
-unique(b2$id) # check ID's
+filter(ch2, enter_den == 1) # check enter_den date
+unique(ch2$id) # check ID's
 
 ## --- CHECK AGAINST PAGANO BEARS AND ELIMINATE BEARS THAT ARE NOT INCLUDED IN HIS LIST --------- #
 
 # Criteria for pag bears: no gap in data > 108 hrs and fix rate <= 4 hrs
 
-pag <- pag %>%
-  select(`Bear ID`, Year) %>%
-  mutate(`Bear ID` = as.character(`Bear ID`)) %>%
-  unite("id", `Bear ID`:Year, sep = '.', remove = TRUE) %>%
-  mutate(id = paste0("pb_", id))
-
-pag[1,] <- "pb_06810.2008"
-
-# IDs
-
 pagIDs <- pag$id
-myIDs <- unique(b2$id)
+myIDs <- unique(ch2$id)
 
 dif <- setdiff(myIDs, pagIDs) # "pb_20418.2005" "pb_21237.2011" "pb_32255.2008"
+dif
 
-# ----------  ELIMINATE DUPLICATES ------------ #
+# ----------  CHECK FOR DUPLICATES ------------ #
 
 # Check for duplicate id/datetime combos
 
-b3 <- b2 %>%
-  select(-c(at_bonepile, collar_drop, start.swim)) %>%
-  replace_na(list(departure_to_ice = 0, landfall = 0, start.swim = 0, collar_drop = 0, study_end = 0)) %>% distinct()
-
-b4 <- b3 %>%
-  select(-c(age, repro)) %>% distinct()
-
-
-dupCheck <- b4 %>%
+dupCheck <- ch2 %>%
   select(id, datetime)
 
-setDT(dupCheck) # 24954
-anyDuplicated(dupCheck)
+setDT(dupCheck) 
+anyDuplicated(dupCheck) # looks good!
 
-
-which(duplicated(dupCheck))
-
-dups <- b2[24954:26248,]
-unique(dups$id) # "pb_06810.2008" "pb_20492.2008" "pb_20586.2008" "pb_20966.2008"
-
-# Check why they're duplicated
-p6810 <- b4 %>%
-  filter(id == "pb_06810.2008" & ymd == '2008-10-01')
-
-#id        ymd            datetime departure_to_ice land landfall study_end ordinal_date   animal year month day
-#1: pb_06810.2008 2008-10-01 2008-10-01 00:01:05                0    0        0         0          275 pb_06810 2008    10   1
-#23: pb_06810.2008 2008-10-01 2008-10-01 00:01:05                0    1        0         0          275 pb_06810 2008    10   1
-
-test <- p6810 %>%
-  arrange(datetime) %>% distinct()

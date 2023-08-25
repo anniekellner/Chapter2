@@ -269,3 +269,8 @@ anyDuplicated(dupCheck) # looks good!
 
 # ------  REMOVE DATES PRIOR TO STUDY_START --------------- #
 
+# Check start dates
+
+ch2 %>% filter(study_start == 1) # Nope, bears are missing. Need to re-run start_dates_for_new_dataset.R
+
+#saveRDS(ch2, file = here("Data", "Derived-data", "DFs", "Ch2_July-Dec_withDenInfo.Rds"))

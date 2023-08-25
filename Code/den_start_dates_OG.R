@@ -267,3 +267,5 @@ dupCheck <- ch2 %>%
 setDT(dupCheck) 
 anyDuplicated(dupCheck) # looks good!
 
+# ------  REMOVE DATES PRIOR TO STUDY_START --------------- #
+

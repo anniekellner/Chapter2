@@ -58,18 +58,24 @@ allUSGS <- allUSGS %>% # add datetime
 allUSGS$datetime <- ymd_hms(allUSGS$datetime, tz = "US/Alaska")
 allUSGS$date <- ymd(allUSGS$date)
 
+allUSGS <- allUSGS %>%
+  select(id:rate) 
+
 # Denning data 
 
 den$entrance_ymd <- mdy(den$entrance)
 den$year <- year(as.character(den$entrance_ymd)) 
+den <- den %>%
+  unite("id", animal, year, sep = '.', remove = FALSE)
 
 denIDs <- unique(den$id)
 
 # Pagano bears
 
 
-
 # -- ADD STUDY END DATES FOR DENNING BEARS  --------------- #
+
+# all df is all USGS data with added columns
 
 allDen <- all %>% # Just to get IDs - later will get all data
   filter(enter_den == 1 | 
@@ -100,42 +106,53 @@ denLocs$gps_lon <- round(denLocs$gps_lon, 1)
 
 # Merge with all USGS data
 
-ch2Fall <- allUSGS %>%
+USGS_fall <- allUSGS %>% # Need to exclude spring dates because bears are still in dens in spring
   select(id:rate) %>%
   filter(month > 9)
   
-ch2Fall <- filter(ch2Fall, id %in% ch2IDs) 
-ch2Fall$gps_lat <- round(ch2Fall$gps_lat, 1) # round to match denLocs and avoid GPS error
-ch2Fall$gps_lon <- round(ch2Fall$gps_lon, 1)
+# Round GPS data for ch2Fall df
+gpsRound <- filter(USGS_fall, id %in% ch2IDs) 
+gpsRound$gps_lat <- round(gpsRound$gps_lat, 1) # round to match denLocs and avoid GPS error
+gpsRound$gps_lon <- round(gpsRound$gps_lon, 1)
 
 inDen <- denLocs %>%
-  inner_join(ch2Fall)
+  inner_join(gpsRound)
 
 inDen$at_densite <- 1
 
-# Merge in_den back into ch2Fall to get all dates
+# Merge in_den back into gpsRound (all USGS > Sept) to get all dates
 
-ch2Fall <- ch2Fall %>%
+noGPS <- gpsRound %>%
   left_join(inDen) %>%
-  replace_na(list(at_densite = 0))
+  replace_na(list(at_densite = 0)) %>%
+  select(-c(gps_lat, gps_lon)) # in order to merge back by datetime and recover full gps locations
+
+# noGPS = all fall USGS data with at_densite added
+
+# Merge into allUSGS df
+
+ch2USGS_ows <- allUSGS %>%
+  filter(id %in% ch2IDs & month > 6) %>% # ows only
+  left_join(noGPS) %>%
+  replace_na(list(at_densite = 0)) %>% glimpse()
 
 # ----------  3-DAY CRITERIA  -------------------- #
 
 # Daily data
 
-ch2Fall<- ch2Fall %>% # if bear is in den at all that day, in_den = 1
+ch2USGS_ows<- ch2USGS_ows %>% # if bear is in den at all that day, in_den = 1
   group_by(id, date) %>%
   mutate(den_day = any(at_densite == 1)) %>%
-  ungroup()
+  ungroup() %>% glimpse()
 
-ch2Fall <- ch2Fall %>% # add column for denning_bear so is easily retrievable
+ch2USGS_ows <- ch2USGS_ows %>% # add column for denning_bear so is easily retrievable
   group_by(id) %>%
   mutate(denning_bear = if_else(any(at_densite == 1), 1, 0)) %>% 
-  ungroup()
+  ungroup() %>% glimpse()
 
 # Select only first entry of the day - denDaily DF (this avoids differences between GPS fix intervals)
 
-denDaily <- ch2Fall %>%
+denDaily <- ch2USGS_ows %>%
   filter(denning_bear == 1) %>%
   group_by(id, date) %>%
   slice_head() %>%
@@ -146,7 +163,7 @@ denDaily<- denDaily %>%
   group_by(id) %>%
   mutate(rowNum = row_number()) %>% 
   select(id, date, gps_lat, gps_lon, den_day:rowNum) %>%
-  ungroup()
+  ungroup() %>% glimpse()
 
 # Use data.table to get cumulative den time with reset
 
@@ -173,7 +190,7 @@ day1date <- select(day1date, id, date)
 # Pull all points from specified date and add a column for enter_den
 
 entranceDate <- day1date %>%
-  left_join(ch2Fall) %>%
+  left_join(ch2USGS_ows) %>%
   group_by(id) %>%
   filter(at_densite == 1) %>%
   select(id:datetime, gps_lon, gps_lat, distance:denning_bear) %>%
@@ -183,41 +200,29 @@ entranceDate$enter_den <- 1
 
 # -----   JOIN BACK INTO MAIN DATAFRAMFE  --------- #
 
-# Join back into ch2Fall df with additional enter_den column (will also be start_date)
-# Ch2 does not have enough dates - did not add dates after 11-1 when creating df
+# Join back into ch2USGS_ows with additional denning-related columns
 
-ch2Fall2 <- ch2Fall %>%
-  left_join(entranceDate)
+ch2USGS_ows <- ch2USGS_ows %>% # starts at July 1
+  left_join(entranceDate) %>% 
+  rename(ymd = date) %>%
+  select(-time) %>%
+  replace_na(list(enter_den = 0)) %>%
+  glimpse()
 
-filter(ch2Fall2, enter_den == 1) # looks good
+ch2USGS_ows %>% group_by(id) %>% slice_head()
+b %>% group_by(id) %>% slice_head() %>% print(n = 28) # none start prior to July 1
 
-which(is.na(ch2Fall2$gps_lat)) # no missing lat/lon values
+filter(ch2USGS_ows, enter_den == 1) # looks good
 
-# ---- MERGE LAT/LON SO DF HAS ALL VALUES ----------- #
-
-# Create owsUSGS for complete lat/lon list
-
-owsUSGS <- allUSGS %>%
-  filter(month > 6 & id %in% ch2IDs) %>%
-  select(id:rate)
-
-ch2Fall2 <- ch2Fall2 %>%
-  select(id, date, datetime, distance, rate, at_densite, denning_bear, enter_den)
-
-owsUSGS <- owsUSGS %>%
-  full_join(ch2Fall2) %>%
-  rename(ymd = date)
-
-filter(owsUSGS, enter_den == 1)
 
 # merge with previous ch2 data
 
 b <- b %>% # remove lat/lon from b so gps coords come from owsUSGS
-  select(id, ymd, datetime, departure_to_ice, land, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
+  select(id, ymd, datetime, departure_to_ice, landfall, age, repro, at_bonepile, start.swim, collar_drop, study_end, ordinal_date)
 
 b2 <- b %>% 
   full_join(owsUSGS) 
-  
+
 # Checks 
 
 filter(b2, enter_den == 1) # check enter_den date
@@ -242,19 +247,37 @@ myIDs <- unique(b2$id)
 
 dif <- setdiff(myIDs, pagIDs) # "pb_20418.2005" "pb_21237.2011" "pb_32255.2008"
 
-setDT(b2)
-anyDuplicated(b2) # check for duplicate rows
+# ----------  ELIMINATE DUPLICATES ------------ #
 
-b %>%
-  group_by(id) %>%
-  arrange(id, datetime) %>%
-  slice_head()
+# Check for duplicate id/datetime combos
 
-b %>%
-  group_by(id) %>%
-  arrange(id, datetime) %>%
-  slice_tail() %>%
-  ungroup()
+b3 <- b2 %>%
+  select(-c(at_bonepile, collar_drop, start.swim)) %>%
+  replace_na(list(departure_to_ice = 0, landfall = 0, start.swim = 0, collar_drop = 0, study_end = 0)) %>% distinct()
+
+b4 <- b3 %>%
+  select(-c(age, repro)) %>% distinct()
 
 
+dupCheck <- b4 %>%
+  select(id, datetime)
 
+setDT(dupCheck) # 24954
+anyDuplicated(dupCheck)
+
+
+which(duplicated(dupCheck))
+
+dups <- b2[24954:26248,]
+unique(dups$id) # "pb_06810.2008" "pb_20492.2008" "pb_20586.2008" "pb_20966.2008"
+
+# Check why they're duplicated
+p6810 <- b4 %>%
+  filter(id == "pb_06810.2008" & ymd == '2008-10-01')
+
+#id        ymd            datetime departure_to_ice land landfall study_end ordinal_date   animal year month day
+#1: pb_06810.2008 2008-10-01 2008-10-01 00:01:05                0    0        0         0          275 pb_06810 2008    10   1
+#23: pb_06810.2008 2008-10-01 2008-10-01 00:01:05                0    1        0         0          275 pb_06810 2008    10   1
+
+test <- p6810 %>%
+  arrange(datetime) %>% distinct()

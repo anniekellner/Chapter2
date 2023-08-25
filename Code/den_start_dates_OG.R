@@ -269,8 +269,35 @@ anyDuplicated(dupCheck) # looks good!
 
 # ------  REMOVE DATES PRIOR TO STUDY_START --------------- #
 
-# Check start dates
+# Not all start dates are included. Need to cross-reference with original df
 
-ch2 %>% filter(study_start == 1) # Nope, bears are missing. Need to re-run start_dates_for_new_dataset.R
+ch2 <- ch2 %>% select(-study_start)
 
-#saveRDS(ch2, file = here("Data", "Derived-data", "DFs", "Ch2_July-Dec_withDenInfo.Rds"))
+b %>% filter(study_start == 1) # all start dates included
+
+ss <- b %>%
+  select(id, datetime, study_start) %>%
+  filter(study_start == 1)
+
+ch2 <- ch2 %>%
+  left_join(ss) %>% 
+  replace_na(list(study_start = 0)) %>% glimpse()
+  
+ch2 %>% filter(study_start == 1) # good
+
+# Remove rows prior to study_start
+
+ch2_2 <- ch2 %>% # every variable becomes NA prior to landfall (except id which is grouping variable)
+  group_by(id) %>%
+  mutate(across(everything(),
+                ~replace(., row_number() < match(1, study_start), NA))) %>%
+  ungroup()
+
+noID <- ch2_2 %>% # Remove rows where all vars are NA but ID
+  select(animal:study_start) %>%
+  filter(if_any(everything(), ~ !is.na(.)))
+
+ch2_3 <- ch2_2 %>% # Put ID back in dataframe 
+  right_join(noID)
+
+#saveRDS(ch2_3, here("Data", "Derived-data", "DFs", "OG_ch2_denInfo.Rds"))

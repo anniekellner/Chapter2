@@ -1,7 +1,6 @@
-########################################################
-####    ADD COLUMNS TO DISTINGUISH BEARS    #############
-####  THAT ARRIVED FROM ICE VS COLLARED ON LAND #########
-#########################################################
+##########################################################################
+####    REVISE START DATES FOR PAG BEARS CAPTURED ON LAND    #############
+##########################################################################
 
 library(tidyverse)
 library(here)
@@ -30,6 +29,14 @@ pag <- pag %>%
 pag[1,] <- "pb_06810.2008"
 
 #saveRDS(pag, here("Data", "Derived-data", "Pag_IDs.Rds"))
+
+# --  EXAMINE STUDY START DATES --------- #
+
+b %>% group_by(id) %>% select(id, datetime, study_start) %>% slice_head() %>% print(n = 28)
+
+# 20965.2008 and 20975.2008 are Pag bears collared on land. Need to revise start dates. 
+
+# ----- CHANGE STUDY START TO REFLECT 5-DAY GRACE PERIOD FOR PAG BEARS CAPTURED ON LAND --------- #
 
 b <- b %>% 
   select(-study_start)

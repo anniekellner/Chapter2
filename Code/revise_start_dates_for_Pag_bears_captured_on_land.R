@@ -72,7 +72,10 @@ noID <- b %>% # Remove rows where all vars are NA but ID # 31893 rows
 b <- b %>% # Put ID back in dataframe 
   right_join(noID) # 31893 rows: looks good
 
-#saveRDS(b, here("Data", "Derived-data", "DFs", "OG_ch2_082623.Rds"))
+b <- b %>%
+  replace_na(list(landfall = 0))
+
+#aveRDS(b, here("Data", "Derived-data", "DFs", "OG_ch2_082623.Rds"))
 
 
 

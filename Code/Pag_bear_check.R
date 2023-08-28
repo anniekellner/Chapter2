@@ -23,3 +23,11 @@ max(pb32255$time_lapse, na.rm = TRUE) # no time lapses > 108 hrs
 
 start <- first(pb32255$datetime)
 end <- last(pb32255$datetime) # not sure why this bear was excluded. No data gap and hourly fix rate
+
+ex <- b %>% filter(id == "pb_20418.2005" | 
+                     id == "pb_21237.2011")
+
+b2 <- b %>%
+  anti_join(ex)
+
+#saveRDS(b2, here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))

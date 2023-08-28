@@ -129,3 +129,5 @@ b2 <- b %>%
   left_join(bsf2)
 
 filter(b2, departure_to_ice == 1) # row numbers identical - no duplicates
+
+#saveRDS(b2, here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))

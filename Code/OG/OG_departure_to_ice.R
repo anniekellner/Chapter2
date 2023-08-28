@@ -42,7 +42,7 @@ demPoly_5k_crop <- st_crop(demPoly_5k, rec)
 buff5k <- demPoly_5k_crop %>%
   filter(OBJECTID == 14) # excludes Canada
 
-b <- select(b, -land) # not correct: did not account for all bears and all dates
+b <- select(b, -c(land, departure_to_ice)) # not correct: did not account for all bears and all dates
 
 bsf <- st_as_sf(b, coords = c("gps_lon", "gps_lat"), crs = 4326)
 bsf <- st_transform(bsf, st_crs(demPoly_5k))
@@ -70,9 +70,9 @@ iceDaily <- on_ice %>% # Take the first daily observation in order to see whethe
   slice_head() %>%
   ungroup() %>% glimpse()
 
-iceDaily <- iceDaily %>% # CRI
+iceDaily <- iceDaily %>% 
   group_by(id) %>%
-  filter(month > 9) %>%
+  filter(month > 9) %>% # Do not count water excursions prior to October
   mutate(rowNum = row_number()) %>% 
   select(id, ymd, datetime, on_ice, rowNum) %>% glimpse()
 
@@ -88,13 +88,13 @@ lastLandDate <- iceDaily %>%
   filter(days_on_ice == 7) %>% 
   group_by(id) %>% # Because some bears leave ice and then return, but the return isn't biologically meaningful (based on data examination)
   slice_head() %>%
-  mutate(day1row = rowNum - 7) %>% # Because need the day PRIOR to the first day bear is not on land
+  mutate(departRow = rowNum - 7) %>% # Because need the day PRIOR to the first day bear is not on land
   group_by(id) %>%
   slice_head() %>%
-  select(id, day1row)
+  select(id, departRow)
 
 lastLandDate <- lastLandDate %>%
-  rename(rowNum = day1row)
+  rename(rowNum = departRow)
 
 departDate <- semi_join(iceDaily, lastLandDate)
 departDate <- select(departDate, id, ymd)
@@ -105,4 +105,21 @@ departDatetime <- departDate %>%
   left_join(bsf) %>%
   group_by(id) %>%
   filter(land == TRUE) %>%
-  slice_tail()
+  slice_tail() %>%
+  ungroup()
+
+departDatetime$departure_to_ice <- 1
+
+departDatetime <- st_drop_geometry(departDatetime)
+
+# ------  JOIN BACK INTO MAIN DF ----------- #
+
+# First join back into bsf to get 'land' column
+
+bsf2 <- bsf %>%
+  left_join(departDatetime)
+  
+
+b2 <- b %>%
+  select(left_join(departDatetime) # row numbers identical - no duplicates
+filter(b2, departure_to_ice == 1) # only 4 obs. Fuck. 

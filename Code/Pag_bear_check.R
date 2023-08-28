@@ -13,7 +13,7 @@ b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))
 pagNo <- b %>%
   filter(id == "pb_20418.2005" | # fix rate < 4 hrs
            id == "pb_21237.2011" | # data gap > 108 hrs
-           id == "pb_32255.2008") # unclear
+           id == "pb_32255.2008") # unclear - keep bear in unless told otherwise
 
 pb32255 <- b %>% filter(id == "pb_32255.2008") %>% mutate(row = row_number())
 pb32255 <- pb32255 %>%

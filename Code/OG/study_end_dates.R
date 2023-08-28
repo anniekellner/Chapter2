@@ -95,5 +95,21 @@ b2 <- b %>%
   left_join(studyEnd) %>%
   replace_na(list(study_end = 0))
 
+# ---   ELIMINATE DATES AFTER STUDY_END ------------- #
 
+b3 <- b2 %>%
+  group_by(id) %>%
+  mutate(across(everything(),
+                ~replace(., row_number() > match(1, study_end), NA))) %>%
+  ungroup()
 
+noID <- b3 %>% # Remove rows where all vars are NA but ID # 24716 rows
+  select(animal:study_end) %>%
+  filter(if_any(everything(), ~ !is.na(.)))
+
+b3<- b3 %>% # Put ID back in dataframe 
+  right_join(noID) # 324716 rows: looks good
+
+b3 %>% group_by(id) %>% slice_tail() %>% glimpse() # check - looks good
+
+#saveRDS(b3, here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))

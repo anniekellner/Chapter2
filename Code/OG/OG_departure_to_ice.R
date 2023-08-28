@@ -2,6 +2,8 @@
 ###     RE-RUN DATES OF DEPARTURE TO ICE    ##############################
 ##########################################################################
 
+## CRITERIA: Departure to ice = the first day between October and December after which bear does not return to land for 7 days
+
 # Aug 26, 2023
 # OG bears
 
@@ -11,6 +13,7 @@ library(terra)
 library(here)
 library(tmap)
 library(tmaptools)
+library(data.table)
 library(conflicted)
 
 conflicts_prefer(
@@ -57,25 +60,49 @@ bsf <- st_transform(bsf, st_crs(demPoly_5k))
 
 bsf$land <- st_intersects(bsf, buff5k) %>% lengths > 0 # https://stackoverflow.com/questions/49294933/r-convert-output-from-sfst-within-to-vector
 
-landDaily <- bsf %>% # Create column for on_land = TRUE or FALSE (for later, if bear was on land that day at any point)
+on_ice <- bsf %>% # Create column for on_ice (land = FALSE); if bear was on ice that day = 1, otherwise 0
   group_by(id, ymd) %>%
-  mutate(on_land = any(land == TRUE)) %>%
-  ungroup()
-
-on_ice <- landDaily %>% # Create column for on_ice (land = FALSE)
-  mutate(on_ice = if_else(
-  on_land == TRUE, 0, 1)) 
-
-on_ice <- on_ice %>% # Take the first daily observation in order to see whether bear used land that day
+  mutate(on_ice = if_else(any(land == TRUE), 0, 1)) %>%
+  ungroup() %>% glimpse()
+    
+iceDaily <- on_ice %>% # Take the first daily observation in order to see whether bear used land that day
   group_by(id, ymd) %>%
   slice_head() %>%
-  ungroup()
+  ungroup() %>% glimpse()
 
-on_ice <- on_ice %>%
+iceDaily <- iceDaily %>% # CRI
   group_by(id) %>%
-  mutate(cum_ice = cumsum(on_ice)) %>%
-  mutate(rowNum = row_number()) %>% glimpse()
+  filter(month > 9) %>%
+  mutate(rowNum = row_number()) %>% 
+  select(id, ymd, datetime, on_ice, rowNum) %>% glimpse()
 
-day7 <- on_ice %>% 
-  filter(cum_ice == 7) %>% 
-  select(id, ymd, rowNum) 
+# Use data.table to get cumulative den time with reset
+
+setDT(iceDaily)
+
+iceDaily[, days_on_ice := on_ice*cumsum(on_ice), .(id, rleid(on_ice))] 
+
+# --- GET DEPARTURE DATETIME  --------- #
+
+lastLandDate <- iceDaily %>% 
+  filter(days_on_ice == 7) %>% 
+  group_by(id) %>% # Because some bears leave ice and then return, but the return isn't biologically meaningful (based on data examination)
+  slice_head() %>%
+  mutate(day1row = rowNum - 7) %>% # Because need the day PRIOR to the first day bear is not on land
+  group_by(id) %>%
+  slice_head() %>%
+  select(id, day1row)
+
+lastLandDate <- lastLandDate %>%
+  rename(rowNum = day1row)
+
+departDate <- semi_join(iceDaily, lastLandDate)
+departDate <- select(departDate, id, ymd)
+
+# Match with dates from main df 
+
+departDatetime <- departDate %>%
+  left_join(bsf) %>%
+  group_by(id) %>%
+  filter(land == TRUE) %>%
+  slice_tail()

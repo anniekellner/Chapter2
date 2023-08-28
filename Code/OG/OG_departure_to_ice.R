@@ -118,8 +118,14 @@ departDatetime <- st_drop_geometry(departDatetime)
 
 bsf2 <- bsf %>%
   left_join(departDatetime)
+
+filter(bsf2, departure_to_ice == 1) # row numbers identical - no duplicates
   
+bsf2 <- bsf2 %>%
+  st_drop_geometry() %>%
+  replace_na(list(departure_to_ice = 0))
 
 b2 <- b %>%
-  select(left_join(departDatetime) # row numbers identical - no duplicates
-filter(b2, departure_to_ice == 1) # only 4 obs. Fuck. 
+  left_join(bsf2)
+
+filter(b2, departure_to_ice == 1) # row numbers identical - no duplicates

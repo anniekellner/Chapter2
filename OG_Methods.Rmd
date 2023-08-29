@@ -19,23 +19,40 @@ conflicts_prefer(
   dplyr::filter()
 )
 ```
-
-
-
-## R Markdown
-
+## Data Collection
 
 ```{r load-df}
 b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))
 
 ```
 
-## Including Plots
+*For Data Collection paragraph:* 
 
-You can also embed plots, for example:
+# Bear IDs and Years
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r ids-and-years}
+
+table(b$animal, b$year)
+length(unique(b$id)) # bear-summers
+length(unique(b$animal))
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+* 26 bear years
+* 23 individuals
+* 3 bears with two years of data
+
+# GPS data
+
+-	GPS fix rates and how many bears with each fix rate
+-	Rate of missed fixes 
+
+```{r gps-data}
+
+```
+
+
+LATER: Can check whether missed fixes appear to be related to habitat variables. For now, say they aren't
+
+
+

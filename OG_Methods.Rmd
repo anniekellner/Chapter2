@@ -105,5 +105,35 @@ sd(summary$DaysTrack)
 
 LATER: Can check whether missed fixes appear to be related to habitat variables. For now, say they aren't
 
+```{r study-window}
 
+start <- b%>%
+  group_by(id) %>%
+  slice_head()
+
+summary(start)
+sd(start$ordinal_date)
+
+end <- b %>%
+  group_by(id) %>%
+  slice_tail()
+
+summary(end)
+sd(end$ordinal_date)
+```
+
+```{r bear-categories}
+
+lf <- b %>%
+  filter(landfall == 1)
+
+l <- b %>%
+  group_by(id) %>%
+  slice_head() %>%
+  filter(landfall == 0)
+
+filter(b, departure_to_ice == 1)
+filter(b, enter_den == 1)
+
+```
 

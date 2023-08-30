@@ -13,15 +13,23 @@ knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse)
 library(here)
+library(sf)
+library(adehabitatLT)
+library(tmap)
+library(tmaptools)
+library(knitr)
 library(conflicted)
 
 conflicts_prefer(
-  dplyr::filter()
+  dplyr::filter(),
+  dplyr::select()
 )
 ```
 ## Data Collection
 
-```{r load-df}
+```{r load-data}
+
+# Bears
 b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))
 
 ```
@@ -42,15 +50,58 @@ length(unique(b$animal))
 * 23 individuals
 * 3 bears with two years of data
 
-# GPS data
+# Tracking data
 
--	GPS fix rates and how many bears with each fix rate
--	Rate of missed fixes 
 
 ```{r gps-data}
 
+gps <- b %>% select(id, datetime, gps_lon, gps_lat)
+
+# Transform to Albers Equal Area
+
+bsf <- st_as_sf(gps, coords = c('gps_lon', 'gps_lat'), crs = st_crs(4326))
+
+bsf <- bsf %>% st_transform(st_crs(3338))
+bsf <- cbind(bsf, st_coordinates(bsf))
+
+# Plot to check transformation looks good - it does
+
+#tmap_mode('view')
+
+#tm_shape(bsf) + 
+  #tm_symbols()
+
 ```
 
+```{r adehabitatLT}
+
+#Convert to dataframe
+
+bdf <- bsf %>%
+  st_drop_geometry() %>%
+  as.data.frame() %>%
+  dplyr::select(id, datetime, X, Y) %>%
+  na.omit()
+
+ltraj <- as.ltraj(bdf[,c("X","Y")], date=bdf$datetime, id=bdf$id, typeII = TRUE)
+
+summary <- summary(ltraj)
+
+summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)
+
+summary <- summary %>%
+  select(id, date.begin, date.end, DaysTrack) %>%
+  mutate(year = year(date.begin)) %>%
+  mutate(DaysTrack = as.numeric(DaysTrack)) %>%
+  arrange(year) 
+
+summary(summary)
+
+sd(summary$DaysTrack)
+```
+* Mean = 74.5
+* Range = 38.8 - 157.0
+* sd = 32.8
 
 LATER: Can check whether missed fixes appear to be related to habitat variables. For now, say they aren't
 

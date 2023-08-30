@@ -45,7 +45,7 @@ iceDen <- b %>%
   filter(departure_to_ice == 1 | 
            enter_den == 1) 
 
-mean(iceDen$ordinal_date) # 307.083, Nov 3rd in a regular year. Going to use Nov. 4 because so many bears are 2008 which is leap year.
+max(iceDen$ordinal_date) # 343, Dec 8 in a regular year. 
 
 
 # ------ DATA LOST IN SEPTEMBER OR OCTOBER  --------- #
@@ -81,7 +81,7 @@ land_end <- b %>%
   filter(!(id %in% iceIDs | 
              id %in% denIDs | 
              id %in% cdIDs)) %>%
-  filter(ordinal_date < 308) %>%
+  filter(ordinal_date < 344) %>%
   group_by(id) %>%
   slice_tail() 
 
@@ -112,4 +112,4 @@ b3<- b3 %>% # Put ID back in dataframe
 
 b3 %>% group_by(id) %>% slice_tail() %>% glimpse() # check - looks good
 
-#saveRDS(b3, here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))
+saveRDS(b3, here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))

@@ -4,10 +4,12 @@
 
 ## Add a 1.5 km buffer to islands to account for GPS error and shoreline changes
 
-library(dplyr)
+library(tidyverse)
 library(sf)
 library(tmap)
 library(tmaptools)
+library(here)
+library(conflicted)
 
 rm(list= ls())
 

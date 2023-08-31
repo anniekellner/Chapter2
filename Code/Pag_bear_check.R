@@ -30,4 +30,14 @@ ex <- b %>% filter(id == "pb_20418.2005" |
 b2 <- b %>%
   anti_join(ex)
 
+# Check other bears
+
+pb_20529 <- b %>% filter(id == "pb_20529.2004") %>% mutate(row = row_number())
+pb_20529 <- pb_20529 %>%
+  mutate(time_lapse = difftime(as.POSIXct(datetime), dplyr::lag(as.POSIXct(datetime)), units = "hours")) %>% glimpse()
+
+max(pb_20529$time_lapse, na.rm = TRUE) # no time lapses > 108 hrs
+
+# Bear 20529.2004 has multiple data gaps > 108 hrs, including during bonepile time frame
+
 #saveRDS(b2, here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))

@@ -20,7 +20,7 @@ rm(list = ls())
 
 # ------- LOAD AND PREP DATA  ----------- #
 
-# Bears
+## Bears
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
 
@@ -31,10 +31,21 @@ pba <- cbind(pbsf, st_coordinates(pbsf)) # separate coords from geometry columns
 
 pbdf <- st_drop_geometry(pba)
 
-# Bonepile
+years <- unique(pbdf$year)
+
+## Bonepile
+
+# Shapefile 
 
 bone <- st_read(here("Data", "Spatial", "Bonepiles", "bonepiles.shp"))
 bone <- st_transform(bone, crs = 3338)
+
+# Spreadshet with dates by year
+
+boneDates <- read_csv(here("Data", "Bonepile_Dates.csv"))
+
+boneDates$Dates <- mdy(boneDates$Dates)
+boneDates$Year <- year(boneDates$Dates)
 
 # Bonepile bears from previous work
 
@@ -83,12 +94,34 @@ ids[[2]]
 
 tmap_mode('view')
 
+# Bear points for whole study
+
 pbx <- filter(pbsf, id == "pb_20529.2004")
 
 tm_shape(bone) + 
   tm_symbols(col = "purple") + 
   tm_shape(pbx) + 
-  tm_symbols(col = "month", palette = "YlOrRd", popup.vars = "datetime")
+  tm_symbols(col = "month", palette = "YlOrRd", popup.vars = "ymd")
+
+# Bonepile dates
+
+filter(boneDates, Year == 2004 & Bonepile == "Kaktovik")
+
+pbxBP <- filter(pbx, month == 9)
+unique(pbxBP$ymd)
+
+tmap_options(max.categories = 35)
+
+tm_shape(bone) + 
+  tm_symbols(col = "purple") + 
+  tm_shape(pbxBP) + 
+  tm_symbols(col = "ymd", palette = "magma", popup.vars = "ymd")
+
+pb_20529 <- pb %>% filter(id == "pb_20529.2004") %>% mutate(row = row_number())
+pb_20529 <- pb_20529 %>%
+  mutate(time_lapse = difftime(as.POSIXct(datetime), dplyr::lag(as.POSIXct(datetime)), units = "hours")) %>% glimpse()
+
+max(pb_20529$time_lapse, na.rm = TRUE) # no time lapses > 108 hrs
   
 
 # recorded data bonepile_denning_info.xlsx

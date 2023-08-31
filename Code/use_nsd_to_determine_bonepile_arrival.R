@@ -4,6 +4,12 @@
 
 # recorded data bonepile_denning_info.xlsx - round 1
 # recorded data OG-Bonepile-denning-info.csv - OG Analysis (saved to Data/Derived-data/Bonepile in repo)
+  # This file is also in Google Sheets in Polar Bears/OG/Bonepile (or something like that)
+
+## TO DO: 
+  # Add bonepile info to spreadsheet 
+  # Write Methods into document
+
 
 library(sf)
 library(tmap)
@@ -86,6 +92,8 @@ for(i in 1:length(ids)){
 
 plotlist[[1]]
 ids[[1]]
+
+# Using plotly, can view sheet in browser and zoom in on time in question to get precise dates
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 

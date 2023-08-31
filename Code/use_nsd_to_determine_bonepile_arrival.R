@@ -2,13 +2,16 @@
 ####    Using NSD to Determine First Day Bear is at Bonepile  ################
 ##############################################################################
 
-library(adehabitatLT)
+# recorded data bonepile_denning_info.xlsx - round 1
+# recorded data OG-Bonepile-denning-info.csv - OG Analysis (saved to Data/Derived-data/Bonepile in repo)
+
 library(sf)
+library(tmap)
+library(tmaptools)
+library(adehabitatLT)
 library(ggplot2)
 library(plotly)
 library(tidyverse)
-library(tmap)
-library(tmaptools)
 library(here)
 library(conflicted)
 
@@ -81,8 +84,8 @@ for(i in 1:length(ids)){
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
-plotlist[[2]]
-ids[[2]]
+plotlist[[1]]
+ids[[1]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
@@ -96,7 +99,7 @@ tmap_mode('view')
 
 # Bear points for whole study
 
-pbx <- filter(pbsf, id == "pb_20529.2004")
+pbx <- filter(pbsf, id == "pb_21358.2013")
 
 tm_shape(bone) + 
   tm_symbols(col = "purple") + 
@@ -105,9 +108,13 @@ tm_shape(bone) +
 
 # Bonepile dates
 
-filter(boneDates, Year == 2004 & Bonepile == "Kaktovik")
+filter(boneDates, Year == 2013 & Bonepile == "Cross")
 
-pbxBP <- filter(pbx, month == 9)
+
+
+## IF NECESSARY ##
+
+pbxBP <- filter(pbx, month == 10)
 unique(pbxBP$ymd)
 
 tmap_options(max.categories = 35)
@@ -117,14 +124,10 @@ tm_shape(bone) +
   tm_shape(pbxBP) + 
   tm_symbols(col = "ymd", palette = "magma", popup.vars = "ymd")
 
-pb_20529 <- pb %>% filter(id == "pb_20529.2004") %>% mutate(row = row_number())
-pb_20529 <- pb_20529 %>%
-  mutate(time_lapse = difftime(as.POSIXct(datetime), dplyr::lag(as.POSIXct(datetime)), units = "hours")) %>% glimpse()
 
-max(pb_20529$time_lapse, na.rm = TRUE) # no time lapses > 108 hrs
   
 
-# recorded data bonepile_denning_info.xlsx
+
 
 
 

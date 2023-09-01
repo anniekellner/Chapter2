@@ -21,13 +21,74 @@ conflicts_prefer(
 
 rm(list = ls())
 
-# ----------------------- Load Data  ----------------------------------------- #
+# ----------------------- LOAD AND PREP DATA  ----------------------------------------- #
 
-pb <- readRDS(here('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # reads in as df 
+## Load
+
+pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.RDS"))
+
+oldPB <- readRDS(here("Data", "Derived-data", "DFs", "Old", "bears_ch2_093022.Rds")) # Where original BP data is saved 
+
+time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
+
+## Prep
+
+# Make pb into sf object
+
+pb <- st_as_sf(pb, coords = c('gps_lon', 'gps_lat'), crs = 4326)
+pb <- cbind(st_coordinates(pb), pb)
+pb <- pb %>% # preserve lat/lon
+  rename(gps_lon = X) %>%
+  rename(gps_lat = Y)
+
+pb <- st_transform(pb, crs = 3338)
+pb <- cbind(st_coordinates(pb), pb)
+pb <- pb %>% # preserve Alaska Albers X and Y
+  rename(Xaa = X) %>%
+  rename(Yaa = Y)
+
+# erase 20333.2008 from time_at_bonepile
+
+time_at_bp[2,] <- NA
+time_at_bp <- na.omit(time_at_bp)
 
 
-# --------------------  Bonepile-only Bears   ---------- #
 
+# ------------------ Bonepile points for bears that travel ------------------------ #
+
+# DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct() AND SPECIFY TIMEZONE
+
+## Bears added to new dataset
+
+tz <- 'US/Alaska'
+
+pb20529.2005 <- pb %>%
+  dplyr::filter(id == "pb_20529.2005") %>%
+  dplyr::filter(datetime >= as.POSIXct("2005-09-20 18:01:00", tz = tz) & 
+                  datetime <= as.POSIXct("2005-10-11 2:00:00", tz = tz)) 
+
+pb20965.2008 <- pb %>%
+  dplyr::filter(id == "pb_20965.2008") %>%
+  dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
+
+pb20975.2008 <- pb %>%
+  dplyr::filter(id == "pb_20975.2008") %>%
+  dplyr::filter(datetime >= as.POSIXct("2008-09-09 01:00:00", tz = tz)) # bear remains at bp until end of study
+
+pb21264.2011 <- pb %>%
+  dplyr::filter(id == "pb_21264.2011") %>%
+  dplyr::filter(datetime >= as.POSIXct("2011-09-09 00:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2011-10-01 16:00:00", tz = tz)) 
+
+pb21358.2013 <- pb %>%
+  dplyr::filter(id == "pb_21358.2013") %>%
+  dplyr::filter(datetime >= as.POSIXct("2013-08-25 22:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2013-09-25 00:00:00", tz = tz)) 
+
+## Bears from old Dataset
+
+# BP-only bears
   # pb_20586.2008
   # pb_20525.2013
   # pb_20525.2014
@@ -36,22 +97,8 @@ pb <- readRDS(here('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # reads in as
 
 bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_32366.2014" | id == "pb_20525.2014") 
-
-
-# ------------------ Bonepile points for bears that travel ------------------------ #
-
-# DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct() AND SPECIFY TIMEZONE
-
-tz <- 'US/Alaska'
-
-pb06810.2008 <- pb %>%
-  dplyr::filter(id == "pb_06810.2008") %>%
-  dplyr::filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = 'US/Alaska')) 
-
-pb20333.2008 <- pb %>%
-  filter(id == "pb_20333.2008") %>%
-  filter(datetime >= as.POSIXct("2008-10-03 08:00:00", tz = tz))
+           id == "pb_32366.2014" | id == "pb_20525.2014") %>%
+  dplyr::select(id, geometry)
 
 pb20492.2008 <- pb %>%
   filter(id == "pb_20492.2008") %>%

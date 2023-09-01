@@ -94,11 +94,11 @@ pb21358.2013 <- pb %>%
 # BP-only bears
   # pb_20586.2008
   # pb_20525.2013
-  # pb_32366.2014
 
 bp_only <- pb %>%
-  filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_32366.2014") 
+  filter(id == "pb_20525.2013" | id == "pb_20586.2008") 
+
+pb20525.2014 <- 
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%
@@ -192,7 +192,7 @@ tmap_mode('view')
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
   tm_shape(all.bp) + 
-  tm_symbols(col = "id", popup.vars = "id")
+  tm_symbols(col = "id", popup.vars = c("id", "ymd"))
 
 # Points that look strange
 

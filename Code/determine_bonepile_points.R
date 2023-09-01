@@ -27,9 +27,12 @@ rm(list = ls())
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.RDS"))
 
-oldPB <- readRDS(here("Data", "Derived-data", "DFs", "Old", "bears_ch2_093022.Rds")) # Where original BP data is saved 
-
 time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
+
+# Spatial
+
+bones <- st_read(here("Data", "Spatial", "Bonepiles", "bonepiles.shp"))
+bones <-st_transform(bones, 3338)
 
 ## Prep
 
@@ -91,12 +94,11 @@ pb21358.2013 <- pb %>%
 # BP-only bears
   # pb_20586.2008
   # pb_20525.2013
-  # pb_20525.2014
   # pb_32366.2014
 
 bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_32366.2014" | id == "pb_20525.2014") 
+           id == "pb_32366.2014") 
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%
@@ -183,28 +185,14 @@ setdiff(allIDs, bpIDs)
 
 # -------- PLOT CHECKS ------------------------------------- #
 
-# Geometry disappeared from points because the st_drop_geometry() fx in {sf} does not separate the coordinates into columns first
-
-# Add back geometry 
-
-all.bp2 <- all.bp %>%
-  st_as_sf() %>%
-  st_set_crs(3338)
-
-
-# Add bonepile shp
-
-bones <- st_read('./Data/Spatial/Bonepiles/bonepiles.shp') %>%
-  st_transform(3338)
-
 # Plot - looks good 9/21/22
 
 tmap_mode('view')
 
-#tm_shape(bones) + 
-  #tm_dots(col = "blue", size = 0.5) + 
-  #tm_shape(all.bp2) + 
-  #tm_dots(col = "purple")
+tm_shape(bones) + 
+  tm_dots(col = "blue", size = 0.5) + 
+  tm_shape(all.bp) + 
+  tm_symbols(col = "id", popup.vars = "id")
 
 # Points that look strange
 

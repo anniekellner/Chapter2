@@ -30,7 +30,8 @@ rm(list = ls())
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.RDS"))
 
 time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
-write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
+#write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
+
 # Spatial
 
 bones <- st_read(here("Data", "Spatial", "Bonepiles", "bonepiles.shp"))
@@ -57,9 +58,7 @@ pb <- pb %>% # preserve Alaska Albers X and Y
 time_at_bp[2,] <- NA
 time_at_bp <- na.omit(time_at_bp)
 
-
-
-# ------------------ Bonepile points for bears that travel ------------------------ #
+# ------------------ BONEPILE POINTS ------------------------ #
 
 # DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct() AND SPECIFY TIMEZONE
 
@@ -169,11 +168,15 @@ pb32608.2008 <- pb %>%
   filter(datetime >= as.POSIXct("2008-08-30 18:00:00", tz = tz) & 
            datetime <= as.POSIXct("2008-10-15 14:00:00", tz = tz)) 
 
+pb20525.2014 <- pb %>%
+  filter(id == "pb_20525.2014") %>% 
+  filter(datetime >= as.POSIXct("2014-08-29 02:00:29", tz = tz) & 
+           datetime <= as.POSIXct("2014-10-26 06:00:22", tz = tz))
+
 
 # Combine
 
-all.bp <- bind_rows(bp_only, 
-                    pb06810.2008,
+all.bp <- bind_rows(pb06810.2008,
                     pb20492.2008, 
                     pb20520.2012, 
                     pb20735.2009, 
@@ -189,14 +192,19 @@ all.bp <- bind_rows(bp_only,
                     pb20965.2008,
                     pb20975.2008,
                     pb21264.2011,
-                    pb21358.2013)
+                    pb21358.2013,
+                    pb20525.2013,
+                    pb20586.2008,
+                    pb32366.2014,
+                    pb20525.2013,
+                    pb20525.2014)
 
 # Check that everything is there - LOOKS GOOD
 
-bpIDs <- unique(all.bp$id) # 21 bear ids - this is correct because there are 4 non-bonepile bears
+bpIDs <- unique(all.bp$id) # 21 bear ids 
 allIDs <- unique(pb$id)
 
-setdiff(allIDs, bpIDs)
+setdiff(allIDs, bpIDs) # Difference of four - looks good!
 
 # -------- PLOT CHECKS ------------------------------------- #
 

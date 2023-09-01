@@ -93,19 +93,19 @@ pb21358.2013 <- pb %>%
 
 ## Bears from old Dataset
 
-# BP-only bears
-  # pb_20586.2008
-  # pb_20525.2013
+pb20586.2008 <- pb %>%
+  filter(id == "pb_20586.2008") %>% 
+  filter(datetime <= as.POSIXct("2008-10-14 07:00:36", tz = tz))
 
-bp_only <- pb %>%
-  filter(id == "pb_20525.2013" | id == "pb_20586.2008") 
-
-pb20525.2014 <- 
+pb20525.2013 <- pb %>%
+  filter(id == "pb_20525.2013") %>%
+  filter(datetime >= as.POSIXct("2013-09-12 08:01:29") & 
+           datetime <= as.POSIXct("2013-10-26 06:00:40"))
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%
-  filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = tz) & 
-           datetime <= as.POSIXct("2008-10-11 23:00:36"))
+  filter(datetime >= as.POSIXct("2008-09-17 02:00:37", tz = tz) & 
+           datetime <= as.POSIXct("2008-10-12 07:00:36"))
 
 pb20492.2008 <- pb %>%
   filter(id == "pb_20492.2008") %>%
@@ -113,48 +113,61 @@ pb20492.2008 <- pb %>%
 
 pb20520.2012 <- pb %>% 
   filter(id == "pb_20520.2012") %>%
-  filter(datetime >= as.POSIXct("2012-08-27 17:00:00", tz = 'US/Alaska') & 
-           datetime <= as.POSIXct("2012-10-19 08:00:00", tz = 'US/Alaska'))
+  filter(datetime >= as.POSIXct("2012-08-28 01:00:00", tz = 'US/Alaska') & 
+           datetime <= as.POSIXct("2012-10-19 16:00:00", tz = 'US/Alaska'))
 
 pb20735.2009 <- pb %>%
   filter(id == "pb_20735.2009") %>%
-  filter(datetime >= as.POSIXct("2009-08-09 22:00:00", tz = tz) &
-           datetime < as.POSIXct("2009-08-30 08:00:00", tz = tz) |
-           datetime >= as.POSIXct("2009-09-16 01:00:00", tz = tz))
+  filter(datetime >= as.POSIXct("2009-08-10 06:00:00", tz = tz) &
+           datetime < as.POSIXct("2009-08-30 05:00:00", tz = tz) |
+           datetime >= as.POSIXct("2009-09-16 09:00:00", tz = tz) & 
+           datetime <= as.POSIXct("2009-10-13 07:00:00", tz = tz))
 
 pb20845.2015 <- pb %>%
   filter(id == "pb_20845.2015") %>%
-  filter(datetime >= as.POSIXct("2015-09-23 20:01:29", tz = tz) & datetime < as.POSIXct("2015-10-03 05:00:19", tz = tz))
+  filter(datetime >= as.POSIXct("2015-09-24 04:01:29", tz = tz) & 
+           datetime < as.POSIXct("2015-10-03 12:00:47", tz = tz))
   
 
 pb20966.2008 <- pb %>%
   filter(id == "pb_20966.2008") %>%
-  filter(datetime >= as.POSIXct("2008-08-26 10:00:00", tz = tz))
+  filter(datetime >= as.POSIXct("2008-08-26 18:00:36", tz = tz) & 
+           datetime <= as.POSIXct("2008-10-15 07:00:37"))
 
 pb20982.2008 <- pb %>%
   filter(id == "pb_20982.2008") %>%
-  filter(datetime >= as.POSIXct("2008-09-21 17:00:00", tz = tz) & datetime < as.POSIXct("2008-10-05 03:00:00", tz = tz))
-
+  filter(datetime >= as.POSIXct("2008-09-22 01:00:00", tz = tz) & 
+           datetime < as.POSIXct("2008-10-05 10:00:00", tz = tz))
 
 pb21015.2013 <- pb %>%
   filter(id == "pb_21015.2013") %>%
-  filter(datetime >= as.POSIXct("2013-08-20 12:00:30", tz = tz) & datetime < as.POSIXct("2013-09-27 06:00", tz = tz))
+  filter(datetime >= as.POSIXct("2013-08-20 20:00:30", tz = tz) & 
+           datetime < as.POSIXct("2013-09-27 12:00:30", tz = tz))
 
 pb21368.2014 <- pb %>%
   filter(id == "pb_21368.2014") %>%
-  filter(datetime >= as.POSIXct("2014-08-26 04:00:00", tz = tz)) 
+  filter(datetime >= as.POSIXct("2014-08-26 04:00:00", tz = tz) & 
+           datetime <= as.POSIXct("2014-10-26 06:00:49", tz = tz)) 
 
 pb32282.2008 <- pb %>%
   filter(id == "pb_32282.2008") %>%
-  filter(datetime >= as.POSIXct("2008-08-31 15:00:00", tz = tz))
+  filter(datetime >= as.POSIXct("2008-08-31 23:00:36", tz = tz) & 
+           datetime <= as.POSIXct("2008-10-05 07:00:20", tz = tz))
 
 pb32366.2011 <- pb %>%
   filter(id == "pb_32366.2011") %>%
-  filter(datetime >= as.POSIXct("2011-08-30 12:00:00", tz = tz))
+  filter(datetime >= as.POSIXct("2011-08-30 20:00:00", tz = tz) & 
+           datetime <= as.POSIXct("2011-10-22 08:00:00", tz = tz))
+
+pb32366.2014 <- pb %>%
+  filter(id == "pb_32366.2014") %>%
+  filter(datetime >= as.POSIXct("2014-09-02 22:00:29", tz = tz) & 
+           datetime <= as.POSIXct("2014-10-26 06:00:30", tz = tz))
 
 pb32608.2008 <- pb %>%
   filter(id == "pb_32608.2008") %>%
-  filter(datetime >= as.POSIXct("2008-08-30 10:00:00", tz = tz) & datetime < as.POSIXct("2008-10-15 07:00:00", tz = tz)) 
+  filter(datetime >= as.POSIXct("2008-08-30 18:00:00", tz = tz) & 
+           datetime <= as.POSIXct("2008-10-15 14:00:00", tz = tz)) 
 
 
 # Combine

@@ -72,6 +72,12 @@ pb20965.2008 <- pb %>%
   dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
                   datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
 
+
+pb20965.2008 <- pb %>%
+  dplyr::filter(id == "pb_20965.2008") %>%
+  dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
+
 pb20975.2008 <- pb %>%
   dplyr::filter(id == "pb_20975.2008") %>%
   dplyr::filter(datetime >= as.POSIXct("2008-09-09 01:00:00", tz = tz)) # bear remains at bp until end of study
@@ -197,10 +203,10 @@ all.bp <- bind_rows(pb06810.2008,
 
 # Check that everything is there - LOOKS GOOD
 
-bpIDs <- unique(all.bp$id) # 21 bear ids 
+bpIDs <- unique(all.bp$id) # 20 bear ids 
 allIDs <- unique(pb$id)
 
-setdiff(allIDs, bpIDs) # Difference of four - looks good!
+setdiff(allIDs, bpIDs) # Difference of 5 - looks good!
 
 # -------- PLOT CHECKS ------------------------------------- #
 
@@ -234,12 +240,15 @@ tm_shape(bones) +
 
 all.bp$at_bonepile <- 1
 
+all.bp <- st_drop_geometry(all.bp) # Need to make df in order to go left_join
+
 pb2 <- pb %>%
+  st_drop_geometry() %>%
+  select(-at_bonepile) %>%
   left_join(all.bp) %>%
   replace_na(list(at_bonepile = 0))
 
-pbsf <- st_as_sf(pb2) %>%
-  st_set_crs(3338) 
+pbsf <- st_as_sf(pb2, coords = c("Xaa", "Yaa"), crs = 3338)
 
 pbsf$at_bonepile <- as.factor(pbsf$at_bonepile)
 
@@ -248,9 +257,9 @@ pbsf$at_bonepile <- as.factor(pbsf$at_bonepile)
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
   tm_shape(pbsf) + 
-  tm_dots(col = "at_bonepile")
+  tm_symbols(col = "at_bonepile", popup.vars = c("id", "ymd"))
 
 # ------------------- Save dataframe  ---------------------------------------- #
 
-#saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
+saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
 

@@ -7,6 +7,7 @@
   # This file is also in Google Sheets in Polar Bears/OG/Bonepile (or something like that)
 
 ## TO DO: 
+  # Re-do 20525.2014, 32366.2014
   # Add bonepile info to spreadsheet 
   # Write Methods into document
 
@@ -49,7 +50,7 @@ years <- unique(pbdf$year)
 bone <- st_read(here("Data", "Spatial", "Bonepiles", "bonepiles.shp"))
 bone <- st_transform(bone, crs = 3338)
 
-# Spreadshet with dates by year
+# Spreadsheet with dates by year
 
 boneDates <- read_csv(here("Data", "Bonepile_Dates.csv"))
 

@@ -94,11 +94,14 @@ pb21358.2013 <- pb %>%
   # pb_20525.2014
   # pb_32366.2014
 
-
 bp_only <- pb %>%
   filter(id == "pb_20525.2013" | id == "pb_20586.2008" |
-           id == "pb_32366.2014" | id == "pb_20525.2014") %>%
-  dplyr::select(id, geometry)
+           id == "pb_32366.2014" | id == "pb_20525.2014") 
+
+pb06810.2008 <- pb %>%
+  filter(id == "pb_06810.2008") %>%
+  filter(datetime >= as.POSIXct("2008-09-16 18:00:37", tz = tz) & 
+           datetime <= as.POSIXct("2008-10-11 23:00:36"))
 
 pb20492.2008 <- pb %>%
   filter(id == "pb_20492.2008") %>%
@@ -154,7 +157,6 @@ pb32608.2008 <- pb %>%
 
 all.bp <- bind_rows(bp_only, 
                     pb06810.2008,
-                    pb20333.2008,
                     pb20492.2008, 
                     pb20520.2012, 
                     pb20735.2009, 
@@ -165,12 +167,19 @@ all.bp <- bind_rows(bp_only,
                     pb32282.2008, 
                     pb32366.2011,
                     pb32608.2008,
-                    pb20982.2008)
+                    pb20982.2008,
+                    pb20529.2005,
+                    pb20965.2008,
+                    pb20975.2008,
+                    pb21264.2011,
+                    pb21358.2013)
 
-# Check that everything is there
+# Check that everything is there - LOOKS GOOD
 
-unique(all.bp$id) # 17 bear ids - this is correct because there are 4 non-bonepile bears
+bpIDs <- unique(all.bp$id) # 21 bear ids - this is correct because there are 4 non-bonepile bears
+allIDs <- unique(pb$id)
 
+setdiff(allIDs, bpIDs)
 
 # -------- PLOT CHECKS ------------------------------------- #
 

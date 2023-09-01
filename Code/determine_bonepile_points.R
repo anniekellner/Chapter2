@@ -9,17 +9,21 @@
 # Then check with script above and use tmap to plot bear locations and bp locations on map to verify
 
 library(sf)
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 library(tmap)
 library(tmaptools)
-library(lubridate)
+library(here)
+library(conflicted)
+
+conflicts_prefer(
+  dplyr::filter()
+)
 
 rm(list = ls())
 
 # ----------------------- Load Data  ----------------------------------------- #
 
-pb <- readRDS('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # reads in as df 
+pb <- readRDS(here('./Data/Derived-data/DFs/bears_ch2_092122.Rds') # reads in as df 
 
 
 # --------------------  Bonepile-only Bears   ---------- #

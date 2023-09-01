@@ -54,6 +54,7 @@ pb <- pb %>% # preserve Alaska Albers X and Y
   rename(Yaa = Y)
 
 # erase 20333.2008 from time_at_bonepile
+# pb_20529.2005 is not a bonepile bear
 
 time_at_bp[2,] <- NA
 time_at_bp <- na.omit(time_at_bp)
@@ -65,11 +66,6 @@ time_at_bp <- na.omit(time_at_bp)
 ## Bears added to new dataset
 
 tz <- 'US/Alaska'
-
-pb20529.2005 <- pb %>%
-  dplyr::filter(id == "pb_20529.2005") %>%
-  dplyr::filter(datetime >= as.POSIXct("2005-09-20 18:01:00", tz = tz) & 
-                  datetime <= as.POSIXct("2005-10-11 2:00:00", tz = tz)) 
 
 pb20965.2008 <- pb %>%
   dplyr::filter(id == "pb_20965.2008") %>%
@@ -108,7 +104,8 @@ pb06810.2008 <- pb %>%
 
 pb20492.2008 <- pb %>%
   filter(id == "pb_20492.2008") %>%
-  filter(datetime <= as.POSIXct("2008-10-17", tz = tz))
+  filter(datetime >= as.POSIXct("2008-08-27 13:00:00", tz = tz) & 
+           datetime < as.POSIXct("2008-10-16 19:00:00")) # < is intentional due to visual inspection
 
 pb20520.2012 <- pb %>% 
   filter(id == "pb_20520.2012") %>%
@@ -125,7 +122,7 @@ pb20735.2009 <- pb %>%
 pb20845.2015 <- pb %>%
   filter(id == "pb_20845.2015") %>%
   filter(datetime >= as.POSIXct("2015-09-24 04:01:29", tz = tz) & 
-           datetime < as.POSIXct("2015-10-03 12:00:47", tz = tz))
+           datetime < as.POSIXct("2015-10-03 08:00:20", tz = tz))
   
 
 pb20966.2008 <- pb %>%
@@ -188,7 +185,6 @@ all.bp <- bind_rows(pb06810.2008,
                     pb32366.2011,
                     pb32608.2008,
                     pb20982.2008,
-                    pb20529.2005,
                     pb20965.2008,
                     pb20975.2008,
                     pb21264.2011,
@@ -208,22 +204,31 @@ setdiff(allIDs, bpIDs) # Difference of four - looks good!
 
 # -------- PLOT CHECKS ------------------------------------- #
 
-# Plot - looks good 9/21/22
-
 tmap_mode('view')
 
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
   tm_shape(all.bp) + 
-  tm_symbols(col = "id", popup.vars = c("id", "ymd"))
+  tm_symbols(col = "id", popup.vars = c("id", "datetime"))
 
-# Points that look strange
+## Resolved
 
-# pb_20529.2005 - not really at bonepile. Check other script and/or see if denning bear 
-# pb_20520.2012 - see if bp end date might be too late
-# pb_20975.2008 - check start date - might be too early
-# pb20492.2008 - check end date and see if too late
-# pb20485.2015 see if end is too late
+# pb_20735.2009 - check ocean excursion - OK; in middle of timeframe
+# pb_20975.2008 - check start date - might be too early - OK because bear goes to bonepile, then island, then back
+# pb_20520.2012 - OK. Random point further away but in the middle of BP timeframe
+
+# Individual plots
+
+#tmap_options(max.categories = 48)
+
+#tm_shape(bones) + 
+  #tm_dots(col = "blue", size = 0.5) + 
+  #tm_shape(pb20975.2008) + 
+  #tm_symbols(col = "ymd", 
+             #palette = "magma", 
+             #popup.vars = c("id", "datetime"), 
+             #legend.col.show = FALSE)
+
 
 # ------- Add 'at_bonepile' column to main df -------------------------------- #
 

@@ -219,9 +219,11 @@ tm_shape(bones) +
 
 # Points that look strange
 
-# pb_20520.2012 - A one-day jaunt. OK. 
-# pb_20982 - revised
-# pb_20492 - OK
+# pb_20529.2005 - not really at bonepile. Check other script and/or see if denning bear 
+# pb_20520.2012 - see if bp end date might be too late
+# pb_20975.2008 - check start date - might be too early
+# pb20492.2008 - check end date and see if too late
+# pb20485.2015 see if end is too late
 
 # ------- Add 'at_bonepile' column to main df -------------------------------- #
 

@@ -8,6 +8,8 @@
 # First look at NSD (script above) and see whether there is a clear asymptote (likely bonepile)
 # Then check with script above and use tmap to plot bear locations and bp locations on map to verify
 
+### CHECK BP DATES AGAINST TIME SPENT AT BONEPILE FOR V1 BEARS (CSV IN GOOGLE SHEETS)
+
 library(sf)
 library(tidyverse)
 library(tmap)
@@ -28,7 +30,7 @@ rm(list = ls())
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.RDS"))
 
 time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
-
+write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
 # Spatial
 
 bones <- st_read(here("Data", "Spatial", "Bonepiles", "bonepiles.shp"))

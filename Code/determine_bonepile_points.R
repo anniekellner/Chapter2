@@ -72,7 +72,6 @@ pb20965.2008 <- pb %>%
   dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
                   datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
 
-
 pb20965.2008 <- pb %>%
   dplyr::filter(id == "pb_20965.2008") %>%
   dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 

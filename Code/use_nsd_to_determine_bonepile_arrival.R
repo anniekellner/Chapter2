@@ -91,8 +91,8 @@ for(i in 1:length(ids)){
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
-plotlist[[1]]
-ids[[1]]
+plotlist[[2]]
+ids[[2]]
 
 # Using plotly, can view sheet in browser and zoom in on time in question to get precise dates
 

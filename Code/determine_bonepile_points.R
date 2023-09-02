@@ -27,7 +27,7 @@ rm(list = ls())
 
 ## Load
 
-pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.RDS"))
+pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
 
 time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
 #write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))

@@ -13,35 +13,47 @@ knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
 
-library(dplyr)
-library(lubridate)
-library(ggplot2)
-library(amt)
 library(sf)
+library(tidyverse)
+library(amt)
 library(tmap)
 library(tmaptools)
 library(adehabitatLT)
+library(data.table)
+library(here)
+library(conflicted)
+
+conflicts_prefer(
+  dplyr::filter()
+)
 ```
 
-```{r load-data, message=FALSE, warning=FALSE, echo=FALSE}
+```{r load-and-prep-data, message=FALSE, warning=FALSE, echo=FALSE}
 
 # Bears
 
-used <- readRDS('./Data/Derived-data/DFs/all_bonepile_points.Rds') # load all bonepile points
+b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+b2 <- b %>% distinct() # Number of points eliminated is same as bonepile, so duplicate bp pts for 20525.2013 were eliminated
+
+#saveRDS(b2, here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+# Bonepile points 
+
+u <- b %>% filter(at_bonepile == 1)  # load all bonepile points
+usf <- st_as_sf(u, coords = c("Xaa", "Yaa"), crs = 3338) %>% distinct() # seeing whether this eliminates duplicates. Appears to. 
 
 # Alaska
 
-us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
+#us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
 
-bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
+#bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
 
-bb <- st_transform(bb, 3338)
+#bb <- st_transform(bb, 3338)
 
-ak <- us %>%
-  filter(STATE_ABBR == "AK") %>%
-  st_transform(3338) 
+#ak <- us %>%
+  #filter(STATE_ABBR == "AK") %>%
+  #st_transform(3338) 
 
-ak <- st_crop(ak, bb)
+#ak <- st_crop(ak, bb)
 
 ```
 
@@ -49,37 +61,37 @@ ak <- st_crop(ak, bb)
 
 tmap_mode('view')
 
-tm_shape(ak) + 
-  tm_polygons(col = "#ABF37E") + 
-  tm_shape(used) + 
-  tm_symbols(size = 0.2, col = "id", legend.col.show = FALSE) + 
+tm_shape(usf) + 
+  tm_symbols(size = 0.2, col = "id", legend.col.show = FALSE)  
   #tm_shape(bone) + 
   #tm_symbols(size = 0.8, shape = 4, col = "black") +
-  tm_legend(show = FALSE)
+  #m_legend(show = FALSE)
 
 ```
 
-```{r number-points-per-bear}
-
-source('./Code/MyFunctions.R')
-
-# Convert sf object to dataframe
-used <- cbind(used, st_coordinates(used)) # separate coords from geometry columns into X and Y columns
-
-used.df <- used %>%
-  st_drop_geometry() %>%
-  as.data.frame()
-
-table(used.df$id)
-
-```
 Number of locations per bear
 
 ```{r days-tracked}
 
 # Create track in adehabitatLT
 
-ltraj <- as.ltraj(xy=used.df[,c("X","Y")], date=used.df$datetime, id=as.character(used.df$id))
+ltraj <- as.ltraj(xy=u[,c("Xaa","Yaa")], date=u$datetime, id=as.character(u$id))
+
+# ERROR: 
+  #in as.ltraj(xy = u[, c("Xaa", "Yaa")], date = u$datetime, id = as.character(u$id)) :
+  # non unique dates for a given burst
+
+# Solution:
+  # 20525.2013 appears to be duplicated
+
+setDT(u)
+anyDuplicated(u)
+
+which(duplicated(u))
+
+dups <- u[1536:2562,]
+unique(dups$id)
+
 summary <- summary(ltraj)
 
 summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)

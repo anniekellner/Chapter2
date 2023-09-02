@@ -251,14 +251,27 @@ pbsf <- st_as_sf(pb2, coords = c("Xaa", "Yaa"), crs = 3338)
 
 pbsf$at_bonepile <- as.factor(pbsf$at_bonepile)
 
-# Plot again
+# Plot 
+
+tmap_mode('view')
 
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
   tm_shape(pbsf) + 
   tm_symbols(col = "at_bonepile", popup.vars = c("id", "ymd"))
 
+
+# Plot BP-only points to see how they align with BP locations
+
+bpSF <- filter(pbsf, at_bonepile == 1) 
+
+tm_shape(bones) + 
+  tm_dots(col = "blue", size = 0.5) +
+  tm_shape(bpSF) + 
+  tm_symbols()
+  
+
 # ------------------- Save dataframe  ---------------------------------------- #
 
-saveRDS(pb2, './Data/Derived-data/DFs/bears_ch2_092122.Rds')
+#saveRDS(pb2, here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
 

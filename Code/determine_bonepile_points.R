@@ -99,8 +99,8 @@ pb20586.2008 <- pb %>%
 
 pb20525.2013 <- pb %>%
   filter(id == "pb_20525.2013") %>%
-  filter(datetime >= as.POSIXct("2013-09-12 08:01:29") & 
-           datetime <= as.POSIXct("2013-10-26 06:00:40"))
+  filter(datetime >= as.POSIXct("2013-09-11 22:01:50") & 
+           datetime <= as.POSIXct("2013-11-08 22:00:30"))
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%

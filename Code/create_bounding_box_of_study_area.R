@@ -18,40 +18,21 @@ rm(list = ls())
 # ---- LOAD DATA ------ #
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds")) # dataframe
+pb <- select(pb, -study_end)
 
 # ----  REMOVE POINTS WEST OF AK-CA BORDER  ----- #
 
 pb2 <- filter(pb, gps_lon < -141) # 141st Meridian
 
-pbsf <- st_as_sf(pb2, coords = c("gps_lon", "gps_lat"), crs = 4326)
-
-pbsf <- cbind(st_coordinates(pbsf), pbsf) 
-
-# Check via plot 
-
-tmap_mode('view')
-
-tm_shape(pbsf) + 
-  tm_symbols(popup.vars = TRUE)
-
-bb <- st_as_sfc(st_bbox(pbsf))
-
-# Save bounding box
-st_write(bb, here("Data", "Spatial", "Derived", "Bounding_boxes", "West_of_141.shp"))
-
-pb3 <- st_drop_geometry(pbsf) # save as df
-
-# Rename X and Y to lat/lon so can add Albers when needed
-
-pb3 <- pb3 %>%
-  rename(gps_lon = X) %>%
-  rename(gps_lat = Y)
-
 # When removed points in Canada, some bears lost study_end dates. Add back to last point on land in USA.
 
-end <- pb3 %>%
+end <- pb2 %>% # skipped pbsf so if 
   group_by(id) %>%
   slice_tail() %>%
-  mutate(study_end = 1)
+  mutate(study_end = 1) %>%
+  select(id, datetime, study_end)
+
+pb4 <- left_join(pb3, end)
+filter(pb4, study_end == 1)
 
 saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG_083023.Rds"))

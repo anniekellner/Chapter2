@@ -29,8 +29,6 @@ rm(list = ls())
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_083123.Rds"))
 
-pb2 <- distinct(pb) # no duplicates
-
 #time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
 #write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
 
@@ -162,6 +160,8 @@ all.bp <- bind_rows(pb06810.2008,
                     pb20492.2008, 
                     pb20520.2012,
                     pb20525.2013,
+                    pb20525.2014,
+                    pb20586.2008,
                     pb20735.2009, 
                     pb20845.2015, 
                     pb20966.2008, 
@@ -177,12 +177,12 @@ all.bp <- bind_rows(pb06810.2008,
                     pb21264.2011,
                     pb21358.2013)
 
-all.bp2 <- distinct(all.bp)
+distinct(all.bp) # no duplicates after rearranging data
 
 # Check that everything is there - LOOKS GOOD
 
 bpIDs <- unique(all.bp$id) # 20 bear ids 
-allIDs <- unique(pb$id)
+allIDs <- unique(pb$id) # 25 ids
 
 setdiff(allIDs, bpIDs) # Difference of 5 - looks good!
 setdiff(bpIDs, allIDs) # none. good. 

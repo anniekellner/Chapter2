@@ -47,4 +47,11 @@ pb3 <- pb3 %>%
   rename(gps_lon = X) %>%
   rename(gps_lat = Y)
 
-#saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+# When removed points in Canada, some bears lost study_end dates. Add back to last point on land in USA.
+
+end <- pb3 %>%
+  group_by(id) %>%
+  slice_tail() %>%
+  mutate(study_end = 1)
+
+saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG_083023.Rds"))

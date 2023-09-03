@@ -235,13 +235,13 @@ tm_shape(bones) +
 
 # ------- Add GPS info from sf object to main df -------------------------------- #
 
+geo <- pbsf %>% st_drop_geometry() 
 
+pb3 <- left_join(pb2, geo)
   
-
-
-
+glimpse(pb3)
 
 # ------------------- Save dataframe  ---------------------------------------- #
 
-#saveRDS(pb2, here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+#saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
 

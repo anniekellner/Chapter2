@@ -5,11 +5,13 @@
 library(tidyverse)
 library(here)
 
+rm(list = ls())
+
 # --------  LOAD DATA ------------- #
 
 #b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))
 
-b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_083023.Rds"))
 
 # Filter bears not in Pagano database
 
@@ -44,6 +46,6 @@ max(pb_20529$time_lapse, na.rm = TRUE) # no time lapses > 108 hrs
 # Bear 20529.2004 has multiple data gaps > 108 hrs, including during bonepile time frame. Eliminate from analysis.
 
 b <- b %>% filter(!id == "pb_20529.2004")
-#saveRDS(b, here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+saveRDS(b, here("Data", "Derived-data", "DFs", "OG", "OG_083123.Rds"))
 
 #saveRDS(b2, here("Data", "Derived-data", "DFs", "OG", "OG_add_depart_ice.Rds"))

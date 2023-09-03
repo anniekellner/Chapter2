@@ -191,10 +191,10 @@ setdiff(bpIDs, allIDs) # none. good.
 
 all.bp$at_bonepile <- 1
 
-all.bp <- all.bp %>%
+all.bp2 <- all.bp %>%
   select(id, datetime, at_bonepile)
 
-pb2 <- left_join(pb, all.bp) # numbers increased. Need to figure out why duplicate id/datetimes
+pb2 <- left_join(pb, all.bp2) # looks good!!!
 
 # -------- PLOT CHECKS ------------------------------------- #
 

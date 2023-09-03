@@ -98,17 +98,13 @@ ids[[2]]
 
 #-----    Plot bonepiles and look at questionable individuals ----------------------------------------------------- #
 
-# Questionable: Need to determine bonepile radius in order to determine bonepile pts
-  # "pb_20446.2009" - only visits bonepile briefly 
-  # "pb_20529.2004" - same as above, can cross-reference with bonepile dates
-
 ## PUT BONEPILE SPREADSHEET INTO GOOGLE SHEETS SO CAN VIEW ON SAME SCREEN 
 
 tmap_mode('view')
 
 # Bear points for whole study
 
-pbx <- filter(pbsf, id == "pb_21358.2013")
+pbx <- filter(pbsf, id == "pb_20525.2013")
 
 tm_shape(bone) + 
   tm_symbols(col = "purple") + 
@@ -123,15 +119,15 @@ filter(boneDates, Year == 2013 & Bonepile == "Cross")
 
 ## IF NECESSARY ##
 
-pbxBP <- filter(pbx, month == 10)
+pbxBP <- filter(pbx, month == 9 | month == 10 | month == 11)
 unique(pbxBP$ymd)
 
-tmap_options(max.categories = 35)
+tmap_options(max.categories = 80)
 
 tm_shape(bone) + 
   tm_symbols(col = "purple") + 
   tm_shape(pbxBP) + 
-  tm_symbols(col = "ymd", palette = "magma", popup.vars = "ymd")
+  tm_symbols(col = "ymd", size = 0.5, palette = "magma", popup.vars = "datetime")
 
 
   

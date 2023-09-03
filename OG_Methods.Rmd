@@ -30,7 +30,7 @@ conflicts_prefer(
 ```{r load-data}
 
 # Bears
-b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_082823.Rds"))
+b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
 
 ```
 
@@ -46,44 +46,17 @@ length(unique(b$animal))
 
 ```
 
-* 26 bear years
+* 25 bear years
 * 23 individuals
-* 3 bears with two years of data
+* 2 bears with two years of data
 
 # Tracking data
 
-
-```{r gps-data}
-
-gps <- b %>% select(id, datetime, gps_lon, gps_lat)
-
-# Transform to Albers Equal Area
-
-bsf <- st_as_sf(gps, coords = c('gps_lon', 'gps_lat'), crs = st_crs(4326))
-
-bsf <- bsf %>% st_transform(st_crs(3338))
-bsf <- cbind(bsf, st_coordinates(bsf))
-
-# Plot to check transformation looks good - it does
-
-#tmap_mode('view')
-
-#tm_shape(bsf) + 
-  #tm_symbols()
-
-```
-
 ```{r adehabitatLT}
 
-#Convert to dataframe
+b <- as.data.frame(b)
 
-bdf <- bsf %>%
-  st_drop_geometry() %>%
-  as.data.frame() %>%
-  dplyr::select(id, datetime, X, Y) %>%
-  na.omit()
-
-ltraj <- as.ltraj(bdf[,c("X","Y")], date=bdf$datetime, id=bdf$id, typeII = TRUE)
+ltraj <- as.ltraj(b[,c("Xaa","Yaa")], date=b$datetime, id=b$id, typeII = TRUE)
 
 summary <- summary(ltraj)
 
@@ -99,15 +72,12 @@ summary(summary)
 
 sd(summary$DaysTrack)
 ```
-* Mean = 74.5
-* Range = 38.8 - 157.0
-* sd = 32.8
 
 LATER: Can check whether missed fixes appear to be related to habitat variables. For now, say they aren't
 
 ```{r study-window}
 
-start <- b%>%
+start <- b %>%
   group_by(id) %>%
   slice_head()
 

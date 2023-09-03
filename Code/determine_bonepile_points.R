@@ -39,22 +39,20 @@ bones <-st_transform(bones, 3338)
 
 ## Prep
 
+pb <- pb %>% select(-at_bonepile) # remove pre-existing bonepile designations
 # Make pb into sf object
 
-pb <- st_as_sf(pb, coords = c('gps_lon', 'gps_lat'), crs = 4326)
-pb <- cbind(st_coordinates(pb), pb)
-pb <- pb %>% # preserve lat/lon
-  rename(gps_lon = X) %>%
-  rename(gps_lat = Y)
+pbsf <- st_as_sf(pb, coords = c('Xaa', 'Yaa'), crs = 3338)
+pbsf <- cbind(st_coordinates(pbsf), pbsf)
+#pbsf <- pbsf %>% # preserve lat/lon
+  #rename(gps_lon = X) %>%
+  #rename(gps_lat = Y)
 
-pb <- st_transform(pb, crs = 3338)
-pb <- cbind(st_coordinates(pb), pb)
-pb <- pb %>% # preserve Alaska Albers X and Y
-  rename(Xaa = X) %>%
-  rename(Yaa = Y)
-
-# erase 20333.2008 from time_at_bonepile
-# pb_20529.2005 is not a bonepile bear
+#pbsf <- st_transform(pbsf, crs = 3338)
+#pbsf <- cbind(st_coordinates(pbsf), pbsf)
+#pbsf <- pbsf %>% # preserve Alaska Albers X and Y
+  #rename(Xaa = X) %>%
+  #rename(Yaa = Y)
 
 time_at_bp[2,] <- NA
 time_at_bp <- na.omit(time_at_bp)

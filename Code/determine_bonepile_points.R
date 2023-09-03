@@ -18,7 +18,8 @@ library(here)
 library(conflicted)
 
 conflicts_prefer(
-  dplyr::filter()
+  dplyr::filter(),
+  dplyr::select()
 )
 
 rm(list = ls())

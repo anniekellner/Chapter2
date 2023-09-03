@@ -27,7 +27,7 @@ rm(list = ls())
 
 ## Load
 
-pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_083123.Rds"))
 
 #time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
 #write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
@@ -40,10 +40,7 @@ bones <-st_transform(bones, 3338)
 ## Prep
 
 pb <- pb %>% select(-at_bonepile) # remove pre-existing bonepile designations
-# Make pb into sf object
 
-pbsf <- st_as_sf(pb, coords = c('Xaa', 'Yaa'), crs = 3338)
-pbsf <- cbind(st_coordinates(pbsf), pbsf)
 #pbsf <- pbsf %>% # preserve lat/lon
   #rename(gps_lon = X) %>%
   #rename(gps_lat = Y)
@@ -125,7 +122,7 @@ pb20735.2009 <- pb %>%
 pb20845.2015 <- pb %>%
   filter(id == "pb_20845.2015") %>%
   filter(datetime >= as.POSIXct("2015-09-24 04:01:29", tz = tz) & 
-           datetime < as.POSIXct("2015-10-03 08:00:20", tz = tz))
+           datetime < as.POSIXct("2015-10-03 04:00:47", tz = tz))
   
 
 pb20966.2008 <- pb %>%
@@ -205,6 +202,7 @@ bpIDs <- unique(all.bp$id) # 20 bear ids
 allIDs <- unique(pb$id)
 
 setdiff(allIDs, bpIDs) # Difference of 5 - looks good!
+setdiff(bpIDs, allIDs) # none. good. 
 
 # -------- PLOT CHECKS ------------------------------------- #
 
@@ -240,13 +238,11 @@ tm_shape(bones) +
 
 all.bp$at_bonepile <- 1
 
-all.bp <- st_drop_geometry(all.bp) # Need to make df in order to go left_join
-
 pb2 <- pb %>%
-  st_drop_geometry() %>%
-  select(-at_bonepile) %>%
   left_join(all.bp) %>%
   replace_na(list(at_bonepile = 0))
+
+temp <- pb2[,1:27]
 
 pbsf <- st_as_sf(pb2, coords = c("Xaa", "Yaa"), crs = 3338)
 

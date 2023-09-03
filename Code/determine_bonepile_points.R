@@ -194,13 +194,16 @@ all.bp$at_bonepile <- 1
 all.bp2 <- all.bp %>%
   select(id, datetime, at_bonepile)
 
-pb2 <- left_join(pb, all.bp2) # looks good!!!
+pb2 <- pb %>%
+  left_join(all.bp2) %>% 
+  replace_na(list(at_bonepile = 0, study_end = 0)) %>% glimpse() # Looks good!
+
 
 # -------- PLOT CHECKS ------------------------------------- #
 
 ## Make spatial object from pb dataframe (all)
 
-pbsf <- st_as_sf(pb, coords = c("gps_lon", "gps_lat"), crs = 4326)
+pbsf <- st_as_sf(pb2, coords = c("gps_lon", "gps_lat"), crs = 4326)
 pbsf <- cbind(pbsf, st_coordinates(pbsf))
 
 pbsf <- pbsf %>% # preserve lat/lon
@@ -215,15 +218,18 @@ pbsf <- pbsf %>% # preserve Alaska Albers X and Y
   rename(Xaa = X) %>%
   rename(Yaa = Y)
 
+glimpse(pbsf) # Looks good
 
+# Separate bonepile points for visual check
 
-BPsf <- filter(pbsf, id %in% all.bp)
+BPsf <- pbsf %>%
+  filter(id %in% bpIDs & at_bonepile == 1)
 
 tmap_mode('view')
 
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
-  tm_shape(bpsf) + 
+  tm_shape(BPsf) + 
   tm_symbols(col = "id", popup.vars = c("id", "datetime"))
 
 ## Resolved
@@ -250,7 +256,7 @@ tm_shape(bones) +
 
 pb2 <- pb %>%
   left_join(all.bp) %>%
-  replace_na(list(at_bonepile = 0))
+  
 
 temp <- pb2[,1:27]
 

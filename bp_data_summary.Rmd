@@ -89,21 +89,23 @@ summary(summary)
 
 sd(summary$DaysTrack)
 ```
-Data Years
 
 # MCP's
 
 ```{r mcp}
 
-used <- dplyr::select(used, id,geometry)
-used.sp <- as_Spatial(used)
+usp <- dplyr::select(usf, id,geometry)
+usp <- as_Spatial(usp)
 
-mcp95 <- mcp(used.sp, percent = 99)
+tmap_mode('view')
+mcp95 <- mcp(usp, percent = 95)
+mcp95sf <- st_as_sf(mcp95)
 
-tm_shape(ak) + 
-  tm_polygons(col = "#ABF37E") + 
-  tm_shape(mcp95) +
+
+tm_shape(mcp95sf) + 
   tm_polygons(col = "id", alpha = 0.4, legend.show = FALSE)
+
+# pb_20525.2013 looks too big. Double check with NSD analysis
 
 ```
 

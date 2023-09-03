@@ -9,9 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r libraries, include=FALSE, message=FALSE}
+```{r clear-workspace-if-needed}
 
 rm(list = ls())
+
+```
+
+
+```{r libraries, include=FALSE, message=FALSE}
 
 library(sf)
 library(tidyverse)
@@ -32,40 +37,16 @@ conflicts_prefer(
 
 ```{r load-and-prep-data, message=FALSE, warning=FALSE, echo=FALSE}
 
+## NOTE: for use with adehabitatLT, input must be data.frame and not tbl
+
 # Bears
 
-b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
+b <- as.data.frame(b)
 
 # Bonepile points 
 
 u <- b %>% filter(at_bonepile == 1)  # load all bonepile points
-usf <- st_as_sf(u, coords = c("Xaa", "Yaa"), crs = 3338) %>% distinct() # seeing whether this eliminates duplicates. Appears to. 
-
-# Alaska
-
-#us <- st_read('./Data/Spatial/State_Shapefile/States_NAD83_Albers.shp') # From NPS state shapefile
-
-#bb <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Polar_Bears_GIS/Rectangle/Rectangle.shp')
-
-#bb <- st_transform(bb, 3338)
-
-#ak <- us %>%
-  #filter(STATE_ABBR == "AK") %>%
-  #st_transform(3338) 
-
-#ak <- st_crop(ak, bb)
-
-```
-
-```{r plot-all-points}
-
-tmap_mode('view')
-
-tm_shape(usf) + 
-  tm_symbols(size = 0.2, col = "id", legend.col.show = FALSE)  
-  #tm_shape(bone) + 
-  #tm_symbols(size = 0.8, shape = 4, col = "black") +
-  #m_legend(show = FALSE)
 
 ```
 

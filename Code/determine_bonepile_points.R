@@ -29,6 +29,8 @@ rm(list = ls())
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_083123.Rds"))
 
+pb2 <- distinct(pb) # no duplicates
+
 #time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
 #write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
 
@@ -41,16 +43,6 @@ bones <-st_transform(bones, 3338)
 
 pb <- pb %>% select(-at_bonepile) # remove pre-existing bonepile designations
 
-#pbsf <- pbsf %>% # preserve lat/lon
-  #rename(gps_lon = X) %>%
-  #rename(gps_lat = Y)
-
-#pbsf <- st_transform(pbsf, crs = 3338)
-#pbsf <- cbind(st_coordinates(pbsf), pbsf)
-#pbsf <- pbsf %>% # preserve Alaska Albers X and Y
-  #rename(Xaa = X) %>%
-  #rename(Yaa = Y)
-
 #time_at_bp[2,] <- NA
 #time_at_bp <- na.omit(time_at_bp)
 
@@ -58,44 +50,9 @@ pb <- pb %>% select(-at_bonepile) # remove pre-existing bonepile designations
 
 # DOES NOT WORK CORRECTLY UNLESS I USE as.POSIXct() AND SPECIFY TIMEZONE
 
-## Bears added to new dataset
-
 tz <- 'US/Alaska'
 
-pb20965.2008 <- pb %>%
-  dplyr::filter(id == "pb_20965.2008") %>%
-  dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
-                  datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
-
-pb20965.2008 <- pb %>%
-  dplyr::filter(id == "pb_20965.2008") %>%
-  dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
-                  datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
-
-pb20975.2008 <- pb %>%
-  dplyr::filter(id == "pb_20975.2008") %>%
-  dplyr::filter(datetime >= as.POSIXct("2008-09-09 01:00:00", tz = tz)) # bear remains at bp until end of study
-
-pb21264.2011 <- pb %>%
-  dplyr::filter(id == "pb_21264.2011") %>%
-  dplyr::filter(datetime >= as.POSIXct("2011-09-09 00:00:00", tz = tz) & 
-                  datetime <= as.POSIXct("2011-10-01 16:00:00", tz = tz)) 
-
-pb21358.2013 <- pb %>%
-  dplyr::filter(id == "pb_21358.2013") %>%
-  dplyr::filter(datetime >= as.POSIXct("2013-08-25 22:00:00", tz = tz) & 
-                  datetime <= as.POSIXct("2013-09-25 00:00:00", tz = tz)) 
-
-## Bears from old Dataset
-
-pb20586.2008 <- pb %>%
-  filter(id == "pb_20586.2008") %>% 
-  filter(datetime <= as.POSIXct("2008-10-14 07:00:36", tz = tz))
-
-pb20525.2013 <- pb %>%
-  filter(id == "pb_20525.2013") %>%
-  filter(datetime >= as.POSIXct("2013-09-11 22:01:50") & 
-           datetime <= as.POSIXct("2013-10-16 00:00:12"))
+# Old bears
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%
@@ -112,6 +69,20 @@ pb20520.2012 <- pb %>%
   filter(datetime >= as.POSIXct("2012-08-28 01:00:00", tz = 'US/Alaska') & 
            datetime <= as.POSIXct("2012-10-19 16:00:00", tz = 'US/Alaska'))
 
+pb20525.2013 <- pb %>%
+  filter(id == "pb_20525.2013") %>%
+  filter(datetime >= as.POSIXct("2013-09-11 22:01:50") & 
+           datetime <= as.POSIXct("2013-10-16 00:00:12"))
+
+pb20525.2014 <- pb %>%
+  filter(id == "pb_20525.2014") %>% 
+  filter(datetime >= as.POSIXct("2014-08-29 02:00:29", tz = tz) & 
+           datetime <= as.POSIXct("2014-10-26 06:00:22", tz = tz))
+
+pb20586.2008 <- pb %>%
+  filter(id == "pb_20586.2008") %>% 
+  filter(datetime <= as.POSIXct("2008-10-14 07:00:36", tz = tz))
+
 pb20735.2009 <- pb %>%
   filter(id == "pb_20735.2009") %>%
   filter(datetime >= as.POSIXct("2009-08-10 06:00:00", tz = tz) &
@@ -123,7 +94,6 @@ pb20845.2015 <- pb %>%
   filter(id == "pb_20845.2015") %>%
   filter(datetime >= as.POSIXct("2015-09-24 04:01:29", tz = tz) & 
            datetime < as.POSIXct("2015-10-03 04:00:47", tz = tz))
-  
 
 pb20966.2008 <- pb %>%
   filter(id == "pb_20966.2008") %>%
@@ -163,13 +133,28 @@ pb32366.2014 <- pb %>%
 pb32608.2008 <- pb %>%
   filter(id == "pb_32608.2008") %>%
   filter(datetime >= as.POSIXct("2008-08-30 18:00:00", tz = tz) & 
-           datetime <= as.POSIXct("2008-10-15 14:00:00", tz = tz)) 
+           datetime <= as.POSIXct("2008-10-15 14:00:00", tz = tz))
 
-pb20525.2014 <- pb %>%
-  filter(id == "pb_20525.2014") %>% 
-  filter(datetime >= as.POSIXct("2014-08-29 02:00:29", tz = tz) & 
-           datetime <= as.POSIXct("2014-10-26 06:00:22", tz = tz))
+# New bears
 
+pb20965.2008 <- pb %>%
+  dplyr::filter(id == "pb_20965.2008") %>%
+  dplyr::filter(datetime >= as.POSIXct("2008-09-15 18:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2008-10-09 03:00:00", tz = tz)) 
+
+pb20975.2008 <- pb %>%
+  dplyr::filter(id == "pb_20975.2008") %>%
+  dplyr::filter(datetime >= as.POSIXct("2008-09-09 01:00:00", tz = tz)) # bear remains at bp until end of study
+
+pb21264.2011 <- pb %>%
+  dplyr::filter(id == "pb_21264.2011") %>%
+  dplyr::filter(datetime >= as.POSIXct("2011-09-09 00:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2011-10-01 16:00:00", tz = tz)) 
+
+pb21358.2013 <- pb %>%
+  dplyr::filter(id == "pb_21358.2013") %>%
+  dplyr::filter(datetime >= as.POSIXct("2013-08-25 22:00:00", tz = tz) & 
+                  datetime <= as.POSIXct("2013-09-25 00:00:00", tz = tz)) 
 
 # Combine
 
@@ -180,21 +165,19 @@ all.bp <- bind_rows(pb06810.2008,
                     pb20735.2009, 
                     pb20845.2015, 
                     pb20966.2008, 
+                    pb20982.2008,
                     pb21015.2013, 
                     pb21368.2014, 
                     pb32282.2008, 
                     pb32366.2011,
+                    pb32366.2014,
                     pb32608.2008,
-                    pb20982.2008,
                     pb20965.2008,
                     pb20975.2008,
                     pb21264.2011,
-                    pb21358.2013,
-                    pb20525.2013,
-                    pb20586.2008,
-                    pb32366.2014,
-                    pb20525.2013,
-                    pb20525.2014)
+                    pb21358.2013)
+
+all.bp2 <- distinct(all.bp)
 
 # Check that everything is there - LOOKS GOOD
 
@@ -204,9 +187,37 @@ allIDs <- unique(pb$id)
 setdiff(allIDs, bpIDs) # Difference of 5 - looks good!
 setdiff(bpIDs, allIDs) # none. good. 
 
+# Add at_bonepile to pb df
+
+all.bp$at_bonepile <- 1
+
+all.bp <- all.bp %>%
+  select(id, datetime, at_bonepile)
+
+pb2 <- left_join(pb, all.bp) # numbers increased. Need to figure out why duplicate id/datetimes
+
 # -------- PLOT CHECKS ------------------------------------- #
 
-bpsf <- st_as_sf(all.bp, coords = c("Xaa", "Yaa"), crs = 3338)
+## Make spatial object from pb dataframe (all)
+
+pbsf <- st_as_sf(pb, coords = c("gps_lon", "gps_lat"), crs = 4326)
+pbsf <- cbind(pbsf, st_coordinates(pbsf))
+
+pbsf <- pbsf %>% # preserve lat/lon
+  rename(gps_lon = X) %>%
+  rename(gps_lat = Y)
+
+# Transform to AA and preserve X and Y coords
+
+pbsf <- st_transform(pbsf, crs = 3338)
+pbsf <- cbind(st_coordinates(pbsf), pbsf)
+pbsf <- pbsf %>% # preserve Alaska Albers X and Y
+  rename(Xaa = X) %>%
+  rename(Yaa = Y)
+
+
+
+BPsf <- filter(pbsf, id %in% all.bp)
 
 tmap_mode('view')
 
@@ -236,7 +247,6 @@ tm_shape(bones) +
 
 # ------- Add 'at_bonepile' column to main df -------------------------------- #
 
-all.bp$at_bonepile <- 1
 
 pb2 <- pb %>%
   left_join(all.bp) %>%

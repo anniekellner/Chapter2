@@ -232,57 +232,14 @@ tm_shape(bones) +
   tm_shape(BPsf) + 
   tm_symbols(col = "id", popup.vars = c("id", "datetime"))
 
-## Resolved
 
-# pb_20735.2009 - check ocean excursion - OK; in middle of timeframe
-# pb_20975.2008 - check start date - might be too early - OK because bear goes to bonepile, then island, then back
-# pb_20520.2012 - OK. Random point further away but in the middle of BP timeframe
-
-# Individual plots
-
-#tmap_options(max.categories = 48)
-
-#tm_shape(bones) + 
-  #tm_dots(col = "blue", size = 0.5) + 
-  #tm_shape(pb20975.2008) + 
-  #tm_symbols(col = "ymd", 
-             #palette = "magma", 
-             #popup.vars = c("id", "datetime"), 
-             #legend.col.show = FALSE)
+# ------- Add GPS info from sf object to main df -------------------------------- #
 
 
-# ------- Add 'at_bonepile' column to main df -------------------------------- #
-
-
-pb2 <- pb %>%
-  left_join(all.bp) %>%
   
 
-temp <- pb2[,1:27]
-
-pbsf <- st_as_sf(pb2, coords = c("Xaa", "Yaa"), crs = 3338)
-
-pbsf$at_bonepile <- as.factor(pbsf$at_bonepile)
-
-# Plot 
-
-tmap_mode('view')
-
-tm_shape(bones) + 
-  tm_dots(col = "blue", size = 0.5) + 
-  tm_shape(pbsf) + 
-  tm_symbols(col = "at_bonepile", popup.vars = c("id", "ymd"))
 
 
-# Plot BP-only points to see how they align with BP locations
-
-bpSF <- filter(pbsf, at_bonepile == 1) 
-
-tm_shape(bones) + 
-  tm_dots(col = "blue", size = 0.5) +
-  tm_shape(bpSF) + 
-  tm_symbols()
-  
 
 # ------------------- Save dataframe  ---------------------------------------- #
 

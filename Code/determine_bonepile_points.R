@@ -29,7 +29,7 @@ rm(list = ls())
 
 pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
 
-time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
+#time_at_bp <- readRDS(here("Data", "Derived-data", "DFs", "Space_Use_Summaries", "time_at_bonepile.Rds"))
 #write_csv(time_at_bp, here("Data", "Derived-data", "Bonepile", "time_at_bonepile.csv"))
 
 # Spatial
@@ -54,8 +54,8 @@ pbsf <- cbind(st_coordinates(pbsf), pbsf)
   #rename(Xaa = X) %>%
   #rename(Yaa = Y)
 
-time_at_bp[2,] <- NA
-time_at_bp <- na.omit(time_at_bp)
+#time_at_bp[2,] <- NA
+#time_at_bp <- na.omit(time_at_bp)
 
 # ------------------ BONEPILE POINTS ------------------------ #
 
@@ -98,7 +98,7 @@ pb20586.2008 <- pb %>%
 pb20525.2013 <- pb %>%
   filter(id == "pb_20525.2013") %>%
   filter(datetime >= as.POSIXct("2013-09-11 22:01:50") & 
-           datetime <= as.POSIXct("2013-11-08 22:00:30"))
+           datetime <= as.POSIXct("2013-10-16 00:00:12"))
 
 pb06810.2008 <- pb %>%
   filter(id == "pb_06810.2008") %>%
@@ -178,7 +178,8 @@ pb20525.2014 <- pb %>%
 
 all.bp <- bind_rows(pb06810.2008,
                     pb20492.2008, 
-                    pb20520.2012, 
+                    pb20520.2012,
+                    pb20525.2013,
                     pb20735.2009, 
                     pb20845.2015, 
                     pb20966.2008, 
@@ -207,11 +208,13 @@ setdiff(allIDs, bpIDs) # Difference of 5 - looks good!
 
 # -------- PLOT CHECKS ------------------------------------- #
 
+bpsf <- st_as_sf(all.bp, coords = c("Xaa", "Yaa"), crs = 3338)
+
 tmap_mode('view')
 
 tm_shape(bones) + 
   tm_dots(col = "blue", size = 0.5) + 
-  tm_shape(all.bp) + 
+  tm_shape(bpsf) + 
   tm_symbols(col = "id", popup.vars = c("id", "datetime"))
 
 ## Resolved

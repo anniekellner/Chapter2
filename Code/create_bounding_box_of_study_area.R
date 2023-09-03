@@ -32,7 +32,7 @@ end <- pb2 %>% # skipped pbsf so if
   mutate(study_end = 1) %>%
   select(id, datetime, study_end)
 
-pb4 <- left_join(pb3, end)
-filter(pb4, study_end == 1)
+pb3 <- left_join(pb2, end)
+filter(pb3, study_end == 1) # looks good
 
-saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG_083023.Rds"))
+#saveRDS(pb3, here("Data", "Derived-data", "DFs", "OG", "OG_083023.Rds"))

@@ -91,6 +91,10 @@ tmap_mode('view')
 tm_shape(mcp95sf) + 
   tm_polygons(col = "id", alpha = 0.4, legend.show = FALSE)
 
+# Save bonepile MCP's as spatial object
+
+#saveRDS(mcp95sf, here("Data", "Derived-data", "Spatial", "MCP95_bonepile_bears.Rds"))
+
 
 ```
 

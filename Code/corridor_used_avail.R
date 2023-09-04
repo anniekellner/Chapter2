@@ -27,7 +27,8 @@ b <- as.data.frame(b)
 # Corridor points
 
 u <- b %>% filter(at_bonepile == 0)  # load all bonepile points
-u <- filter(!id = "pb_32608.2008") # AT SOME POINT, ADJUST BONEPILE DATES TO REFLECT BONEPILE-ONLY BEAR
+u <- u %>%
+  filter(!(id == "pb_32608.2008")) # AT SOME POINT, ADJUST BONEPILE DATES TO REFLECT BONEPILE-ONLY BEAR
 
 # ------  SUMMARY STATS ----------------- #
 

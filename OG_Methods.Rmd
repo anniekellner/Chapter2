@@ -30,7 +30,12 @@ conflicts_prefer(
 ```{r load-data}
 
 # Bears
+
 b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
+
+# GPS Data
+
+fix <- readRDS(here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
 
 ```
 
@@ -104,6 +109,16 @@ l <- b %>%
 
 filter(b, departure_to_ice == 1)
 filter(b, enter_den == 1)
+
+```
+
+# GPS Fix Rate Data
+
+```{r}
+
+fix$median <- round(fix$median, digits = 0)
+
+table(fix$median)
 
 ```
 

@@ -52,12 +52,13 @@ sd(summary$DaysTrack)
 
 # Make track (amt package)
 
-track <- make_track(u, Xaa, Yaa, datetime, id = id, crs = 3338)
-tr <- track %>% nest(data = -"id") # create individual dataframes
+track <- make_track(u, .x = Xaa, .y = Yaa, .t = datetime, id = id, crs = 3338)
+tr <- track %>% nest(data = c(-"id")) # create individual dataframes
 
 tr2 <- tr %>% # downsample to 2-hr fix rate
   mutate(steps = map(data, function(x)
-    x %>% track_resample(rate = hours(2), tolerance = minutes(20)) %>% steps_by_burst()))
+    x %>% track_resample(rate = hours(2), tolerance = minutes(20)))) #%>% 
+      #steps_by_burst()))
 
 # Dataframe
 
@@ -67,9 +68,7 @@ df <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps)
 
 # Histogram showing step length
 
-steps <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
-
-slHist <- ggplot(data = steps, aes(sl_, fill =factor(id))) + 
+slHist <- ggplot(data = df, aes(sl_, fill =factor(id))) + 
   geom_histogram(alpha = 0.5) + 
   xlab("step length (m)") + 
   ylab("Number of steps") + 
@@ -99,3 +98,35 @@ ggsave(taDensity, filename = "Turning Angle Density plot for Corr Bears.pdf",
        width = 7,
        height = 5, 
        units = "in")
+
+# ----- GET USED AND AVAILABLE POINTS --------- #
+
+tr3 <- tr2 %>% filter_min_n_burst(3)
+
+ua <- steps %>% group_by(id) %>% random_steps(n_control = 20) # add random steps (gamma/von mises = default distributions)
+
+df %>% filter(df,)
+
+ua <- df %>% random_steps(n_control = 20) # add random steps (gamma/von mises = default distributions)
+
+# Plot random v matched points
+
+ggplot(ua, aes(x2_, y2_, color=case_))+
+  geom_point()+
+  facet_wrap(~id, scales="free")
+
+saveRDS(ua, './non_bp_pts_used_avail.Rds')
+
+# --------- USED AND AVAILABLE POINTS --------------  #
+
+tr2 <- 
+
+ua <- tr2 %>% steps_by_burst(n_control = 20) # add random steps (gamma/von mises = default distributions)
+
+# Plot random v matched points
+
+ggplot(ua, aes(x2_, y2_, color=case_))+
+  geom_point()+
+  facet_wrap(~id, scales="free")
+
+saveRDS(ua, './non_bp_pts_used_avail.Rds')

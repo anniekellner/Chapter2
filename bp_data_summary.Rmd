@@ -75,21 +75,24 @@ sd(summary$DaysTrack)
 
 ```{r mcp}
 
+# MCP95 looks better than MCP99
+
+usf <- st_as_sf(u, coords = c('Xaa','Yaa'), crs = 3338)
+
 usp <- dplyr::select(usf, id,geometry)
 usp <- as_Spatial(usp)
 
-tmap_mode('view')
+
 mcp95 <- mcp(usp, percent = 95)
 mcp95sf <- st_as_sf(mcp95)
 
+tmap_mode('view')
 
 tm_shape(mcp95sf) + 
   tm_polygons(col = "id", alpha = 0.4, legend.show = FALSE)
 
-# pb_20525.2013 looks too big. Double check with NSD analysis
 
 ```
-
 
 
 # Plot used v. available points
@@ -97,21 +100,25 @@ tm_shape(mcp95sf) +
 ```{r create-used-avail-pts, echo=FALSE}
 # Make track with package amt
 
-track <- make_track(used.df, X, Y, crs = sp::CRS("+init=epsg:3338"), id = id) # makes one big track with all animals
+
+
+track <- make_track(u, .x = Xaa, .y = Yaa, crs = 3338, id = id) # makes one big track with all animals
 trk <- track %>% nest(data = -"id") # creates dataframes for each individual
 
-# Create random points using 99 MCP for each individual
+# Create random points using 95 MCP for each individual
 
 rsf <- data.frame(case_ = logical(), x_ = double(), y_ = double(), id = character())
-ids <- unique(used.df$id)
+ids <- unique(u$id)
 
 for(i in 1:length(ids)){
   bear_trk = trk$data[[i]]
-  hr = hr_mcp(bear_trk, levels = 0.99)
+  hr = hr_mcp(bear_trk, levels = 0.95)
   rsf_pts = random_points(hr, n = 20*nrow(bear_trk), presence = bear_trk)
   rsf_pts$id = ids[i]
   rsf = rbind(rsf, rsf_pts)
 }
+
+#saveRDS(rsf, here("Data", "Derived-data", "DFs", "OG", "bonepile_pts_ua_090323.Rds"))
 
 ```
 
@@ -123,6 +130,5 @@ ggplot(rsf, aes(x_, y_, color=case_))+
   geom_point()+
   facet_wrap(~id, scales="free")
 ```
- Used and available points for bonepile bears
- 
- The 'blue' ("TRUE") points are more obvious here than in the step-selection. That makes sense because these points could be anywhere in the MCP whereas the step-selection available points are more limited?
+
+

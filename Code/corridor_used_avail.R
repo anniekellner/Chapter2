@@ -33,62 +33,42 @@ u <- u %>%
 # Fix rates
 
 fix <- readRDS(here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
-fix$median <- round(fix$median, digits = 0)
+#fix$median <- round(fix$median, digits = 0)
 
 #saveRDS(fix, here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
 # ------------  USED AND AVAILABLE PTS  ------------- #
 
-# Check fix rates for corridor animals
+# Divide corridor animals into fix rates (downsample 1 to 2 and then run 4)
 
 uIDs <- unique(u$id)
 
 uFixes <- filter(fix, id %in% uIDs)
 
-table(uFixes$id, uFixes$median)
+# Identify bears in each group
 
-trackList <- list()
+fixHRs1_2 <- filter(uFixes, median == 1 | median == 2)
+fixHr4 <- filter(uFixes, median == 4)
 
-for(i in 1:length(uIDs)){
-  animal = filter(u, id == uIDs[i])
-  trackList[[i]] = make_track(animal, 
-                              .x = Xaa, 
-                              .y = Yaa, 
-                              .t = datetime, 
-                              id = id, 
-                              crs = 3338)
- 
-}
+TwoHrsIDs <- fixHRs1_2$id
+FourHrsIDs <- fixHr4$id
 
-downSampled <- list()
+# Filter used df
 
-for(i in 1:length(uIDs)){
-  downSampled[[i]] = track_resample(trackList[[i]],
-                                    rate = hours(2),
-                                    tolerance = minutes(10))
-}
+grp1 <- filter(u, id %in% TwoHrsIDs)
+grp2 <- filter(u, id %in% FourHrsIDs)
 
-stepsBurst <- list()
+# Make tracks
 
-for(i in 1:length(uIDs)){
-  stepsBurst[[i]] = steps_by_burst(downSampled[[i]])
-}
+trk1 <- make_track(grp1, Xaa, Yaa, datetime, id = id, crs = 3338)
+tr1 <- trk1 %>% nest(data = -"id") 
 
-random <- list()
+tr1_resamp <- tr1 %>% # downsample to 2-hr fix rate
+  mutate(steps = map(data, function(x)
+    x %>% track_resample(rate = hours(2), tolerance = minutes(20)) %>% steps_by_burst()))
 
-for(i in 1:length(uIDs)){
-  random[[2]] = random_steps(stepsBurst[[2]], n_control = 20)
-}
+steps1 <- tr1_resamp %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
 
-steps <- tr2 %>% dplyr::select(id, steps)# %>% unnest(cols = steps) 
-
-
-trk <- track %>% nest(data = c(-"id")) # create individual dataframes
-
-
-trk_unnest <- unnest(trk)
-
-tr2 <- steps(track)
-tr3 <- tr2 %>% nest(data = c(-"id"))
+ua1 <- steps1 %>% group_by(id) %>% random_steps(n_control = 20) 
 
 # ----- GET USED AND AVAILABLE POINTS --------- #
 

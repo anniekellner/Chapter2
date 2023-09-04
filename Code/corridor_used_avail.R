@@ -47,4 +47,55 @@ summary$DaysTrack <- as.numeric(summary$DaysTrack)
 summary(summary)
 
 sd(summary$DaysTrack)
-```
+
+# ------------  USED AND AVAILABLE PTS  ------------- #
+
+# Make track (amt package)
+
+track <- make_track(u, Xaa, Yaa, datetime, id = id, crs = 3338)
+tr <- track %>% nest(data = -"id") # create individual dataframes
+
+tr2 <- tr %>% # downsample to 2-hr fix rate
+  mutate(steps = map(data, function(x)
+    x %>% track_resample(rate = hours(2), tolerance = minutes(20)) %>% steps_by_burst()))
+
+# Dataframe
+
+df <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
+
+# ------  PLOTS ------------------  #
+
+# Histogram showing step length
+
+steps <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
+
+slHist <- ggplot(data = steps, aes(sl_, fill =factor(id))) + 
+  geom_histogram(alpha = 0.5) + 
+  xlab("step length (m)") + 
+  ylab("Number of steps") + 
+  theme_classic() +
+  theme(legend.position = "bottom") 
+
+
+ggsave(slHist, filename = "Step Length Histogram for Corr Bears.pdf", 
+       path = here("Plots", "OG"),
+       dpi = 300,
+       width = 7,
+       height = 5,
+       units = "in")
+
+# Density distribution showing turning angle
+
+taDensity <- ggplot(data = steps, aes(ta_, fill = factor(id))) + 
+  geom_density(alpha = 0.2) + 
+  xlab("Turning Angle") + 
+  ylab("Density") + 
+  theme_classic() +
+  theme(legend.position = "bottom") 
+
+ggsave(taDensity, filename = "Turning Angle Density plot for Corr Bears.pdf", 
+       path = here("Plots", "OG"),
+       dpi = 300,
+       width = 7,
+       height = 5, 
+       units = "in")

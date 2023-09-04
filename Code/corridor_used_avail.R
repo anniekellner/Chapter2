@@ -30,11 +30,21 @@ u <- b %>% filter(at_bonepile == 0)  # load all bonepile points
 u <- u %>%
   filter(!(id == "pb_32608.2008")) # AT SOME POINT, ADJUST BONEPILE DATES TO REFLECT BONEPILE-ONLY BEAR
 
+# Fix rates
+
+fix <- readRDS(here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
+fix$median <- round(fix$median, digits = 0)
+
+#saveRDS(fix, here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
 # ------------  USED AND AVAILABLE PTS  ------------- #
 
-##Make a list of tracks for individuals from main df 
+# Check fix rates for corridor animals
 
 uIDs <- unique(u$id)
+
+uFixes <- filter(fix, id %in% uIDs)
+
+table(uFixes$id, uFixes$median)
 
 trackList <- list()
 

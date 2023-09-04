@@ -22,82 +22,63 @@ rm(list = ls())
 # ----------  LOAD AND PREP DATA  --------------- #
 
 b <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
-b <- as.data.frame(b)
 
 # Corridor points
 
 u <- b %>% filter(at_bonepile == 0)  # load all bonepile points
+
 u <- u %>%
   filter(!(id == "pb_32608.2008")) # AT SOME POINT, ADJUST BONEPILE DATES TO REFLECT BONEPILE-ONLY BEAR
 
-# ------  SUMMARY STATS ----------------- #
-
-# Create track in adehabitatLT
-
-ltraj <- as.ltraj(xy=u[,c("Xaa","Yaa")], date=u$datetime, id=as.character(u$id))
-
-summary <- summary(ltraj)
-
-summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)
-summary <- dplyr::select(summary, id, date.begin, date.end, DaysTrack)
-summary
-
-summary$DaysTrack <- as.numeric(summary$DaysTrack)
-
-summary(summary)
-
-sd(summary$DaysTrack)
-
 # ------------  USED AND AVAILABLE PTS  ------------- #
 
-# Make track (amt package)
+##Make a list of tracks for individuals from main df 
 
-track <- make_track(u, .x = Xaa, .y = Yaa, .t = datetime, id = id, crs = 3338)
-tr <- track %>% nest(data = c(-"id")) # create individual dataframes
+uIDs <- unique(u$id)
 
-tr2 <- tr %>% # downsample to 2-hr fix rate
-  mutate(steps = map(data, function(x)
-    x %>% track_resample(rate = hours(2), tolerance = minutes(20)))) #%>% 
-      #steps_by_burst()))
+trackList <- list()
 
-# Dataframe
+for(i in 1:length(uIDs)){
+  animal = filter(u, id == uIDs[i])
+  trackList[[i]] = make_track(animal, 
+                              .x = Xaa, 
+                              .y = Yaa, 
+                              .t = datetime, 
+                              id = id, 
+                              crs = 3338)
+ 
+}
 
-df <- tr2 %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
+downSampled <- list()
 
-# ------  PLOTS ------------------  #
+for(i in 1:length(uIDs)){
+  downSampled[[i]] = track_resample(trackList[[i]],
+                                    rate = hours(2),
+                                    tolerance = minutes(10))
+}
 
-# Histogram showing step length
+stepsBurst <- list()
 
-slHist <- ggplot(data = df, aes(sl_, fill =factor(id))) + 
-  geom_histogram(alpha = 0.5) + 
-  xlab("step length (m)") + 
-  ylab("Number of steps") + 
-  theme_classic() +
-  theme(legend.position = "bottom") 
+for(i in 1:length(uIDs)){
+  stepsBurst[[i]] = steps_by_burst(downSampled[[i]])
+}
+
+random <- list()
+
+for(i in 1:length(uIDs)){
+  random[[2]] = random_steps(stepsBurst[[2]], n_control = 20)
+}
+
+steps <- tr2 %>% dplyr::select(id, steps)# %>% unnest(cols = steps) 
 
 
-ggsave(slHist, filename = "Step Length Histogram for Corr Bears.pdf", 
-       path = here("Plots", "OG"),
-       dpi = 300,
-       width = 7,
-       height = 5,
-       units = "in")
+trk <- track %>% nest(data = c(-"id")) # create individual dataframes
 
-# Density distribution showing turning angle
 
-taDensity <- ggplot(data = steps, aes(ta_, fill = factor(id))) + 
-  geom_density(alpha = 0.2) + 
-  xlab("Turning Angle") + 
-  ylab("Density") + 
-  theme_classic() +
-  theme(legend.position = "bottom") 
+trk_unnest <- unnest(trk)
 
-ggsave(taDensity, filename = "Turning Angle Density plot for Corr Bears.pdf", 
-       path = here("Plots", "OG"),
-       dpi = 300,
-       width = 7,
-       height = 5, 
-       units = "in")
+tr2 <- steps(track)
+tr3 <- tr2 %>% nest(data = c(-"id"))
 
 # ----- GET USED AND AVAILABLE POINTS --------- #
 

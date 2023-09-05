@@ -208,7 +208,68 @@ ggsave(taDensity, filename = "Turning Angle Density plot for Corr Bears.pdf",
 
 ```
 
+## Bonepile vs Corridor Comparison
 
+```{r corridor}
+
+# Movement rates for corridor bears
+
+burst1 <- map_df(stepsBurst1, ~as.data.frame(.x), .id = "id") # burst from corridor_used_avail (stepsBurst converted to dataframe)
+
+burst2 <- map_df(stepsBurst2, ~as.data.frame(.x), .id = "id")
+
+burst1a <- na.omit(burst1)
+burst2a <- na.omit(burst2)
+
+corr <- bind_rows(burst1a, burst2a)
+corr$rate <- corr$sl_ / as.numeric(corr$dt_)
+
+
+burst1a$Rate <- 
+
+hourly2 <- burst1a %>% mutate(hourly_sl = sl_/2)
+hourly4 <- burst2a %>% mutate(hourly_sl = sl_/4)
+
+hourly <- hourly2 %>% bind_rows(hourly4)
+
+mean(hourly$hourly_sl)
+
+hourly$hr
+
+```
+```{r movement-rates-at-bonepile}
+ltraj <- as.ltraj(xy=u[,c("Xaa","Yaa")], date=u$datetime, id=as.character(u$id))
+
+trajdf <- ld(ltraj)
+trajdf$dt <- trajdf$dt/3600 # convert dt to hours
+
+trajdf$Rate <- (trajdf$dist)/(trajdf$dt)
+
+```
+
+```{r paired-t-test}
+
+bpIDs <- unique(trajdf$id)
+corrIDs <- unique(corr$id)
+
+corr <- corr %>% filter(id %in% bpIDs)
+
+setdiff(bpIDs, corrIDs)
+
+trajdf <- trajdf %>% filter(!id == "pb_32608.2008")
+
+corrMean <- corr %>%
+  group_by(id) %>%
+  summarise(meanRate = mean(rate)) %>%
+  arrange(id)
+
+bpMean <- trajdf %>%
+  group_by(id) %>%
+  summarise(meanRate = mean(Rate, na.rm = TRUE)) %>%
+  arrange(id)
+
+t.test(corrMean$meanRate, bpMean$meanRate, paired = TRUE)
+```
 
 
 

@@ -26,6 +26,7 @@ library(tmaptools)
 library(adehabitatLT)
 library(adehabitatHR)
 library(data.table)
+library(knitr)
 library(here)
 library(conflicted)
 
@@ -58,16 +59,19 @@ Number of locations per bear
 
 ltraj <- as.ltraj(xy=u[,c("Xaa","Yaa")], date=u$datetime, id=as.character(u$id))
 
+trajdf <- ld(ltraj)
+trajdf$dt <- trajdf$dt/3600 # convert dt to hours
+
+trajdf$hrRate <- trajdf$dist/trajdf$dt
+
 summary <- summary(ltraj)
 
 summary$DaysTrack <-round(difftime(summary$date.end, summary$date.begin, units="days"),digits=1)
 summary <- dplyr::select(summary, id, date.begin, date.end, DaysTrack)
+
 summary
 
 summary$DaysTrack <- as.numeric(summary$DaysTrack)
-
-summary(summary)
-
 sd(summary$DaysTrack)
 ```
 

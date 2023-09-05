@@ -146,6 +146,18 @@ ssf_4hr_ua <- map_df(random2, ~as.data.frame(.x), .id = "id")
 ssf2_naomit <- na.omit(ssf_2hr_ua) # looks like NA's occurred when fix rate was > hour specified. Remove those points and note in methods.
 ssf4_naomit <- na.omit(ssf_4hr_ua)
 
+burst1 <- map_df(stepsBurst1, ~as.data.frame(.x), .id = "id")
+burst2 <- map_df(stepsBurst2, ~as.data.frame(.x), .id = "id")
+
+# ---- Get mean overall step length per hour for corridor bears  --------- #
+
+hourly2 <- burst1 %>% mutate(hourly_sl = sl_/2)
+hourly4 <- burst2 %>% mutate(hourly_sl = sl_/4)
+
+hourly <- hourly2 %>% bind_rows(hourly4)
+
+mean(hourly$hourly_sl)
+
 #saveRDS(ssf2_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_2h_ua.Rds"))
 #saveRDS(ssf4_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_4h_ua.Rds"))
 

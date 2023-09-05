@@ -6,11 +6,6 @@
 # recorded data OG-Bonepile-denning-info.csv - OG Analysis (saved to Data/Derived-data/Bonepile in repo)
   # This file is also in Google Sheets in Polar Bears/OG/Bonepile (or something like that)
 
-## TO DO: 
-  # Re-do 20525.2014, 32366.2014
-  # Add bonepile info to spreadsheet 
-  # Write Methods into document
-
 
 library(sf)
 library(tmap)
@@ -32,14 +27,11 @@ rm(list = ls())
 
 ## Bears
 
-pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG.Rds"))
+pb <- readRDS(here("Data", "Derived-data", "DFs", "OG", "OG_090323.Rds"))
 
-pbsf <- st_as_sf(pb, coords = c("gps_lon", "gps_lat"), crs = 4326) 
-pbsf <- st_transform(pbsf, crs = 3338) # Albers Alaska
+pbsf <- st_as_sf(pb, coords = c("Xaa", "Yaa"), crs = 3338) #
 
-pba <- cbind(pbsf, st_coordinates(pbsf)) # separate coords from geometry columns into X and Y columns
-
-pbdf <- st_drop_geometry(pba)
+pbdf <- st_drop_geometry(pbsf)
 
 years <- unique(pbdf$year)
 
@@ -75,7 +67,9 @@ unique(NSDbears$id)
 
 # ----  CREATE TRAJ OBJECT  ------ #
 
-traj.pb<-as.ltraj(xy=NSDbears[,c("X","Y")], date=NSDbears$datetime, id=as.character(NSDbears$id))
+pb <- as.data.frame(pb)
+
+traj.pb<-as.ltraj(xy=pb[,c("Xaa","Yaa")], date=pb$datetime, id=as.character(pb$id))
 traj.df <- ld(traj.pb)
 
 # Play around with r2n
@@ -91,8 +85,14 @@ for(i in 1:length(ids)){
   plotlist[[i]] = plot_ly(data = temp, x = ~date, y = ~R2n, type = "scatter") # https://plotly.com/r/reference/#scatter
   }
 
-plotlist[[2]]
-ids[[2]]
+bp_example <- plotlist[[1]]
+ids[[3]]
+
+
+
+bp_example <- plotlist[[1]]
+orca(bp_example, file = here("Plots", "OG", "Bonepile_example.png"))
+
 
 # Using plotly, can view sheet in browser and zoom in on time in question to get precise dates
 

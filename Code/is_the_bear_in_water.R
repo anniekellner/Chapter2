@@ -15,10 +15,7 @@ rm(list = ls())
 
 # --- Load Data -------------------- #
 
-corr <- readRDS('./Data/Derived-data/corridor_data.Rds')
-
-bone <- readRDS('./Data/Derived-data/bonepile_data.Rds')
-
+uaSF <- here("Data", "Derived-data", "DFs", "OG", "uaSF.Rds")
 islands <- st_read('./Data/Spatial/Barrier_Islands/islands_w_1500m_buffer.shp') 
 
 

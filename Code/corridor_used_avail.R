@@ -72,7 +72,7 @@ for(i in 1:length(TwoHrsIDs)){
                               .t = datetime, 
                               id = id, 
                               crs = 3338)
-  
+  names(trackList1)[i] = TwoHrsIDs[i]
 }
     
 downSampled1 <- list()
@@ -81,18 +81,21 @@ for(i in 1:length(TwoHrsIDs)){
   downSampled1[[i]] = track_resample(trackList1[[i]],
                                     rate = hours(2),
                                     tolerance = minutes(10))
+  names(downSampled1)[i] = TwoHrsIDs[i]
 }    
     
 stepsBurst1 <- list()
 
 for(i in 1:length(TwoHrsIDs)){
   stepsBurst1[[i]] = steps_by_burst(downSampled1[[i]])
+  names(stepsBurst1)[i] = TwoHrsIDs[i]
 }    
 
 random1<- list()
 
 for(i in 1:length(TwoHrsIDs)){
   random1[[i]] = random_steps(stepsBurst1[[i]], n_control = 20)
+  names(random1)[i] = TwoHrsIDs[i]
 }
 
 # Make tracks for 4 hr group
@@ -107,7 +110,7 @@ for(i in 1:length(FourHrsIDs)){
                                .t = datetime, 
                                id = id, 
                                crs = 3338)
-  
+  names(trackList2)[i] = FourHrsIDs[i]
 }
 
 
@@ -117,12 +120,14 @@ for(i in 1:length(FourHrsIDs)){
   resampled2[[i]] = track_resample(trackList2[[i]],
                                    rate = hours(4),
                                    tolerance = minutes(10))
+  names(resampled2)[i] = FourHrsIDs[i]
 }    
 
 stepsBurst2 <- list()
 
 for(i in 1:length(FourHrsIDs)){
   stepsBurst2[[i]] = steps_by_burst(resampled2[[i]])
+  names(stepsBurst2)[i] = FourHrsIDs[i]
 }
 
 
@@ -130,19 +135,17 @@ random2<- list()
 
 for(i in 1:length(FourHrsIDs)){
   random2[[i]] = random_steps(stepsBurst2[[i]], n_control = 20)
+  names(random2)[i] = FourHrsIDs[i]
 }
 
 # Combine lists into dataframes
 
-ssf_2hr_ua <- do.call(rbind.data.frame, random1)
-
-ssf_4hr_ua <- do.call(rbind.data.frame, random2)
+ssf_2hr_ua <- map_df(random1, ~as.data.frame(.x), .id = "id")
+ssf_4hr_ua <- map_df(random2, ~as.data.frame(.x), .id = "id")
 
 # Plot random v matched points
 
-ggplot(ssf_4hr_ua, aes(x2_, y2_, color=case_))+
-  geom_point()+
-  facet_wrap(~id, scales="free")
+
 
 saveRDS(ua, './non_bp_pts_used_avail.Rds')
 

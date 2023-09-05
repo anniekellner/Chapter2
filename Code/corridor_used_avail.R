@@ -40,6 +40,7 @@ fix <- readRDS(here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
 
 # ------------  USED AND AVAILABLE PTS  ------------- #
 
+## NEED TO PUT ID BACK INTO LISTS
 # Divide corridor animals into fix rates (downsample 1 to 2 and then run 4)
 
 uIDs <- unique(u$id)
@@ -133,13 +134,13 @@ for(i in 1:length(FourHrsIDs)){
 
 # Combine lists into dataframes
 
+ssf_2hr_ua <- do.call(rbind.data.frame, random1)
 
-
-
+ssf_4hr_ua <- do.call(rbind.data.frame, random2)
 
 # Plot random v matched points
 
-ggplot(ua, aes(x2_, y2_, color=case_))+
+ggplot(ssf_4hr_ua, aes(x2_, y2_, color=case_))+
   geom_point()+
   facet_wrap(~id, scales="free")
 

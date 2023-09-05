@@ -143,25 +143,28 @@ for(i in 1:length(FourHrsIDs)){
 ssf_2hr_ua <- map_df(random1, ~as.data.frame(.x), .id = "id")
 ssf_4hr_ua <- map_df(random2, ~as.data.frame(.x), .id = "id")
 
-saveRDS(ssf_2hr_ua, here("Data", "Derived-data", "DFs", "OG", "ssf_2h_ua.Rds"))
-saveRDS(ssf_4hr_ua, here("Data", "Derived-data", "DFs", "OG", "ssf_4h_ua.Rds"))
+ssf2_naomit <- na.omit(ssf_2hr_ua) # looks like NA's occurred when fix rate was > hour specified. Remove those points and note in methods.
+ssf4_naomit <- na.omit(ssf_4hr_ua)
 
-# Plot random v matched points
+#saveRDS(ssf2_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_2h_ua.Rds"))
+#saveRDS(ssf4_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_4h_ua.Rds"))
 
+# NA stats:
+# 3.9% of points for 2 hr group: 541.7/13861 
+# 3.0% for 4 hr group: 22.85/767
 
+# ------- PLOT CHECK  ----------- #
 
-saveRDS(ua, './non_bp_pts_used_avail.Rds')
+# Use 4 hr points because there are fewer, but still get an idea of used v. available
 
-# --------- USED AND AVAILABLE POINTS --------------  #
+sSF4 <- st_as_sf(ssf4_naomit, coords = c('x2_', 'y2_'), crs = 3338)
+true <- filter(sSF4, case_ == TRUE)
+false <- filter(sSF4, case_ == FALSE)
 
-tr2 <- 
+tmap_mode('view')
 
-ua <- tr2 %>% steps_by_burst(n_control = 20) # add random steps (gamma/von mises = default distributions)
+tm_shape(false) + 
+  tm_symbols(col = "grey") + 
+  tm_shape(true) + 
+  tm_symbols(col = "red")
 
-# Plot random v matched points
-
-ggplot(ua, aes(x2_, y2_, color=case_))+
-  geom_point()+
-  facet_wrap(~id, scales="free")
-
-saveRDS(ua, './non_bp_pts_used_avail.Rds')

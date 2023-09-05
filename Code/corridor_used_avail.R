@@ -5,8 +5,8 @@
 library(tidyverse)
 library(amt)
 library(sf)
-#library(tmap)
-#library(tmaptools)
+library(tmap)
+library(tmaptools)
 library(adehabitatLT)
 library(here)
 library(conflicted)
@@ -142,6 +142,9 @@ for(i in 1:length(FourHrsIDs)){
 
 ssf_2hr_ua <- map_df(random1, ~as.data.frame(.x), .id = "id")
 ssf_4hr_ua <- map_df(random2, ~as.data.frame(.x), .id = "id")
+
+saveRDS(ssf_2hr_ua, here("Data", "Derived-data", "DFs", "OG", "ssf_2h_ua.Rds"))
+saveRDS(ssf_4hr_ua, here("Data", "Derived-data", "DFs", "OG", "ssf_4h_ua.Rds"))
 
 # Plot random v matched points
 

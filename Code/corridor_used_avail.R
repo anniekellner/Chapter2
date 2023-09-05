@@ -36,6 +36,8 @@ fix <- readRDS(here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
 #fix$median <- round(fix$median, digits = 0)
 
 #saveRDS(fix, here("Data", "Derived-data", "DFs", "OG", "Fix_Rates.Rds"))
+
+
 # ------------  USED AND AVAILABLE PTS  ------------- #
 
 # Divide corridor animals into fix rates (downsample 1 to 2 and then run 4)
@@ -57,28 +59,83 @@ FourHrsIDs <- fixHr4$id
 grp1 <- filter(u, id %in% TwoHrsIDs)
 grp2 <- filter(u, id %in% FourHrsIDs)
 
-# Make tracks
+# Make tracks for two-hour group
 
-trk1 <- make_track(grp1, Xaa, Yaa, datetime, id = id, crs = 3338)
-tr1 <- trk1 %>% nest(data = -"id") 
+trackList1 <- list()
 
-tr1_resamp <- tr1 %>% # downsample to 2-hr fix rate
-  mutate(steps = map(data, function(x)
-    x %>% track_resample(rate = hours(2), tolerance = minutes(20)) %>% steps_by_burst()))
+for(i in 1:length(TwoHrsIDs)){
+  animal = filter(grp1, id == TwoHrsIDs[i])
+  trackList1[[i]] = make_track(animal, 
+                              .x = Xaa, 
+                              .y = Yaa, 
+                              .t = datetime, 
+                              id = id, 
+                              crs = 3338)
+  
+}
+    
+downSampled1 <- list()
 
-steps1 <- tr1_resamp %>% dplyr::select(id, steps) %>% unnest(cols = steps) 
+for(i in 1:length(TwoHrsIDs)){
+  downSampled1[[i]] = track_resample(trackList1[[i]],
+                                    rate = hours(2),
+                                    tolerance = minutes(10))
+}    
+    
+stepsBurst1 <- list()
 
-ua1 <- steps1 %>% group_by(id) %>% random_steps(n_control = 20) 
+for(i in 1:length(TwoHrsIDs)){
+  stepsBurst1[[i]] = steps_by_burst(downSampled1[[i]])
+}    
 
-# ----- GET USED AND AVAILABLE POINTS --------- #
+random1<- list()
 
-tr3 <- tr2 %>% filter_min_n_burst(3)
+for(i in 1:length(TwoHrsIDs)){
+  random1[[i]] = random_steps(stepsBurst1[[i]], n_control = 20)
+}
 
-ua <- steps %>% group_by(id) %>% random_steps(n_control = 20) # add random steps (gamma/von mises = default distributions)
+# Make tracks for 4 hr group
 
-df %>% filter(df,)
+trackList2 <- list()
 
-ua <- df %>% random_steps(n_control = 20) # add random steps (gamma/von mises = default distributions)
+for(i in 1:length(FourHrsIDs)){
+  animal = filter(grp2, id == FourHrsIDs[i])
+  trackList2[[i]] = make_track(animal, 
+                               .x = Xaa, 
+                               .y = Yaa, 
+                               .t = datetime, 
+                               id = id, 
+                               crs = 3338)
+  
+}
+
+
+resampled2 <- list()
+
+for(i in 1:length(FourHrsIDs)){
+  resampled2[[i]] = track_resample(trackList2[[i]],
+                                   rate = hours(4),
+                                   tolerance = minutes(10))
+}    
+
+stepsBurst2 <- list()
+
+for(i in 1:length(FourHrsIDs)){
+  stepsBurst2[[i]] = steps_by_burst(resampled2[[i]])
+}
+
+
+random2<- list()
+
+for(i in 1:length(FourHrsIDs)){
+  random2[[i]] = random_steps(stepsBurst2[[i]], n_control = 20)
+}
+
+# Combine lists into dataframes
+
+
+
+
 
 # Plot random v matched points
 

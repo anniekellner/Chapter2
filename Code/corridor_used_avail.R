@@ -151,12 +151,6 @@ burst2 <- map_df(stepsBurst2, ~as.data.frame(.x), .id = "id")
 
 # ---- Get mean overall step length per hour for corridor bears  --------- #
 
-hourly2 <- burst1 %>% mutate(hourly_sl = sl_/2)
-hourly4 <- burst2 %>% mutate(hourly_sl = sl_/4)
-
-hourly <- hourly2 %>% bind_rows(hourly4)
-
-mean(hourly$hourly_sl)
 
 #saveRDS(ssf2_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_2h_ua.Rds"))
 #saveRDS(ssf4_naomit, here("Data", "Derived-data", "DFs", "OG", "ssf_4h_ua.Rds"))

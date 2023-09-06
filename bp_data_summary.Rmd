@@ -83,12 +83,23 @@ sd(summary$DaysTrack)
 
 usf <- st_as_sf(u, coords = c('Xaa','Yaa'), crs = 3338)
 
+# Add which bonepile for summary stats
+
+Bonepiles_visited <- read_csv("Data/Derived-data/Bonepile/Bonepiles_visited.csv")
+
+usf <- left_join(usf, Bonepiles_visited)
+
 usp <- dplyr::select(usf, id,geometry)
 usp <- as_Spatial(usp)
 
 
 mcp95 <- mcp(usp, percent = 95)
 mcp95sf <- st_as_sf(mcp95)
+
+area_by_bonepile <- mcp95sf %>% 
+  left_join(Bonepiles_visited) %>%
+  group_by(Bonepile) %>%
+  summarize(mean_area = mean(area))
 
 tmap_mode('view')
 

@@ -5,26 +5,60 @@
 # Data from shapefiles created using Google Earth Engine
 
 library(sf)
-library(dplyr)
-library(tidyr)
+library(tidyverse)
+library(here)
+library(conflicted)
 
 rm(list = ls())
 
-# ---- Load data  ----------------------- #
+# --------------------   LOAD DATA   ----------------------- #
 
-# GEE
-corr.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_corridor_pts/terrain_corridor_pts.shp')
-bone.gee <- st_read('C:/Users/akell/OneDrive - Colostate/PhD/Chapter2/Data/Terrain/terrain_bonepile_pts/terrain_bonepile_pts.shp')
+# GEE SHP
 
-# Take a peek
+terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "terrain_used_avail_091423.shp")) 
+plot(st_geometry(terr)) # take a peek. Comes from GEE in lat/lon
 
-plot(st_geometry(corr.gee))
-plot(st_geometry(bone.gee))
+# R DF
 
-# R
+ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "allUA.Rds"))
 
-corr <- readRDS('Data/Derived-data/corridor_data.Rds')
-bone <- readRDS('Data/Derived-data/bonepile_data.Rds')
+#   --------------    ADJUST VALUES   --------------  #
+
+# Terrain - classify as categorical
+
+terr <- terr %>%
+  mutate(aspect2 = case_when(
+    aspect >= 315 | aspect <= 45 ~ "North",
+    aspect > 45 | aspect < 135 ~ "East",
+    aspect > 135 | aspect < 225 ~ "South",
+    aspect > 225 | aspect < 315 ~ "West"
+  )) %>%
+  replace_na(list(aspect2 = "Flat")) %>%
+  select(-aspect) %>%
+  rename(aspect = aspect2) %>% glimpse()
+
+# Record lat/lon values
+
+terr2 <- terr %>%
+  bind_cols(st_coordinates(terr)) %>%
+  rename(gps_lon = X) %>%
+  rename(gps_lat = Y)
+
+# Record AA values
+
+terr2 <- st_transform(terr2, 3338) # project to AA
+
+terr2 <- terr2 %>%
+  bind_cols(st_coordinates(terr2)) %>%
+  rename(Xaa = X) %>%
+  rename(Yaa = Y)
+
+#saveRDS(terr2, here("Data", "Derived-data", "DFs", "OG", "uaSF_091823.Rds"))
+
+
+
+
+
 
 # Remove previous columns for elevation, aspect and slope
 

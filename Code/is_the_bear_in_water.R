@@ -7,22 +7,36 @@
 # In some cases, land = 0, but the point should register as a veg type or on island. I expect false positives to be very low.
 
 library(sf)
-library(dplyr)
+library(tidyverse)
 library(tmap)
 library(tmaptools)
+library(here)
+library(conflicted)
+
+conflicts_prefer(
+  dplyr::filter()
+)
 
 rm(list = ls())
 
 # --- Load Data -------------------- #
 
-uaSF <- here("Data", "Derived-data", "DFs", "OG", "uaSF.Rds")
-islands <- st_read('./Data/Spatial/Barrier_Islands/islands_w_1500m_buffer.shp') 
+uaSF <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_091823.Rds"))
+islands <- st_read(here("Data", "Spatial", "Barrier_Islands", "islands_w_1500m_buffer.shp"))
 
+#   ----    CHECK NA'S    ----------    #
+
+nas <- filter(uaSF, is.na(elevation))
+
+tmap_mode('view')
+
+tm_shape(nas) + 
+  tm_symbols()
 
 # -- Assign Water ---------------- #
 
-corr2 <- corr %>%
-  mutate(in_water = ifelse(on_island == "TRUE" | !is.na(veg) | elevation > 0, 0, 1))
+uaSF <- uaSF %>%
+  mutate(in_water = ifelse(on_island == 0 & elevation > 0, 0, 1))
 
 bone2 <- bone %>%
   mutate(in_water = ifelse(on_island == "TRUE" | elevation > 0, 0, 1))

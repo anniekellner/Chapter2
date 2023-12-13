@@ -19,31 +19,33 @@ rm(list = ls())
 
 terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_12_23", "terrain_used_avail.shp")) 
 
+samp <- slice_sample(terr, prop = 0.1) # too many points, so sampled 10%
+
 # Plot to see that values look right
 
 tmap_mode('view')
 
-tm_shape(terr) + 
+tm_shape(samp) + # look good
   tm_symbols()
 
 # R DF
 
-ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "allUA.Rds"))
+ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF.Rds"))
 
 #   --------------    ADJUST VALUES   --------------  #
 
 # Terrain - classify as categorical
 
 terr <- terr %>%
-  mutate(aspect2 = case_when(
+  mutate(aspect_cat = case_when(
     aspect >= 315 | aspect <= 45 ~ "North",
     aspect > 45 | aspect < 135 ~ "East",
     aspect > 135 | aspect < 225 ~ "South",
     aspect > 225 | aspect < 315 ~ "West"
   )) %>%
-  replace_na(list(aspect2 = "Flat")) %>%
-  select(-aspect) %>%
-  rename(aspect = aspect2) %>% glimpse()
+  replace_na(list(aspect_cat = "Flat")) 
+  #select(-aspect) %>%
+  #rename(aspect = aspect2) %>% glimpse()
 
 # Record lat/lon values
 

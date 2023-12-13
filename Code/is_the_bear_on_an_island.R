@@ -15,13 +15,9 @@ rm(list= ls())
 
 # --------- LOAD AND PREP DATA   ------------------------------------------------------- #
 
-ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "allUA.Rds"))
+ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-12-23.Rds"))
 
 islands <- st_read(here("Data", "Spatial", "Barrier_Islands", "islands_w_1500m_buffer.shp")) 
-
-# Create spatial object for bear pts
-
-uaSF <- st_as_sf(ua, coords = c('X', 'Y'), crs = 3338)
 
 
 # ------- Plot  ---------------------------------------------------------- #
@@ -30,21 +26,6 @@ tmap_mode('view')
 
 tm_shape(islands) + 
   tm_polygons(col = "green") 
-
-# ------  Add buffer to islands ------------------------------------ #
-
-# Plot to check
-
-tmap_mode('view')
-
-tm_shape(islands) +
-  tm_polygons(col = "orange") + 
-  tm_shape(uaSF) + 
-  tm_symbols(size = 0.25) 
-
-# Save because it takes time to create these buffers
-
-#st_write(buff, './Data/Spatial/islands_w_1500m_buffer.shp')
 
 
 # ------  Analysis  ----------------------------------------------------- #

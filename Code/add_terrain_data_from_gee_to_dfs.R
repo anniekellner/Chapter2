@@ -6,6 +6,8 @@
 
 library(sf)
 library(tidyverse)
+library(tmap)
+library(tmaptools)
 library(here)
 library(conflicted)
 
@@ -15,8 +17,14 @@ rm(list = ls())
 
 # GEE SHP
 
-terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "terrain_used_avail_091423.shp")) 
-plot(st_geometry(terr)) # take a peek. Comes from GEE in lat/lon
+terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_12_23", "terrain_used_avail.shp")) 
+
+# Plot to see that values look right
+
+tmap_mode('view')
+
+tm_shape(terr) + 
+  tm_symbols()
 
 # R DF
 

@@ -63,6 +63,8 @@ terr2 <- terr2 %>%
   rename(Xaa = X) %>%
   rename(Yaa = Y)
 
+terr2 <- select(terr2, -hillshade)
+
 #saveRDS(terr2, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-12-23.Rds"))
 
 

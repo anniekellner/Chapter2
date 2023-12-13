@@ -51,4 +51,4 @@ tm_shape(islands) +
 
 # ----------- Save data ------------------------------ #
 
-saveRDS(ua, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-13-23.Rds")) # save as spatial object
+#saveRDS(ua, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-13-23.Rds")) # save as spatial object

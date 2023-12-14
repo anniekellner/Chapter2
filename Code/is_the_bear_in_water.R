@@ -43,16 +43,16 @@ uaSF <- uaSF %>%
 uaSF <- uaSF %>%
   mutate(on_island = ifelse(on_island == TRUE, 1, 0))
 
-## START HERE ########
 
 # -- Assign Water ---------------- #
 
 uaSF <- uaSF %>%
-  mutate(in_water = ifelse(on_island == 0 & elevation > 0, 0, 1))
+  mutate(in_water = ifelse(on_island == 1 | elevation > 0, 0, 1))
 
 # -- Check  ----------- #
 
 # Randomly sample 1% of rows and make sf object to plot
+# Should use 5km buffer in GEE because some points on the shoreline have elevation of 0
 
 samp <- slice_sample(uaSF, prop = 0.01)
 

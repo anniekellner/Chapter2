@@ -13,11 +13,19 @@ library(tidyverse)
 library(here)
 library(conflicted)
 
+rm(list = ls())
+
 #   --------  LOAD DATA   ---------------   #
 
-ua <- readRDS(here("Data", "Derived-Data", "DFs", "OG", "uaSF.Rds"))
+ua <- readRDS(here("Data", "Derived-Data", "DFs", "OG", "uaSF_12-15-23.Rds"))
+ua <- ua %>%
+  bind_cols(st_coordinates(ua)) 
+
+ua <- ua %>%
+  rename(Xaa = X) %>%
+  rename(Yaa = Y)
 
 #   --------  WRITE TO SHP    ------------    #
 
-#st_write(ua, here("Data", "Derived-data", "Spatial", "UA_shapefiles", "uaSHP.shp")) 
+#st_write(ua, here("Data", "Derived-data", "Spatial", "UA_shapefiles", "uaSHP_12-15-23.shp")) # got warning that t2_ created as Date field, but DateTime requested
 

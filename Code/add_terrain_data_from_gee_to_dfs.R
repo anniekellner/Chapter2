@@ -17,7 +17,7 @@ rm(list = ls())
 
 # GEE SHP
 
-terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_12_23", "terrain_used_avail.shp")) 
+terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_15_23", "terrain_used_avail_12_15_23.shp")) 
 
 samp <- slice_sample(terr, prop = 0.1) # too many points, so sampled 10%
 

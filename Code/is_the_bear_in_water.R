@@ -3,7 +3,8 @@
 #########################################################
 
 # Water is defined as elevation = 0, on_island= FALSE
-# In looking at ifSAR, land appears to be >0
+# In looking at ifSAR, land appears to be >0 in most cases, but points very close to the coast will be false positives
+  # Create a 10 m buffer that includes points within 10 m of the coast as 'on_land'
 # In some cases, land = 0, but I expect false positives to be low enough not to matter.
 
 library(sf)
@@ -22,7 +23,11 @@ rm(list = ls())
 # --- Load Data -------------------- #
 
 uaSF <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-13-23.Rds"))
+
 islands <- st_read(here("Data", "Spatial", "Barrier_Islands", "islands_w_1500m_buffer.shp"))
+
+coast <- st_read('./Data/Spatial/coastline/digitized_coastline.shp') # Used .shp of coastline as digitized from IFSAR images on GEE
+coast <- st_transform(coast, 3338)
 
 #   ----    CHECK NA'S    ----------    #
 
@@ -45,6 +50,32 @@ uaSF <- uaSF %>%
 
 
 # -- Assign Water ---------------- #
+
+# Include points within 10 m of coast as on_land
+
+### START HERE. TRY USING TERRA PACKAGE INSTEAD OF SF #####
+
+# Sample lots of points along coast
+
+coastline <- st_cast(coast, "LINESTRING") # convert multilinestring into linestring 
+
+dist <- st_distance(uaSF, coastline)
+dist2 <- apply(dist, 2, min)
+
+
+dist_union_seine <- st_distance(st_union(st_geometry(seine_int))
+
+uaSF2 <- uaSF %>%
+  mutate(dist_to_coast = st_distance(., coastline)) 
+
+dist <- st_distance(uaSF, coastline)
+dist <- apply(dist, 2, min)
+
+dist_seine <- st_distance(seine_int, fr_departments_grid_int)
+# Only minimum distance
+dist_seine <- apply(dist_seine, 2, min)
+
+coastPts <- 
 
 uaSF <- uaSF %>%
   mutate(in_water = ifelse(on_island == 1 | elevation > 0, 0, 1))

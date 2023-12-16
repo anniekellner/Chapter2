@@ -2,6 +2,9 @@
 ###   DISTANCE TO MAINLAND COAST   #####################
 ########################################################
 
+### NEED TO ADD TIMESTAMPS BACK INTO DF ###############
+
+
 ## Only calculating distance to coast for mainland points (decided at meeting with GW 4/13/22)
 ## This metric is really only relevant for mainland points
 ## The positive/negative denotation messes with coefficients

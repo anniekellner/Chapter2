@@ -47,10 +47,10 @@ rsf$analysis <- "rsf"
 # Combine ssf analyses and rename columns
 
 ssf2 <- ssf2 %>%
-  select(id, x2_, y2_, case_, analysis) 
+  select(id, x2_, y2_, case_, sl_, ta_, t2_, step_id_, analysis) 
 
 ssf4 <- ssf4 %>%
-  select(id, x2_, y2_, case_, analysis) 
+  select(id, x2_, y2_, case_, sl_, ta_, t2_, step_id_, analysis)
 
 allssf <- rbind(ssf2, ssf4)
 
@@ -72,8 +72,8 @@ rsf <- rsf %>%
 
 # Combine all points into single dataframe
 
-allUA <- rbind(allssf, rsf)
+allUA <- full_join(allssf, rsf) # total = allssf + rsf (rows)
   
-#saveRDS(allUA, here("Data", "Derived-data", "DFs", "OG", "allUA.Rds"))
+#saveRDS(allUA, here("Data", "Derived-data", "DFs", "OG", "allUA_12_15_23.Rds"))
 
 

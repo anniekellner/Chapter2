@@ -2,6 +2,8 @@
 ##    EXTRACT TERRAIN DATA  ###
 ###############################
 
+### NEED TO ADD TERRAIN DATA TO FULL DATAFRAME (cannot just substitute GEE shapefile because not all pts represented)
+
 # Data from shapefiles created using Google Earth Engine
 
 library(sf)
@@ -17,7 +19,7 @@ rm(list = ls())
 
 # GEE SHP
 
-terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_15_23", "terrain_used_avail_12_15_23.shp")) 
+terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_15_23", "terrain_used_avail_12-15-23.shp")) 
 
 samp <- slice_sample(terr, prop = 0.1) # too many points, so sampled 10%
 
@@ -30,7 +32,8 @@ tm_shape(samp) + # look good
 
 # R DF
 
-ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF.Rds"))
+uaSF <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-15-23.Rds"))
+
 
 #   --------------    ADJUST VALUES   --------------  #
 
@@ -51,8 +54,8 @@ terr <- terr %>%
 
 terr2 <- terr %>%
   bind_cols(st_coordinates(terr)) %>%
-  rename(gps_lon = X) %>%
-  rename(gps_lat = Y)
+  rename(gps_lon_GEE = X) %>%
+  rename(gps_lat_GEE = Y)
 
 # Record AA values
 

@@ -3,7 +3,7 @@
 ######      FOR USE WITH GOOGLE EARTH ENGINE  ##############
 ############################################################
 
-# 09-14-23
+# 12-20-23
 # All used and available points in a single df
 # Used with GEE to extract terrain data
 
@@ -25,7 +25,12 @@ ua <- ua %>%
   rename(Xaa = X) %>%
   rename(Yaa = Y)
 
+ua <- ua %>%
+  arrange(id, t2_) %>%
+  mutate(row = row_number()) 
+
+#saveRDS(ua, here("Data", "Derived-Data", "DFs", "OG", "uaSF_12-20-23.Rds"))
 #   --------  WRITE TO SHP    ------------    #
 
-#st_write(ua, here("Data", "Derived-data", "Spatial", "UA_shapefiles", "uaSHP_12-15-23.shp")) # got warning that t2_ created as Date field, but DateTime requested
+st_write(ua, here("Data", "Derived-data", "Spatial", "UA_shapefiles", "uaSHP_12-20-23.shp")) # got warning that t2_ created as Date field, but DateTime requested
 

@@ -1,6 +1,8 @@
-###############################
-##    EXTRACT TERRAIN DATA  ###
-###############################
+###########################################
+##    ADD TERRAIN DATA TO USED-AVAIL DF ###
+###########################################
+
+# Points outside ifSAR have NA values for all terrain variables
 
 ### NEED TO ADD TERRAIN DATA TO FULL DATAFRAME (cannot just substitute GEE shapefile because not all pts represented)
 
@@ -15,13 +17,13 @@ library(conflicted)
 
 rm(list = ls())
 
-# --------------------   LOAD DATA   ----------------------- #
+# --------------------   LOAD AND PREP DATA   ----------------------- #
 
 # GEE SHP
 
 terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_15_23", "terrain_used_avail_12-15-23.shp")) 
 
-samp <- slice_sample(terr, prop = 0.1) # too many points, so sampled 10%
+samp <- slice_sample(terr, prop = 0.01) # too many points, so sampled 1%
 
 # Plot to see that values look right
 
@@ -32,21 +34,24 @@ tm_shape(samp) + # look good
 
 # R DF
 
-uaSF <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-15-23.Rds"))
+ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-15-23.Rds"))
+ua <- st_drop_geometry(ua)
 
+ua <- ua %>%
+  mutate(on_island = ifelse(on_island == TRUE, 1, 0))
 
 #   --------------    ADJUST VALUES   --------------  #
 
 # Terrain - classify as categorical
 
-terr <- terr %>%
+terr <- terr %>% 
   mutate(aspect_cat = case_when(
     aspect >= 315 | aspect <= 45 ~ "North",
     aspect > 45 | aspect < 135 ~ "East",
     aspect > 135 | aspect < 225 ~ "South",
     aspect > 225 | aspect < 315 ~ "West"
   )) %>%
-  replace_na(list(aspect_cat = "Flat")) 
+  replace_na(list(aspect_cat = "Flat")) ### WATER POINTS WILL HAVE NA VALUES SO BE SURE TO ONLY INCLUDE LAND PTS DURING ANALYSIS
   #select(-aspect) %>%
   #rename(aspect = aspect2) %>% glimpse()
 
@@ -63,10 +68,22 @@ terr2 <- st_transform(terr2, 3338) # project to AA
 
 terr2 <- terr2 %>%
   bind_cols(st_coordinates(terr2)) %>%
-  rename(Xaa = X) %>%
-  rename(Yaa = Y)
+  rename(Xaa_GEE = X) %>%
+  rename(Yaa_GEE = Y)
 
-terr2 <- select(terr2, -hillshade)
+terr2 <- terr2 %>%
+  select(-hillshade) %>%
+  select(-t2_) %>%
+  st_drop_geometry()
+
+# ----------  BIND DATASETS --------------- #
+
+ua2 <- left_join(ua, terr2, by = c("id", "step_id_", "analysis", "used", "ta_", "on_island"))
+
+
+
+
+
 
 #saveRDS(terr2, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-12-23.Rds"))
 

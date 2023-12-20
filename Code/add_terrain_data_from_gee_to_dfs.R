@@ -21,7 +21,7 @@ rm(list = ls())
 
 # GEE SHP
 
-terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_15_23", "terrain_used_avail_12-15-23.shp")) 
+terr <- st_read(here("Data", "Derived-data", "Spatial", "Terrain", "Terrain_GEE_12_20_23", "terrain_used_avail_12_20_23.shp")) 
 
 samp <- slice_sample(terr, prop = 0.01) # too many points, so sampled 1%
 
@@ -32,9 +32,14 @@ tmap_mode('view')
 tm_shape(samp) + # look good
   tm_symbols()
 
+# Remove unnecessary variables
+
+terr <- terr %>%
+  select(-c("hillshade", "t2_", "sl_", "step_id_", "Xaa", "Yaa"))
+
 # R DF
 
-ua <- readRDS(here("Data", "Derived-data", "DFs", "OG", "uaSF_12-15-23.Rds"))
+ua <- readRDS(here("Data", "Derived-Data", "DFs", "OG", "uaSF_12-20-23.Rds"))
 ua <- st_drop_geometry(ua)
 
 ua <- ua %>%
@@ -72,20 +77,17 @@ terr2 <- terr2 %>%
   rename(Yaa_GEE = Y)
 
 terr2 <- terr2 %>%
-  select(-hillshade) %>%
-  select(-t2_) %>%
   st_drop_geometry()
 
 # ----------  BIND DATASETS --------------- #
 
-ua2 <- left_join(ua, terr2, by = c("id", "step_id_", "analysis", "used", "ta_", "on_island"))
+ua2 <- left_join(ua, terr2, by = c("id", "analysis", "used", "on_island", "row"))
 
+ua2 <- ua2 %>%
+  select(-"ta_.y") %>%
+  rename(turning_angle = ta_.x)
 
-
-
-
-
-#saveRDS(terr2, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-12-23.Rds"))
+#saveRDS(ua2, here("Data", "Derived-data", "DFs", "OG", "uaSF_12-20-23.Rds"))
 
 
 
